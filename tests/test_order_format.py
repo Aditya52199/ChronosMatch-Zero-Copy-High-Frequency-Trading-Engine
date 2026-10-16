@@ -54,3 +54,57 @@ def test_wrong_binary_size_is_rejected():
 
 def test_record_size_is_fixed():
     assert ORDER_SIZE == 29
+
+
+
+import struct
+
+from chronosmatch.order_format import (
+    ORDER_FORMAT,
+    Order,
+    BUY,
+    SELL,
+    pack_order,
+    unpack_order,
+)
+
+
+def test_maximum_order_id_is_supported():
+    order = Order(2**64 - 1, BUY, 100, 1, 0)
+    assert unpack_order(pack_order(order)) == order
+
+
+def test_maximum_quantity_is_supported():
+    order = Order(1, SELL, 100, 2**32 - 1, 0)
+    assert unpack_order(pack_order(order)) == order
+
+
+def test_negative_order_id_is_rejected():
+    order = Order(-1, BUY, 100, 1, 0)
+
+    with pytest.raises(ValueError):
+        pack_order(order)
+
+
+def test_negative_price_is_rejected():
+    order = Order(1, BUY, -1, 1, 0)
+
+    with pytest.raises(ValueError):
+        pack_order(order)
+
+
+def test_negative_timestamp_is_rejected():
+    order = Order(1, SELL, 100, 1, -1)
+
+    with pytest.raises(ValueError):
+        pack_order(order)
+
+
+def test_invalid_binary_side_is_rejected():
+    # Side is the second field (one byte) in !QBQIQ.
+    data = bytearray(struct.pack(ORDER_FORMAT, 1, BUY, 100, 1, 0))
+    data[8] = 2
+
+    with pytest.raises(ValueError):
+        unpack_order(bytes(data))
+
