@@ -1,0 +1,6 @@
+com\platform\oms\controller\OrderController.class
+com\platform\oms\kafka\KafkaEventPublisher.class
+com\platform\oms\OmsApplication.class
+com\platform\oms\model\OrderRequest.class
+com\platform\oms\service\OrderService.class
+com\platform\oms\model\OrderResponse.class
