@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trading-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: trading-gateway }
+  template:
+    metadata:
+      labels: { app: trading-gateway }
+    spec:
+      containers:
+        - name: gateway
+          image: trading-gateway:local
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trading-gateway
+spec:
+  selector: { app: trading-gateway }
+  ports:
+    - port: 8080
+      targetPort: 8080
