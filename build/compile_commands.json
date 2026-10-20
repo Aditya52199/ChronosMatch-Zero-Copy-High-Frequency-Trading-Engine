@@ -1,0 +1,14 @@
+[
+{
+  "directory": "D:/Trading app/ChronosMatch-Zero-Copy-High-Frequency-Trading-Engine/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles\\matching_engine.dir\\includes_CXX.rsp -g -std=gnu++1z -o CMakeFiles\\matching_engine.dir\\src\\main.cpp.obj -c \"D:\\Trading app\\ChronosMatch-Zero-Copy-High-Frequency-Trading-Engine\\matching-engine\\src\\main.cpp\"",
+  "file": "D:/Trading app/ChronosMatch-Zero-Copy-High-Frequency-Trading-Engine/matching-engine/src/main.cpp",
+  "output": "CMakeFiles/matching_engine.dir/src/main.cpp.obj"
+},
+{
+  "directory": "D:/Trading app/ChronosMatch-Zero-Copy-High-Frequency-Trading-Engine/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles\\matching_engine.dir\\includes_CXX.rsp -g -std=gnu++1z -o CMakeFiles\\matching_engine.dir\\src\\engine.cpp.obj -c \"D:\\Trading app\\ChronosMatch-Zero-Copy-High-Frequency-Trading-Engine\\matching-engine\\src\\engine.cpp\"",
+  "file": "D:/Trading app/ChronosMatch-Zero-Copy-High-Frequency-Trading-Engine/matching-engine/src/engine.cpp",
+  "output": "CMakeFiles/matching_engine.dir/src/engine.cpp.obj"
+}
+]

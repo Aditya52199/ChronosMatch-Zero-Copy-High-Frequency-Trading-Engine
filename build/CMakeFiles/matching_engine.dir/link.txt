@@ -1,0 +1,3 @@
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\matching_engine.dir/objects.a
+C:\MinGW\bin\ar.exe qc CMakeFiles\matching_engine.dir/objects.a @CMakeFiles\matching_engine.dir\objects1.rsp
+C:\MinGW\bin\g++.exe -g -Wl,--whole-archive CMakeFiles\matching_engine.dir/objects.a -Wl,--no-whole-archive -o matching_engine.exe -Wl,--out-implib,libmatching_engine.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\matching_engine.dir\linkLibs.rsp
