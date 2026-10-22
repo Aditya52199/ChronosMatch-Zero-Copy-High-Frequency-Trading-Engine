@@ -17,7 +17,8 @@ export default function App() {
     ]));
   }, []);
   return <main className="shell">
-    <header className="topbar"><div className="brand"><span className="brand-mark">T</span><div><strong>TradeDesk</strong><small>MARKET TERMINAL</small></div></div>
+    <header className="topbar"><div className="brand"><span className="brand-mark"></span><div><strong>ChronosMatch</strong><small>Zero-Copy High-Frequency Trading
+Engine</small></div></div>
       <div className="status"><span className={health === 'online' ? 'dot green' : 'dot'} /> API {health}</div>
     </header>
     <section className="intro"><div><p className="eyebrow">OVERVIEW / MARKETS</p><h1>Market dashboard</h1><p className="muted">A starter trading interface with simulated market data.</p></div><span className="pill">PAPER TRADING</span></section>

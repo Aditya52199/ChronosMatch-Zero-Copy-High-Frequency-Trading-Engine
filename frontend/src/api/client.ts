@@ -1,4 +1,6 @@
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
+// Use the Vite proxy by default so the browser and API share an origin.
+// Set VITE_API_BASE only when the browser should call a separately hosted gateway.
+const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/$/, '');
 
 export async function fetchHealth(): Promise<{status:string}> {
   const response = await fetch(`${API_BASE}/health`);
