@@ -1,202 +1,267 @@
-# \# ChronosMatch — High-Performance Order Matching Engine
+# ChronosMatch --- Zero-Copy High-Frequency Trading Engine
+
+ChronosMatch is an educational high-frequency trading engine prototype
+developed in Python. It demonstrates binary order serialization,
+limit-order matching, memory-mapped order transport, trade persistence,
+latency measurement, and an interactive monitoring dashboard.
+
+## Project Overview
+
+The project implements a simplified trading pipeline that accepts
+orders, serializes them into a fixed-size binary format, transports them
+through a memory-mapped ring buffer, matches compatible buy and sell
+orders, and stores executed trades in SQLite.
+
+A Streamlit dashboard visualizes order-book state, trade executions, and
+matching latency.
+
+## Features
+
+-   **Binary order serialization:** Fixed-size 29-byte order records
+    using Python's `struct` module.
+-   **Order validation:** Validation of order sides, numeric fields,
+    prices, and quantities.
+-   **Matching engine:** Limit-order matching with price priority,
+    timestamp-based ordering, partial fills, and duplicate order-ID
+    rejection.
+-   **Memory-mapped ring buffer:** Fixed-capacity FIFO buffer for binary
+    order records.
+-   **Trade ledger:** SQLite persistence for executed trades.
+-   **Simulation pipeline:** Integrates order transport, matching, and
+    trade storage.
+-   **Interactive dashboard:** Displays order-book metrics, resting
+    orders, executed trades, and latency statistics.
+-   **Performance benchmark:** Measures matching-call latency and
+    reports mean, median, P95, P99, and maximum values.
+-   **Automated testing:** Pytest coverage for core functionality and
+    integration.
+
+## Architecture
+
+``` text
+        Sample Orders
+             |
+             v
+    Binary Order Format
+       (29 bytes)
+             |
+             v
+     Mmap Ring Buffer
+             |
+             v
+      Matching Engine
+             |
+       +-----+------+
+       |            |
+       v            v
+  Resting Book   Executed Trades
+                      |
+                      v
+                SQLite Ledger
+
+        Simulation Results
+               |
+               v
+       Streamlit Dashboard
+```
+
+## Technology Stack
+
+-   Python 3.13
+-   `struct` --- binary serialization
+-   `mmap` --- memory-mapped ring buffer
+-   SQLite --- trade persistence
+-   Streamlit --- interactive dashboard
+-   Pandas --- tabular data display
+-   Pytest --- automated testing
+-   Git and GitHub --- version control
+
+## Project Structure
+
+``` text
+ChronosMatch-Zero-Copy-High-Frequency-Trading-Engine/
+├── src/
+│   └── chronosmatch/
+│       ├── __init__.py
+│       ├── __main__.py
+│       ├── order_format.py
+│       ├── matching_engine.py
+│       ├── ring_buffer.py
+│       ├── ledger.py
+│       └── simulator.py
+├── tests/
+│   ├── test_environment.py
+│   ├── test_order_format.py
+│   ├── test_matching_engine.py
+│   ├── test_ring_buffer.py
+│   └── test_simulator.py
+├── dashboard.py
+├── benchmark.py
+├── pyproject.toml
+├── .gitignore
+└── README.md
+```
 
-# 
+## Setup and Installation
 
-# ChronosMatch is an educational trading-engine MVP built to demonstrate binary order serialization, price-time-priority matching, an mmap-backed ring buffer, trade persistence, latency measurement, and an interactive dashboard.
+### 1. Clone the repository
 
-# 
+``` bash
+git clone <your-repository-url>
+cd ChronosMatch-Zero-Copy-High-Frequency-Trading-Engine
+```
 
-# \## Features
+Replace `<your-repository-url>` with your actual repository URL.
 
-# 
+### 2. Create a virtual environment
 
-# \- \*\*Binary order format:\*\* Fixed-size 29-byte order records using Python's `struct` module.
+Windows PowerShell:
 
-# \- \*\*Order validation:\*\* Checks order fields and rejects invalid binary order data.
+``` powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 
-# \- \*\*Matching engine:\*\* Limit-order matching with price priority, timestamp ordering, partial fills, and duplicate order-ID protection.
+### 3. Install the project and dependencies
 
-# \- \*\*Mmap-backed ring buffer:\*\* Fixed-capacity FIFO transport for serialized orders.
+``` powershell
+python -m pip install -e .
+python -m pip install streamlit pandas pytest
+```
 
-# \- \*\*Trade ledger:\*\* SQLite persistence for executed trades.
+## Run the Simulation
 
-# \- \*\*Latency measurements:\*\* Records matching duration in nanoseconds.
+Run the sample order flow:
 
-# \- \*\*Interactive dashboard:\*\* Streamlit dashboard showing order-book metrics, resting orders, executed trades, and latency samples.
+``` powershell
+python -m chronosmatch
+```
 
-# \- \*\*Automated tests:\*\* Pytest coverage for serialization, matching, buffering, and simulation integration.
+The demonstration processes three sample orders and is expected to
+generate two trades.
 
-# 
+The output includes order and trade counts, best bid and ask, and
+matching-call latency statistics.
 
-# \## Architecture
+## Launch the Dashboard
 
-# 
+Run:
 
-# ```text
+``` powershell
+python -m streamlit run dashboard.py
+```
 
-# Sample Orders
+Open the local URL displayed by Streamlit, typically
+`http://localhost:8501`.
 
-# &#x20;    |
+Click **Run simulation** to populate the dashboard.
 
-# &#x20;    v
+The dashboard presents:
 
-# Binary Order Format
+-   Processed order and executed trade counts
+-   Best bid and best ask
+-   Resting orders
+-   Executed trades from SQLite
+-   Mean and maximum matching latency
+-   A matching-latency chart
 
-# &#x20;    |
+## Run Automated Tests
 
-# &#x20;    v
+Execute the test suite:
 
-# Mmap Ring Buffer
+``` powershell
+python -m pytest -q
+```
 
-# &#x20;    |
+The tests cover binary order encoding and validation, matching behavior,
+ring-buffer operations, and simulation integration.
 
-# &#x20;    v
+## Run the Performance Benchmark
 
-# Matching Engine
+Run a 1,000-iteration microbenchmark:
 
-# &#x20;    |
+``` powershell
+python benchmark.py --iterations 1000
+```
 
-# &#x20;    +------> Resting Order Book
+Or use the default workload:
 
-# &#x20;    |
+``` powershell
+python benchmark.py
+```
 
-# &#x20;    v
+The benchmark reports:
 
-# Executed Trades
+-   Mean matching-call latency
+-   Median latency
+-   P95 latency
+-   P99 latency
+-   Maximum latency
 
-# &#x20;    |
+Results depend on the machine, Python runtime, and benchmark workload.
+Run multiple trials before drawing performance conclusions.
 
-# &#x20;    v
+## Latency Measurement
 
-# SQLite Trade Ledger
+The simulation uses `time.perf_counter_ns()` to measure elapsed time
+around the matching-engine call.
 
-# 
+These measurements represent matching-call duration, not end-to-end
+order-processing latency. The microbenchmark also measures a specific
+synthetic workload and does not establish production high-frequency
+trading performance.
 
-# Simulation Results
+## Current Limitations
 
-# &#x20;    |
+ChronosMatch is an educational MVP and is not suitable for live
+financial trading.
 
-# &#x20;    v
+-   The ring buffer is intended for single-process use without
+    concurrent producer-consumer synchronization.
+-   The matching engine uses Python data structures and is not a
+    lock-free implementation.
+-   The dashboard runs a sample simulation on demand rather than
+    consuming a live market feed.
+-   Risk controls, exchange connectivity, crash recovery, and
+    comprehensive stress testing are not implemented.
+-   Performance results require more extensive benchmarking before
+    meaningful comparisons can be made.
 
-# Streamlit Dashboard
+## Future Improvements
 
-# ```
+-   Optimize order-book data structures.
+-   Implement safe concurrent producer-consumer operations.
+-   Add cancellation and replacement of orders.
+-   Introduce risk checks and configurable trading limits.
+-   Add larger-scale load tests and latency-distribution analysis.
+-   Support live or simulated market-data feeds.
+-   Improve dashboard refresh and monitoring capabilities.
 
-# 
+## Development Workflow
 
-# \## Technology Stack
+Project development is maintained on the `devavarshita` branch.
 
-# 
+To check the active branch:
 
-# \- Python 3.13
+``` powershell
+git branch --show-current
+```
 
-# \- `struct` and `mmap`
+To commit and push changes:
 
-# \- SQLite
+``` powershell
+git add README.md
+git commit -m "docs: update ChronosMatch documentation"
+git push origin devavarshita
+```
 
-# \- Streamlit
+The `main` branch is kept separate from ongoing development.
 
-# \- Pandas
+## Conclusion
 
-# \- Pytest
-
-# 
-
-# \## Setup
-
-# 
-
-# Create and activate a virtual environment.
-
-# 
-
-# \### Windows PowerShell
-
-# 
-
-# ```powershell
-
-# python -m venv .venv
-
-# .\\.venv\\Scripts\\Activate.ps1
-
-# python -m pip install -e .
-
-# python -m pip install streamlit pandas pytest
-
-# ```
-
-# 
-
-# \## Run the simulation
-
-# 
-
-# ```powershell
-
-# python -m chronosmatch
-
-# ```
-
-# 
-
-# The sample simulation submits three orders and demonstrates two trades.
-
-# 
-
-# \## Launch the dashboard
-
-# 
-
-# ```powershell
-
-# python -m streamlit run dashboard.py
-
-# ```
-
-# 
-
-# Open the local URL printed by Streamlit, typically `http://localhost:8501`, and click \*\*Run simulation\*\*.
-
-# 
-
-# \## Run tests
-
-# 
-
-# ```powershell
-
-# python -m pytest -q
-
-# ```
-
-# 
-
-# \## Latency interpretation
-
-# 
-
-# The simulator measures elapsed time around the matching-engine call using `time.perf\_counter\_ns()`. These measurements represent matching-call duration for the sample workload, not end-to-end pipeline latency or a statistically rigorous performance benchmark.
-
-# 
-
-# \## Current limitations
-
-# 
-
-# This is an educational MVP, not a production trading system. The ring buffer is designed for single-process use without concurrent producer/consumer synchronization. The matching engine uses Python data structures and is not lock-free. The dashboard runs a sample simulation on demand rather than consuming a continuous live market feed.
-
-# 
-
-# Production deployment would require additional concurrency controls, risk checks, robust recovery, market-data integration, stress testing, and reproducible benchmarking.
-
-# 
-
-# \## Development branch
-
-# 
-
-# Development is performed on `devavarshita`. The `main` branch is kept separate.
-
-
-
+ChronosMatch demonstrates the design and integration of a simplified
+trading-engine pipeline, from compact binary order representation
+through matching and trade persistence to dashboard visualization and
+performance measurement. It provides a foundation for further
+exploration of low-latency systems, order-book algorithms, and
+performance engineering.
