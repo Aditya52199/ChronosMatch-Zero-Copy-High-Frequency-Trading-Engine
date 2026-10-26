@@ -49,17 +49,24 @@ class SharedOrderRing:
         elif os.fstat(self._file.fileno()).st_size != size:
             self._file.close()
             raise ValueError("ring file size does not match capacity")
-        self._map = mmap.mmap(self._file.fileno(), size, access=mmap.ACCESS_WRITE)
+        buffer = mmap.mmap(self._file.fileno(), size, access=mmap.ACCESS_WRITE)
+        self._map = buffer
         if create:
-            HEADER.pack_into(self._map, 0, MAGIC, VERSION, capacity, RECORD_SIZE, 0, 0, 0)
+            HEADER.pack_into(buffer, 0, MAGIC, VERSION, capacity, RECORD_SIZE, 0, 0, 0)
         else:
-            magic, version, stored_capacity, record_size, _, _, _ = HEADER.unpack_from(self._map)
+            magic, version, stored_capacity, record_size, _, _, _ = HEADER.unpack_from(buffer)
             if (magic, version, stored_capacity, record_size) != (MAGIC, VERSION, capacity, RECORD_SIZE):
                 self.close()
                 raise ValueError("incompatible ring header")
 
+    def _buffer(self) -> mmap.mmap:
+        buffer = self._map
+        if buffer is None:
+            raise RuntimeError("ring is closed")
+        return buffer
+
     def _indexes(self) -> tuple[int, int]:
-        return HEADER.unpack_from(self._map)[-2:]
+        return HEADER.unpack_from(self._buffer())[-2:]
 
     def try_write(self, order: Order) -> bool:
         return self.try_write_fields(order.order_id, order.price_ticks, order.quantity_lots,
@@ -74,22 +81,24 @@ class SharedOrderRing:
             raise ValueError("price must be non-negative and quantity must be positive")
         if side not in (SIDE_BUY, SIDE_SELL) or order_type not in (TYPE_LIMIT, TYPE_MARKET):
             raise ValueError("invalid side or order type")
+        buffer = self._buffer()
         head, tail = self._indexes()
         if head - tail >= self.capacity:
             return False
         offset = HEADER_SIZE + (head % self.capacity) * RECORD_SIZE
         encoded_id = order_id | (side << _SIDE_SHIFT) | (order_type << _TYPE_SHIFT)
-        ORDER.pack_into(self._map, offset, encoded_id, price_ticks, quantity_lots)
-        struct.pack_into("<Q", self._map, 20, head + 1)
+        ORDER.pack_into(buffer, offset, encoded_id, price_ticks, quantity_lots)
+        struct.pack_into("<Q", buffer, 20, head + 1)
         return True
 
     def try_read(self) -> Order | None:
+        buffer = self._buffer()
         head, tail = self._indexes()
         if tail == head:
             return None
         offset = HEADER_SIZE + (tail % self.capacity) * RECORD_SIZE
-        encoded_id, price_ticks, quantity_lots = ORDER.unpack_from(self._map, offset)
-        struct.pack_into("<Q", self._map, 28, tail + 1)
+        encoded_id, price_ticks, quantity_lots = ORDER.unpack_from(buffer, offset)
+        struct.pack_into("<Q", buffer, 28, tail + 1)
         return Order(encoded_id & _ID_MASK, price_ticks, quantity_lots,
                      (encoded_id >> _SIDE_SHIFT) & 1,
                      (encoded_id >> _TYPE_SHIFT) & 1)
@@ -103,11 +112,14 @@ class SharedOrderRing:
             time.sleep(0)
 
     def close(self) -> None:
-        if getattr(self, "_map", None) is not None:
-            self._map.close()
+        _map = self._map
+        if _map is not None:
+            _map.close()
             self._map = None
-        if getattr(self, "_file", None) is not None:
-            self._file.close()
+
+        _file = self._file
+        if _file is not None:
+            _file.close()
             self._file = None
 
     def __enter__(self) -> "SharedOrderRing":

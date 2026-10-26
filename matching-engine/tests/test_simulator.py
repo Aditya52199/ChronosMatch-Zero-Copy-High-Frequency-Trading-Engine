@@ -3,6 +3,12 @@ import asyncio
 import os
 import tempfile
 import unittest
+import sys
+from pathlib import Path
+
+# Add the matching_engine directory to Python path
+project_root = Path(__file__).parent.parent.resolve()
+sys.path.insert(0, str(project_root))
 
 from chronosmatch.protocol import SharedOrderRing
 from chronosmatch.simulator import publish

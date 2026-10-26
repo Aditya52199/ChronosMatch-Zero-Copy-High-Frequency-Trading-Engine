@@ -1,5 +1,11 @@
 """Tests for Price-Time-Priority Cython engine."""
 import unittest
+import sys
+from pathlib import Path
+
+# Add the matching_engine directory to Python path
+project_root = Path(__file__).parent.parent.resolve()
+sys.path.insert(0, str(project_root))
 from chronosmatch.engine import Book
 
 
@@ -47,3 +53,13 @@ class TestLimitOrderBook(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_instant_match_buy_sell():
+    book = Book(capacity=1024)
+    res_buy = book.submit(order_id=100, price_ticks=120, quantity_lots=10, side=0, order_type=0)
+    assert res_buy["fills"] == 0
+    res_sell = book.submit(order_id=101, price_ticks=120, quantity_lots=10, side=1, order_type=0)
+    assert res_sell["fills"] == 1
+    assert res_sell["resting_quantity"] == 0
+    assert res_sell["last_trade_price"] == 120
