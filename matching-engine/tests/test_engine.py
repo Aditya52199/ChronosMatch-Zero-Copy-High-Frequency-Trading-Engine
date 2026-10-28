@@ -50,6 +50,26 @@ class TestLimitOrderBook(unittest.TestCase):
         self.assertEqual(self.book.snapshot()["best_bid"], 0)
         self.assertFalse(self.book.cancel(10))
 
+    def test_zero_gc_collection_during_trades(self):
+        import gc
+        book = Book(capacity=20000)
+        self.assertFalse(gc.is_tracked(book), "Book instance must not be tracked by Python GC")
+
+        res = book.submit(order_id=1, price_ticks=100, quantity_lots=10, side=0, order_type=0)
+        self.assertFalse(gc.is_tracked(res), "MatchResult must not be tracked by Python GC")
+
+        # Force a collection to settle GC generation baselines
+        gc.collect()
+        stats_before = gc.get_stats()[0]["collections"]
+
+        # Submit 5,000 orders/trades
+        for i in range(2, 5002):
+            book.submit(order_id=i, price_ticks=100, quantity_lots=1, side=1 if i % 2 == 0 else 0, order_type=0)
+
+        stats_after = gc.get_stats()[0]["collections"]
+        self.assertEqual(stats_before, stats_after, "Garbage collector must never trigger during trades")
+
+
 
 if __name__ == "__main__":
     unittest.main()

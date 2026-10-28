@@ -1,12 +1,141 @@
+import { useState } from 'react';
+import { useAppState } from '../../context/AppContext';
 import { Panel } from '../../components/Panel';
-const points = [32,36,34,42,39,48,45,53,50,58,55,64,60,68,66,74,71,79];
+import { Activity, TrendingUp, TrendingDown } from 'lucide-react';
+
 export function PriceChart() {
-  const path = points.map((p,i)=>`${i===0?'M':'L'} ${i*20} ${110-p}`).join(' ');
-  return <Panel title="BTC-USD · Price overview" action={<span className="muted small">1D · SIMULATED</span>}>
-    <div className="chart-wrap"><svg viewBox="0 0 340 120" role="img" aria-label="Illustrative upward price chart" preserveAspectRatio="none">
-      <defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#4f8cff" stopOpacity=".3"/><stop offset="100%" stopColor="#4f8cff" stopOpacity="0"/></linearGradient></defs>
-      {[25,50,75,100].map(y=><line key={y} x1="0" x2="340" y1={y} y2={y} stroke="var(--line)" strokeDasharray="4 5"/> )}
-      <path d={`${path} L 340 120 L 0 120 Z`} fill="url(#area)"/><path d={path} fill="none" stroke="#4f8cff" strokeWidth="2.5" vectorEffect="non-scaling-stroke"/>
-    </svg></div><div className="chart-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span></div>
-  </Panel>;
+  const { currentMarket } = useAppState();
+  const [timeframe, setTimeframe] = useState<'1m' | '5m' | '15m' | '1H'>('1m');
+
+  const history = currentMarket.history;
+  const isPositive = currentMarket.change >= 0;
+  const strokeColor = isPositive ? '#42d6a0' : '#ff7186';
+  const gradientId = isPositive ? 'chart-gradient-green' : 'chart-gradient-red';
+
+  // Compute SVG coordinates from real-time history
+  const minVal = Math.min(...history);
+  const maxVal = Math.max(...history);
+  const range = Math.max(0.01, maxVal - minVal);
+  const width = 580;
+  const height = 150;
+  const paddingY = 16;
+  const plotHeight = height - paddingY * 2;
+
+  const points = history.map((val, idx) => {
+    const x = (idx / Math.max(1, history.length - 1)) * width;
+    const y = paddingY + plotHeight - ((val - minVal) / range) * plotHeight;
+    return { x, y, val };
+  });
+
+  const pathD = points
+    .map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+    .join(' ');
+
+  const areaD = `${pathD} L ${width} ${height} L 0 ${height} Z`;
+  const lastPoint = points[points.length - 1] || { x: width, y: height / 2, val: currentMarket.price };
+
+  return (
+    <Panel
+      title={`${currentMarket.symbol} · Real-Time Price Stream`}
+      action={
+        <div className="chart-header-actions">
+          <div className="timeframe-buttons">
+            {(['1m', '5m', '15m', '1H'] as const).map(tf => (
+              <button
+                key={tf}
+                type="button"
+                className={`tf-btn ${timeframe === tf ? 'active' : ''}`}
+                onClick={() => setTimeframe(tf)}
+              >
+                {tf}
+              </button>
+            ))}
+          </div>
+          <span className="live-stream-badge">
+            <Activity size={12} /> STREAMING
+          </span>
+        </div>
+      }
+    >
+      <div className="chart-meta-row">
+        <div className="meta-item">
+          <span className="muted">Live Price</span>
+          <strong className="text-xl">
+            ${currentMarket.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </strong>
+        </div>
+        <div className="meta-item">
+          <span className="muted">24h Change</span>
+          <strong className={`flex-center gap-1 ${isPositive ? 'positive' : 'negative'}`}>
+            {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+            {isPositive ? '+' : ''}{currentMarket.change}% (${currentMarket.changeAmount > 0 ? '+' : ''}{currentMarket.changeAmount})
+          </strong>
+        </div>
+        <div className="meta-item">
+          <span className="muted">24h High</span>
+          <strong>${currentMarket.high24h.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>
+        </div>
+        <div className="meta-item">
+          <span className="muted">24h Low</span>
+          <strong>${currentMarket.low24h.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>
+        </div>
+        <div className="meta-item">
+          <span className="muted">24h Volume</span>
+          <strong>{currentMarket.volume24h.toLocaleString(undefined, { maximumFractionDigits: 0 })} {currentMarket.asset}</strong>
+        </div>
+      </div>
+
+      <div className="chart-wrap">
+        <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="chart-gradient-green" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#42d6a0" stopOpacity="0.32" />
+              <stop offset="100%" stopColor="#42d6a0" stopOpacity="0.0" />
+            </linearGradient>
+            <linearGradient id="chart-gradient-red" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ff7186" stopOpacity="0.32" />
+              <stop offset="100%" stopColor="#ff7186" stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
+
+          {/* Grid lines */}
+          {[0.25, 0.5, 0.75].map((ratio, i) => (
+            <line
+              key={i}
+              x1="0"
+              x2={width}
+              y1={height * ratio}
+              y2={height * ratio}
+              stroke="var(--line)"
+              strokeDasharray="4 4"
+              opacity="0.6"
+            />
+          ))}
+
+          {/* Area Fill */}
+          <path d={areaD} fill={`url(#${gradientId})`} />
+
+          {/* Stroke Line */}
+          <path
+            d={pathD}
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth="2.4"
+            vectorEffect="non-scaling-stroke"
+          />
+
+          {/* Pulse marker on current live point */}
+          <circle cx={lastPoint.x} cy={lastPoint.y} r="5" fill={strokeColor} />
+          <circle cx={lastPoint.x} cy={lastPoint.y} r="9" fill={strokeColor} opacity="0.3" className="pulse-circle" />
+        </svg>
+      </div>
+
+      <div className="chart-labels">
+        <span>-30s</span>
+        <span>-20s</span>
+        <span>-10s</span>
+        <span className="positive">Now (Live)</span>
+      </div>
+    </Panel>
+  );
 }
