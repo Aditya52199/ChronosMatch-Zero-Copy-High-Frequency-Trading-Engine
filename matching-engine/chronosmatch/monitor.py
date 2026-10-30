@@ -36,10 +36,9 @@ def run(stdscr, path: str, capacity: int, price_scale: int, quantity_scale: int)
                 order = ring.try_read()
                 if order is None:
                     break
-                started = time.perf_counter_ns()
-                book.submit(order.order_id, order.price_ticks, order.quantity_lots,
-                            order.side, order.order_type)
-                latencies.append((time.perf_counter_ns() - started) / 1000)
+                res = book.submit(order.order_id, order.price_ticks, order.quantity_lots,
+                                  order.side, order.order_type)
+                latencies.append(res.latency_ns / 1000)
                 processed += 1
             snapshot = book.snapshot()
             avg = sum(latencies) / len(latencies) if latencies else 0

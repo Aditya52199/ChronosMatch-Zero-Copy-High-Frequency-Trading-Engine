@@ -1693,8 +1693,8 @@ struct __pyx_t_12chronosmatch_6engine_MatchResultData;
 struct __pyx_t_12chronosmatch_6engine_BookCore;
 struct __pyx_opt_args_12chronosmatch_6engine_4Book_submit;
 
-/* "chronosmatch/engine.pyx":21
- * from libc.string cimport memset, memmove
+/* "chronosmatch/engine.pyx":22
+ * import time
  * 
  * cdef struct LevelOrder:             # <<<<<<<<<<<<<<
  *     uint64_t order_id
@@ -1707,7 +1707,7 @@ struct __pyx_t_12chronosmatch_6engine_LevelOrder {
   uint8_t side;
 };
 
-/* "chronosmatch/engine.pyx":27
+/* "chronosmatch/engine.pyx":28
  *     uint8_t side
  * 
  * cdef struct MatchResultData:             # <<<<<<<<<<<<<<
@@ -1719,10 +1719,12 @@ struct __pyx_t_12chronosmatch_6engine_MatchResultData {
   uint64_t first_maker_id;
   int64_t resting_quantity;
   int64_t last_trade_price;
+  uint64_t entry_time_ns;
+  uint64_t exit_time_ns;
 };
 
-/* "chronosmatch/engine.pyx":33
- *     int64_t last_trade_price
+/* "chronosmatch/engine.pyx":36
+ *     uint64_t exit_time_ns
  * 
  * cdef struct BookCore:             # <<<<<<<<<<<<<<
  *     LevelOrder* orders
@@ -1738,19 +1740,20 @@ struct __pyx_t_12chronosmatch_6engine_BookCore {
   int64_t best_ask;
 };
 
-/* "chronosmatch/engine.pyx":255
+/* "chronosmatch/engine.pyx":300
  *         return c_submit(&self.core, order_id, price_ticks, quantity_lots, side, order_type)
  * 
  *     cpdef MatchResult submit(self, uint64_t order_id, int64_t price_ticks, int64_t quantity_lots,             # <<<<<<<<<<<<<<
- *                              uint8_t side, uint8_t order_type=0):
+ *                              uint8_t side, uint8_t order_type=0, uint64_t entry_time_ns=0):
  *         """Submit limit or market order to the book, executing matching with nogil.
 */
 struct __pyx_opt_args_12chronosmatch_6engine_4Book_submit {
   int __pyx_n;
   uint8_t order_type;
+  uint64_t entry_time_ns;
 };
 
-/* "chronosmatch/engine.pyx":145
+/* "chronosmatch/engine.pyx":150
  *     return False
  * 
  * cdef class MatchResult:             # <<<<<<<<<<<<<<
@@ -1764,10 +1767,13 @@ struct __pyx_obj_12chronosmatch_6engine_MatchResult {
   uint64_t first_maker_id;
   int64_t resting_quantity;
   int64_t last_trade_price;
+  uint64_t entry_time_ns;
+  uint64_t exit_time_ns;
+  uint64_t latency_ns;
 };
 
 
-/* "chronosmatch/engine.pyx":198
+/* "chronosmatch/engine.pyx":227
  *         }
  * 
  * cdef class Book:             # <<<<<<<<<<<<<<
@@ -1779,11 +1785,18 @@ struct __pyx_obj_12chronosmatch_6engine_Book {
   struct __pyx_vtabstruct_12chronosmatch_6engine_Book *__pyx_vtab;
   struct __pyx_t_12chronosmatch_6engine_BookCore core;
   struct __pyx_t_12chronosmatch_6engine_MatchResultData last_result;
+  uint64_t last_entry_time_ns;
+  uint64_t last_exit_time_ns;
+  uint64_t last_latency_ns;
+  uint64_t total_latency_ns;
+  uint64_t last_trade_entry_time_ns;
+  uint64_t last_trade_exit_time_ns;
+  uint64_t last_trade_latency_ns;
 };
 
 
 
-/* "chronosmatch/engine.pyx":145
+/* "chronosmatch/engine.pyx":150
  *     return False
  * 
  * cdef class MatchResult:             # <<<<<<<<<<<<<<
@@ -1792,13 +1805,13 @@ struct __pyx_obj_12chronosmatch_6engine_Book {
 */
 
 struct __pyx_vtabstruct_12chronosmatch_6engine_MatchResult {
-  void (*_set)(struct __pyx_obj_12chronosmatch_6engine_MatchResult *, uint64_t, uint64_t, int64_t, int64_t);
+  void (*_set)(struct __pyx_obj_12chronosmatch_6engine_MatchResult *, uint64_t, uint64_t, int64_t, int64_t, uint64_t, uint64_t);
 };
 static struct __pyx_vtabstruct_12chronosmatch_6engine_MatchResult *__pyx_vtabptr_12chronosmatch_6engine_MatchResult;
-static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_11MatchResult__set(struct __pyx_obj_12chronosmatch_6engine_MatchResult *, uint64_t, uint64_t, int64_t, int64_t);
+static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_11MatchResult__set(struct __pyx_obj_12chronosmatch_6engine_MatchResult *, uint64_t, uint64_t, int64_t, int64_t, uint64_t, uint64_t);
 
 
-/* "chronosmatch/engine.pyx":198
+/* "chronosmatch/engine.pyx":227
  *         }
  * 
  * cdef class Book:             # <<<<<<<<<<<<<<
@@ -2453,6 +2466,26 @@ static int __Pyx__SetItemOnTypeDict(PyTypeObject *tp, PyObject *k, PyObject *v);
 /* SetupReduce.export */
 static int __Pyx_setup_reduce(PyObject* type_obj);
 
+/* HasAttr.proto (used by ImportImpl) */
+#if __PYX_LIMITED_VERSION_HEX >= 0x030d0000
+#define __Pyx_HasAttr(o, n)  PyObject_HasAttrWithError(o, n)
+#else
+static CYTHON_INLINE int __Pyx_HasAttr(PyObject *, PyObject *);
+#endif
+
+/* TupleOrListFromArrayImpl.proto (used by ListFromArray) */
+CYTHON_UNUSED static PyObject *
+__Pyx_PyList_FromArray(PyObject *const *src, Py_ssize_t n);
+
+/* ListFromArray.proto (used by ImportImpl) */
+
+
+/* ImportImpl.export */
+static PyObject *__Pyx__Import(PyObject *name, PyObject *const *imported_names, Py_ssize_t len_imported_names, PyObject *qualname, PyObject *moddict, int level);
+
+/* Import.proto */
+static CYTHON_INLINE PyObject *__Pyx_Import(PyObject *name, PyObject *const *imported_names, Py_ssize_t len_imported_names, PyObject *qualname, int level);
+
 /* dict_setdefault.proto (used by FetchCommonType) */
 static CYTHON_INLINE PyObject *__Pyx_PyDict_SetDefault(PyObject *d, PyObject *key, PyObject *default_value);
 
@@ -2766,7 +2799,7 @@ static int __Pyx_State_RemoveModule(void*);
 #define __PYX_ABI_MODULE_NAME "_cython_" CYTHON_ABI
 #define __PYX_TYPE_MODULE_PREFIX __PYX_ABI_MODULE_NAME "."
 
-static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_11MatchResult__set(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, uint64_t __pyx_v_fills, uint64_t __pyx_v_first_maker_id, int64_t __pyx_v_resting_quantity, int64_t __pyx_v_last_trade_price); /* proto*/
+static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_11MatchResult__set(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, uint64_t __pyx_v_fills, uint64_t __pyx_v_first_maker_id, int64_t __pyx_v_resting_quantity, int64_t __pyx_v_last_trade_price, uint64_t __pyx_v_entry_time_ns, uint64_t __pyx_v_exit_time_ns); /* proto*/
 static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosmatch_6engine_4Book__c_submit(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, uint64_t __pyx_v_order_id, int64_t __pyx_v_price_ticks, int64_t __pyx_v_quantity_lots, uint8_t __pyx_v_side, uint8_t __pyx_v_order_type); /* proto*/
 static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmatch_6engine_4Book_submit(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, uint64_t __pyx_v_order_id, int64_t __pyx_v_price_ticks, int64_t __pyx_v_quantity_lots, uint8_t __pyx_v_side, int __pyx_skip_dispatch, struct __pyx_opt_args_12chronosmatch_6engine_4Book_submit *__pyx_optional_args); /* proto*/
 static int __pyx_f_12chronosmatch_6engine_4Book__c_cancel(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, uint64_t __pyx_v_order_id); /* proto*/
@@ -2793,8 +2826,8 @@ int __pyx_module_is_main_chronosmatch__engine = 0;
 /* Implementation of "chronosmatch.engine" */
 /* #### Code section: global_var ### */
 /* #### Code section: string_decls ### */
-static const char __pyx_k_fills_first_maker_id_last_trade[] = "fills, first_maker_id, last_trade_price, resting_quantity";
 static const char __pyx_k_Ultra_low_latency_Price_Time_Pri[] = "Ultra-low-latency Price-Time-Priority Limit Order Book implemented in Cython.\n\nAll core structures and variables are statically typed using C-types (libc.stdint\nand libc.stdlib) to execute inside pure C functions (`nogil`), releasing the Python\nGlobal Interpreter Lock (GIL) during matching and order queue operations.\n\nC-Level Optimization:\n1. Pure C BookCore state decoupled from Python object dispatch.\n2. 100% C-level matching loop without any Python API calls, reference counting,\n   or GIL acquisition.\n3. Fast vectorized memmove for resting order removals.\n4. Non-GC-tracked MatchResult return type (Py_TPFLAGS_HAVE_GC is unset) with zero-allocation\n   caching during trades, guaranteeing the Python cyclic Garbage Collector never triggers.\n";
+static const char __pyx_k_entry_time_ns_exit_time_ns_fills[] = "entry_time_ns, exit_time_ns, fills, first_maker_id, last_trade_price, latency_ns, resting_quantity";
 /* #### Code section: decls ### */
 static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult___getitem__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, PyObject *__pyx_v_key); /* proto */
 static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_2get(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, PyObject *__pyx_v_key, PyObject *__pyx_v_default); /* proto */
@@ -2808,6 +2841,12 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_16resting_quantit
 static int __pyx_pf_12chronosmatch_6engine_11MatchResult_16resting_quantity_2__set__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_16last_trade_price___get__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self); /* proto */
 static int __pyx_pf_12chronosmatch_6engine_11MatchResult_16last_trade_price_2__set__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_13entry_time_ns___get__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self); /* proto */
+static int __pyx_pf_12chronosmatch_6engine_11MatchResult_13entry_time_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_12exit_time_ns___get__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self); /* proto */
+static int __pyx_pf_12chronosmatch_6engine_11MatchResult_12exit_time_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_10latency_ns___get__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self); /* proto */
+static int __pyx_pf_12chronosmatch_6engine_11MatchResult_10latency_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_8__reduce_cython__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_10__setstate_cython__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, PyObject *__pyx_v___pyx_state); /* proto */
 static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, Py_ssize_t __pyx_v_capacity); /* proto */
@@ -2817,9 +2856,23 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_8best_ask___get__(struct 
 static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_16last_trade_price___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_6trades___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_5count___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_4submit(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, uint64_t __pyx_v_order_id, int64_t __pyx_v_price_ticks, int64_t __pyx_v_quantity_lots, uint8_t __pyx_v_side, uint8_t __pyx_v_order_type); /* proto */
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_4submit(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, uint64_t __pyx_v_order_id, int64_t __pyx_v_price_ticks, int64_t __pyx_v_quantity_lots, uint8_t __pyx_v_side, uint8_t __pyx_v_order_type, uint64_t __pyx_v_entry_time_ns); /* proto */
 static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_6cancel(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, uint64_t __pyx_v_order_id); /* proto */
 static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_8snapshot(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_18last_entry_time_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self); /* proto */
+static int __pyx_pf_12chronosmatch_6engine_4Book_18last_entry_time_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_17last_exit_time_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self); /* proto */
+static int __pyx_pf_12chronosmatch_6engine_4Book_17last_exit_time_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_15last_latency_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self); /* proto */
+static int __pyx_pf_12chronosmatch_6engine_4Book_15last_latency_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_16total_latency_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self); /* proto */
+static int __pyx_pf_12chronosmatch_6engine_4Book_16total_latency_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_24last_trade_entry_time_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self); /* proto */
+static int __pyx_pf_12chronosmatch_6engine_4Book_24last_trade_entry_time_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_23last_trade_exit_time_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self); /* proto */
+static int __pyx_pf_12chronosmatch_6engine_4Book_23last_trade_exit_time_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_21last_trade_latency_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self); /* proto */
+static int __pyx_pf_12chronosmatch_6engine_4Book_21last_trade_latency_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_10__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_12__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_pf_12chronosmatch_6engine___pyx_unpickle_MatchResult(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v___pyx_type, long __pyx_v___pyx_checksum, PyObject *__pyx_v___pyx_state); /* proto */
@@ -2901,7 +2954,7 @@ namespace {
     __Pyx_CachedCFunction __pyx_umethod_PyDict_Type_values;
     PyObject *__pyx_tuple[2];
     PyObject *__pyx_codeobj_tab[10];
-    PyObject *__pyx_string_tab[97];
+    PyObject *__pyx_string_tab[116];
     PyObject *__pyx_number_tab[2];
 /* #### Code section: module_state_contents ### */
 /* CommonTypesMetaclass.module_state_decls */
@@ -2946,105 +2999,124 @@ static __pyx_mstatetype __pyx_mstate_global_static =
 static __pyx_mstatetype * const __pyx_mstate_global = &__pyx_mstate_global_static;
 #endif
 /* #### Code section: constant_name_defines ### */
-#define __pyx_kp_u_first_maker_id_2 __pyx_string_tab[0]
-#define __pyx_kp_u_last_trade_price_2 __pyx_string_tab[1]
-#define __pyx_kp_u_resting_quantity_2 __pyx_string_tab[2]
-#define __pyx_kp_u_tree_fragment __pyx_string_tab[3]
-#define __pyx_kp_u_MatchResult_fills __pyx_string_tab[4]
-#define __pyx_kp_u_ __pyx_string_tab[5]
-#define __pyx_kp_u__2 __pyx_string_tab[6]
-#define __pyx_kp_u_Failed_to_allocate_order_memory __pyx_string_tab[7]
-#define __pyx_kp_u_Note_that_Cython_is_deliberately __pyx_string_tab[8]
-#define __pyx_kp_u_add_note __pyx_string_tab[9]
-#define __pyx_kp_u_capacity_must_be_positive __pyx_string_tab[10]
-#define __pyx_kp_u_chronosmatch_engine_pyx __pyx_string_tab[11]
-#define __pyx_kp_u_disable __pyx_string_tab[12]
-#define __pyx_kp_u_enable __pyx_string_tab[13]
-#define __pyx_kp_u_gc __pyx_string_tab[14]
-#define __pyx_kp_u_invalid_order_fields __pyx_string_tab[15]
-#define __pyx_kp_u_isenabled __pyx_string_tab[16]
-#define __pyx_kp_u_limit_order_price_must_be_positi __pyx_string_tab[17]
-#define __pyx_kp_u_no_default___reduce___due_to_non __pyx_string_tab[18]
-#define __pyx_kp_u_order_book_capacity_reached __pyx_string_tab[19]
-#define __pyx_n_u_Book __pyx_string_tab[20]
-#define __pyx_n_u_Book___reduce_cython __pyx_string_tab[21]
-#define __pyx_n_u_Book___setstate_cython __pyx_string_tab[22]
-#define __pyx_n_u_Book_cancel __pyx_string_tab[23]
-#define __pyx_n_u_Book_snapshot __pyx_string_tab[24]
-#define __pyx_n_u_Book_submit __pyx_string_tab[25]
-#define __pyx_n_u_MatchResult __pyx_string_tab[26]
-#define __pyx_n_u_MatchResult___reduce_cython __pyx_string_tab[27]
-#define __pyx_n_u_MatchResult___setstate_cython __pyx_string_tab[28]
-#define __pyx_n_u_MatchResult_as_dict __pyx_string_tab[29]
-#define __pyx_n_u_MatchResult_get __pyx_string_tab[30]
-#define __pyx_n_u_Pyx_PyDict_NextRef __pyx_string_tab[31]
-#define __pyx_n_u_annotate __pyx_string_tab[32]
-#define __pyx_n_u_dict __pyx_string_tab[33]
-#define __pyx_n_u_func __pyx_string_tab[34]
-#define __pyx_n_u_getstate __pyx_string_tab[35]
-#define __pyx_n_u_main __pyx_string_tab[36]
-#define __pyx_n_u_module __pyx_string_tab[37]
-#define __pyx_n_u_name __pyx_string_tab[38]
-#define __pyx_n_u_new __pyx_string_tab[39]
-#define __pyx_n_u_pyx_checksum __pyx_string_tab[40]
-#define __pyx_n_u_pyx_result __pyx_string_tab[41]
-#define __pyx_n_u_pyx_state __pyx_string_tab[42]
-#define __pyx_n_u_pyx_type __pyx_string_tab[43]
-#define __pyx_n_u_pyx_unpickle_MatchResult __pyx_string_tab[44]
-#define __pyx_n_u_pyx_vtable __pyx_string_tab[45]
-#define __pyx_n_u_qualname __pyx_string_tab[46]
-#define __pyx_n_u_reduce __pyx_string_tab[47]
-#define __pyx_n_u_reduce_cython __pyx_string_tab[48]
-#define __pyx_n_u_reduce_ex __pyx_string_tab[49]
-#define __pyx_n_u_set_name __pyx_string_tab[50]
-#define __pyx_n_u_setstate __pyx_string_tab[51]
-#define __pyx_n_u_setstate_cython __pyx_string_tab[52]
-#define __pyx_n_u_test __pyx_string_tab[53]
-#define __pyx_n_u_dict_2 __pyx_string_tab[54]
-#define __pyx_n_u_is_coroutine __pyx_string_tab[55]
-#define __pyx_n_u_as_dict __pyx_string_tab[56]
-#define __pyx_n_u_asyncio_coroutines __pyx_string_tab[57]
-#define __pyx_n_u_best_ask __pyx_string_tab[58]
-#define __pyx_n_u_best_bid __pyx_string_tab[59]
-#define __pyx_n_u_cancel __pyx_string_tab[60]
-#define __pyx_n_u_capacity __pyx_string_tab[61]
-#define __pyx_n_u_chronosmatch_engine __pyx_string_tab[62]
-#define __pyx_n_u_cline_in_traceback __pyx_string_tab[63]
-#define __pyx_n_u_default __pyx_string_tab[64]
-#define __pyx_n_u_fills __pyx_string_tab[65]
-#define __pyx_n_u_first_maker_id __pyx_string_tab[66]
-#define __pyx_n_u_get __pyx_string_tab[67]
-#define __pyx_n_u_items __pyx_string_tab[68]
-#define __pyx_n_u_key __pyx_string_tab[69]
-#define __pyx_n_u_last_trade_price __pyx_string_tab[70]
-#define __pyx_n_u_order_id __pyx_string_tab[71]
-#define __pyx_n_u_order_type __pyx_string_tab[72]
-#define __pyx_n_u_pop __pyx_string_tab[73]
-#define __pyx_n_u_price_ticks __pyx_string_tab[74]
-#define __pyx_n_u_quantity_lots __pyx_string_tab[75]
-#define __pyx_n_u_resting_orders __pyx_string_tab[76]
-#define __pyx_n_u_resting_quantity __pyx_string_tab[77]
-#define __pyx_n_u_self __pyx_string_tab[78]
-#define __pyx_n_u_setdefault __pyx_string_tab[79]
-#define __pyx_n_u_side __pyx_string_tab[80]
-#define __pyx_n_u_snapshot __pyx_string_tab[81]
-#define __pyx_n_u_state __pyx_string_tab[82]
-#define __pyx_n_u_submit __pyx_string_tab[83]
-#define __pyx_n_u_trades __pyx_string_tab[84]
-#define __pyx_n_u_update __pyx_string_tab[85]
-#define __pyx_n_u_use_setstate __pyx_string_tab[86]
-#define __pyx_n_u_values __pyx_string_tab[87]
-#define __pyx_kp_b_iso88591_Q __pyx_string_tab[88]
-#define __pyx_kp_b_iso88591__3 __pyx_string_tab[89]
-#define __pyx_kp_b_iso88591_q_0_kQR_haq_7_QnN_1 __pyx_string_tab[90]
-#define __pyx_kp_b_iso88591_XT_2_6I_Q_q_l_vWE_Q_q_q_q_D_7_D __pyx_string_tab[91]
-#define __pyx_kp_b_iso88591_A_T_d_A_A __pyx_string_tab[92]
-#define __pyx_kp_b_iso88591_A_Bc_b_AQ_c_4_3a_AQ_1D_z_oVST_3 __pyx_string_tab[93]
-#define __pyx_kp_b_iso88591_A_E_E_d_q_d_q_E __pyx_string_tab[94]
-#define __pyx_kp_b_iso88591_A_haq_G1_q __pyx_string_tab[95]
-#define __pyx_kp_b_iso88591_1_4s_4q_A_4q_A_4q_A_4q_q __pyx_string_tab[96]
+#define __pyx_kp_u_entry_time_ns_2 __pyx_string_tab[0]
+#define __pyx_kp_u_exit_time_ns_2 __pyx_string_tab[1]
+#define __pyx_kp_u_first_maker_id_2 __pyx_string_tab[2]
+#define __pyx_kp_u_last_trade_price_2 __pyx_string_tab[3]
+#define __pyx_kp_u_latency_ns_2 __pyx_string_tab[4]
+#define __pyx_kp_u_resting_quantity_2 __pyx_string_tab[5]
+#define __pyx_kp_u_tree_fragment __pyx_string_tab[6]
+#define __pyx_kp_u_MatchResult_fills __pyx_string_tab[7]
+#define __pyx_kp_u_ __pyx_string_tab[8]
+#define __pyx_kp_u__2 __pyx_string_tab[9]
+#define __pyx_kp_u_Failed_to_allocate_order_memory __pyx_string_tab[10]
+#define __pyx_kp_u_Note_that_Cython_is_deliberately __pyx_string_tab[11]
+#define __pyx_kp_u_add_note __pyx_string_tab[12]
+#define __pyx_kp_u_capacity_must_be_positive __pyx_string_tab[13]
+#define __pyx_kp_u_chronosmatch_engine_pyx __pyx_string_tab[14]
+#define __pyx_kp_u_disable __pyx_string_tab[15]
+#define __pyx_kp_u_enable __pyx_string_tab[16]
+#define __pyx_kp_u_gc __pyx_string_tab[17]
+#define __pyx_kp_u_invalid_order_fields __pyx_string_tab[18]
+#define __pyx_kp_u_isenabled __pyx_string_tab[19]
+#define __pyx_kp_u_limit_order_price_must_be_positi __pyx_string_tab[20]
+#define __pyx_kp_u_no_default___reduce___due_to_non __pyx_string_tab[21]
+#define __pyx_kp_u_order_book_capacity_reached __pyx_string_tab[22]
+#define __pyx_n_u_Book __pyx_string_tab[23]
+#define __pyx_n_u_Book___reduce_cython __pyx_string_tab[24]
+#define __pyx_n_u_Book___setstate_cython __pyx_string_tab[25]
+#define __pyx_n_u_Book_cancel __pyx_string_tab[26]
+#define __pyx_n_u_Book_snapshot __pyx_string_tab[27]
+#define __pyx_n_u_Book_submit __pyx_string_tab[28]
+#define __pyx_n_u_MatchResult __pyx_string_tab[29]
+#define __pyx_n_u_MatchResult___reduce_cython __pyx_string_tab[30]
+#define __pyx_n_u_MatchResult___setstate_cython __pyx_string_tab[31]
+#define __pyx_n_u_MatchResult_as_dict __pyx_string_tab[32]
+#define __pyx_n_u_MatchResult_get __pyx_string_tab[33]
+#define __pyx_n_u_Pyx_PyDict_NextRef __pyx_string_tab[34]
+#define __pyx_n_u_annotate __pyx_string_tab[35]
+#define __pyx_n_u_dict __pyx_string_tab[36]
+#define __pyx_n_u_func __pyx_string_tab[37]
+#define __pyx_n_u_getstate __pyx_string_tab[38]
+#define __pyx_n_u_main __pyx_string_tab[39]
+#define __pyx_n_u_module __pyx_string_tab[40]
+#define __pyx_n_u_name __pyx_string_tab[41]
+#define __pyx_n_u_new __pyx_string_tab[42]
+#define __pyx_n_u_pyx_checksum __pyx_string_tab[43]
+#define __pyx_n_u_pyx_result __pyx_string_tab[44]
+#define __pyx_n_u_pyx_state __pyx_string_tab[45]
+#define __pyx_n_u_pyx_type __pyx_string_tab[46]
+#define __pyx_n_u_pyx_unpickle_MatchResult __pyx_string_tab[47]
+#define __pyx_n_u_pyx_vtable __pyx_string_tab[48]
+#define __pyx_n_u_qualname __pyx_string_tab[49]
+#define __pyx_n_u_reduce __pyx_string_tab[50]
+#define __pyx_n_u_reduce_cython __pyx_string_tab[51]
+#define __pyx_n_u_reduce_ex __pyx_string_tab[52]
+#define __pyx_n_u_set_name __pyx_string_tab[53]
+#define __pyx_n_u_setstate __pyx_string_tab[54]
+#define __pyx_n_u_setstate_cython __pyx_string_tab[55]
+#define __pyx_n_u_test __pyx_string_tab[56]
+#define __pyx_n_u_dict_2 __pyx_string_tab[57]
+#define __pyx_n_u_is_coroutine __pyx_string_tab[58]
+#define __pyx_n_u_as_dict __pyx_string_tab[59]
+#define __pyx_n_u_asyncio_coroutines __pyx_string_tab[60]
+#define __pyx_n_u_best_ask __pyx_string_tab[61]
+#define __pyx_n_u_best_bid __pyx_string_tab[62]
+#define __pyx_n_u_cancel __pyx_string_tab[63]
+#define __pyx_n_u_capacity __pyx_string_tab[64]
+#define __pyx_n_u_chronosmatch_engine __pyx_string_tab[65]
+#define __pyx_n_u_cline_in_traceback __pyx_string_tab[66]
+#define __pyx_n_u_default __pyx_string_tab[67]
+#define __pyx_n_u_entry_time __pyx_string_tab[68]
+#define __pyx_n_u_entry_time_ns __pyx_string_tab[69]
+#define __pyx_n_u_entry_timestamp_ns __pyx_string_tab[70]
+#define __pyx_n_u_exit_time __pyx_string_tab[71]
+#define __pyx_n_u_exit_time_ns __pyx_string_tab[72]
+#define __pyx_n_u_exit_timestamp_ns __pyx_string_tab[73]
+#define __pyx_n_u_fills __pyx_string_tab[74]
+#define __pyx_n_u_first_maker_id __pyx_string_tab[75]
+#define __pyx_n_u_get __pyx_string_tab[76]
+#define __pyx_n_u_items __pyx_string_tab[77]
+#define __pyx_n_u_key __pyx_string_tab[78]
+#define __pyx_n_u_last_entry_time_ns __pyx_string_tab[79]
+#define __pyx_n_u_last_exit_time_ns __pyx_string_tab[80]
+#define __pyx_n_u_last_latency_ns __pyx_string_tab[81]
+#define __pyx_n_u_last_trade_entry_time_ns __pyx_string_tab[82]
+#define __pyx_n_u_last_trade_exit_time_ns __pyx_string_tab[83]
+#define __pyx_n_u_last_trade_latency_ns __pyx_string_tab[84]
+#define __pyx_n_u_last_trade_price __pyx_string_tab[85]
+#define __pyx_n_u_latency __pyx_string_tab[86]
+#define __pyx_n_u_latency_ns __pyx_string_tab[87]
+#define __pyx_n_u_order_id __pyx_string_tab[88]
+#define __pyx_n_u_order_type __pyx_string_tab[89]
+#define __pyx_n_u_perf_counter_ns __pyx_string_tab[90]
+#define __pyx_n_u_pop __pyx_string_tab[91]
+#define __pyx_n_u_price_ticks __pyx_string_tab[92]
+#define __pyx_n_u_quantity_lots __pyx_string_tab[93]
+#define __pyx_n_u_resting_orders __pyx_string_tab[94]
+#define __pyx_n_u_resting_quantity __pyx_string_tab[95]
+#define __pyx_n_u_self __pyx_string_tab[96]
+#define __pyx_n_u_setdefault __pyx_string_tab[97]
+#define __pyx_n_u_side __pyx_string_tab[98]
+#define __pyx_n_u_snapshot __pyx_string_tab[99]
+#define __pyx_n_u_state __pyx_string_tab[100]
+#define __pyx_n_u_submit __pyx_string_tab[101]
+#define __pyx_n_u_time __pyx_string_tab[102]
+#define __pyx_n_u_trades __pyx_string_tab[103]
+#define __pyx_n_u_update __pyx_string_tab[104]
+#define __pyx_n_u_use_setstate __pyx_string_tab[105]
+#define __pyx_n_u_values __pyx_string_tab[106]
+#define __pyx_kp_b_iso88591_Q __pyx_string_tab[107]
+#define __pyx_kp_b_iso88591__3 __pyx_string_tab[108]
+#define __pyx_kp_b_iso88591_q_0_kQR_haq_7_QnN_1 __pyx_string_tab[109]
+#define __pyx_kp_b_iso88591_T_HDHYY_ppt_u_B_B_F_F_G_q_l_vWE __pyx_string_tab[110]
+#define __pyx_kp_b_iso88591_A_T_d_A_A_T_D_a __pyx_string_tab[111]
+#define __pyx_kp_b_iso88591_A_XXY_1_s_SWWggh_Bc_b_AQ_c_4_3a __pyx_string_tab[112]
+#define __pyx_kp_b_iso88591_A_E_E_d_q_d_q_E_a_Q_t1_A_t1_T __pyx_string_tab[113]
+#define __pyx_kp_b_iso88591_A_haq_G1_q __pyx_string_tab[114]
+#define __pyx_kp_b_iso88591_1_4s_4q_A_4q_A_4q_A_4q_nA_4q_4q __pyx_string_tab[115]
 #define __pyx_int_0 __pyx_number_tab[0]
-#define __pyx_int_136212302 __pyx_number_tab[1]
+#define __pyx_int_65643452 __pyx_number_tab[1]
 /* #### Code section: module_state_clear ### */
 #if CYTHON_USE_MODULE_STATE
 static CYTHON_SMALL_CODE int __pyx_m_clear(PyObject *m) {
@@ -3068,7 +3140,7 @@ static CYTHON_SMALL_CODE int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_umethod_PyDict_Type_values.method);
   for (int i=0; i<2; ++i) { Py_CLEAR(clear_module_state->__pyx_tuple[i]); }
   for (int i=0; i<10; ++i) { Py_CLEAR(clear_module_state->__pyx_codeobj_tab[i]); }
-  for (int i=0; i<97; ++i) { Py_CLEAR(clear_module_state->__pyx_string_tab[i]); }
+  for (int i=0; i<116; ++i) { Py_CLEAR(clear_module_state->__pyx_string_tab[i]); }
   for (int i=0; i<2; ++i) { Py_CLEAR(clear_module_state->__pyx_number_tab[i]); }
 /* #### Code section: module_state_clear_contents ### */
 /* CommonTypesMetaclass.module_state_clear */
@@ -3101,7 +3173,7 @@ static CYTHON_SMALL_CODE int __pyx_m_traverse(PyObject *m, visitproc visit, void
   Py_VISIT(traverse_module_state->__pyx_umethod_PyDict_Type_values.method);
   for (int i=0; i<2; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_tuple[i]); }
   for (int i=0; i<10; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_codeobj_tab[i]); }
-  for (int i=0; i<97; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_string_tab[i]); }
+  for (int i=0; i<116; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_string_tab[i]); }
   for (int i=0; i<2; ++i) { __Pyx_VISIT_CONST(traverse_module_state->__pyx_number_tab[i]); }
 /* #### Code section: module_state_traverse_contents ### */
 /* CommonTypesMetaclass.module_state_traverse */
@@ -3116,7 +3188,7 @@ return 0;
 #endif
 /* #### Code section: module_code ### */
 
-/* "chronosmatch/engine.pyx":42
+/* "chronosmatch/engine.pyx":45
  *     int64_t best_ask
  * 
  * cdef inline void c_refresh_top(BookCore* core) noexcept nogil:             # <<<<<<<<<<<<<<
@@ -3133,7 +3205,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
   int64_t __pyx_t_5;
   int __pyx_t_6;
 
-  /* "chronosmatch/engine.pyx":45
+  /* "chronosmatch/engine.pyx":48
  *     """Scan top of the book without Python overhead or GIL."""
  *     cdef Py_ssize_t i
  *     core.best_bid = 0             # <<<<<<<<<<<<<<
@@ -3142,7 +3214,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
 */
   __pyx_v_core->best_bid = 0;
 
-  /* "chronosmatch/engine.pyx":46
+  /* "chronosmatch/engine.pyx":49
  *     cdef Py_ssize_t i
  *     core.best_bid = 0
  *     core.best_ask = 0             # <<<<<<<<<<<<<<
@@ -3151,7 +3223,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
 */
   __pyx_v_core->best_ask = 0;
 
-  /* "chronosmatch/engine.pyx":47
+  /* "chronosmatch/engine.pyx":50
  *     core.best_bid = 0
  *     core.best_ask = 0
  *     for i in range(core.count):             # <<<<<<<<<<<<<<
@@ -3165,7 +3237,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "chronosmatch/engine.pyx":48
+    /* "chronosmatch/engine.pyx":51
  *     core.best_ask = 0
  *     for i in range(core.count):
  *         if core.orders[i].side == 0:             # <<<<<<<<<<<<<<
@@ -3177,7 +3249,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
     if (__pyx_t_4) {
 
 
-      /* "chronosmatch/engine.pyx":49
+      /* "chronosmatch/engine.pyx":52
  *     for i in range(core.count):
  *         if core.orders[i].side == 0:
  *             if core.orders[i].price_ticks > core.best_bid:             # <<<<<<<<<<<<<<
@@ -3189,7 +3261,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
       if (__pyx_t_4) {
 
 
-        /* "chronosmatch/engine.pyx":50
+        /* "chronosmatch/engine.pyx":53
  *         if core.orders[i].side == 0:
  *             if core.orders[i].price_ticks > core.best_bid:
  *                 core.best_bid = core.orders[i].price_ticks             # <<<<<<<<<<<<<<
@@ -3200,7 +3272,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
 
         __pyx_v_core->best_bid = __pyx_t_5;
 
-        /* "chronosmatch/engine.pyx":49
+        /* "chronosmatch/engine.pyx":52
  *     for i in range(core.count):
  *         if core.orders[i].side == 0:
  *             if core.orders[i].price_ticks > core.best_bid:             # <<<<<<<<<<<<<<
@@ -3209,7 +3281,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
 */
       }
 
-      /* "chronosmatch/engine.pyx":48
+      /* "chronosmatch/engine.pyx":51
  *     core.best_ask = 0
  *     for i in range(core.count):
  *         if core.orders[i].side == 0:             # <<<<<<<<<<<<<<
@@ -3219,7 +3291,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
       goto __pyx_L5;
     }
 
-    /* "chronosmatch/engine.pyx":51
+    /* "chronosmatch/engine.pyx":54
  *             if core.orders[i].price_ticks > core.best_bid:
  *                 core.best_bid = core.orders[i].price_ticks
  *         elif core.best_ask == 0 or core.orders[i].price_ticks < core.best_ask:             # <<<<<<<<<<<<<<
@@ -3245,7 +3317,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
     if (__pyx_t_4) {
 
 
-      /* "chronosmatch/engine.pyx":52
+      /* "chronosmatch/engine.pyx":55
  *                 core.best_bid = core.orders[i].price_ticks
  *         elif core.best_ask == 0 or core.orders[i].price_ticks < core.best_ask:
  *             core.best_ask = core.orders[i].price_ticks             # <<<<<<<<<<<<<<
@@ -3256,7 +3328,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
 
       __pyx_v_core->best_ask = __pyx_t_5;
 
-      /* "chronosmatch/engine.pyx":51
+      /* "chronosmatch/engine.pyx":54
  *             if core.orders[i].price_ticks > core.best_bid:
  *                 core.best_bid = core.orders[i].price_ticks
  *         elif core.best_ask == 0 or core.orders[i].price_ticks < core.best_ask:             # <<<<<<<<<<<<<<
@@ -3268,7 +3340,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
   }
 
 
-  /* "chronosmatch/engine.pyx":42
+  /* "chronosmatch/engine.pyx":45
  *     int64_t best_ask
  * 
  * cdef inline void c_refresh_top(BookCore* core) noexcept nogil:             # <<<<<<<<<<<<<<
@@ -3280,7 +3352,7 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_c_refresh_top(struct __
 
 }
 
-/* "chronosmatch/engine.pyx":54
+/* "chronosmatch/engine.pyx":57
  *             core.best_ask = core.orders[i].price_ticks
  * 
  * cdef MatchResultData c_submit(BookCore* core, uint64_t order_id, int64_t price_ticks,             # <<<<<<<<<<<<<<
@@ -3304,7 +3376,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
   int __pyx_t_6;
   uint64_t __pyx_t_7;
 
-  /* "chronosmatch/engine.pyx":58
+  /* "chronosmatch/engine.pyx":61
  *     """Pure C matching routine executed entirely without the GIL or Python runtime."""
  *     cdef MatchResultData res
  *     res.fills = 0             # <<<<<<<<<<<<<<
@@ -3313,7 +3385,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
   __pyx_v_res.fills = 0;
 
-  /* "chronosmatch/engine.pyx":59
+  /* "chronosmatch/engine.pyx":62
  *     cdef MatchResultData res
  *     res.fills = 0
  *     res.first_maker_id = 0             # <<<<<<<<<<<<<<
@@ -3322,28 +3394,46 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
   __pyx_v_res.first_maker_id = 0;
 
-  /* "chronosmatch/engine.pyx":60
+  /* "chronosmatch/engine.pyx":63
  *     res.fills = 0
  *     res.first_maker_id = 0
  *     res.resting_quantity = 0             # <<<<<<<<<<<<<<
  *     res.last_trade_price = core.last_trade_price
- * 
+ *     res.entry_time_ns = 0
 */
   __pyx_v_res.resting_quantity = 0;
 
-  /* "chronosmatch/engine.pyx":61
+  /* "chronosmatch/engine.pyx":64
  *     res.first_maker_id = 0
  *     res.resting_quantity = 0
  *     res.last_trade_price = core.last_trade_price             # <<<<<<<<<<<<<<
- * 
- *     cdef int64_t remaining = quantity_lots
+ *     res.entry_time_ns = 0
+ *     res.exit_time_ns = 0
 */
   __pyx_t_1 = __pyx_v_core->last_trade_price;
 
   __pyx_v_res.last_trade_price = __pyx_t_1;
 
-  /* "chronosmatch/engine.pyx":63
+  /* "chronosmatch/engine.pyx":65
+ *     res.resting_quantity = 0
  *     res.last_trade_price = core.last_trade_price
+ *     res.entry_time_ns = 0             # <<<<<<<<<<<<<<
+ *     res.exit_time_ns = 0
+ * 
+*/
+  __pyx_v_res.entry_time_ns = 0;
+
+  /* "chronosmatch/engine.pyx":66
+ *     res.last_trade_price = core.last_trade_price
+ *     res.entry_time_ns = 0
+ *     res.exit_time_ns = 0             # <<<<<<<<<<<<<<
+ * 
+ *     cdef int64_t remaining = quantity_lots
+*/
+  __pyx_v_res.exit_time_ns = 0;
+
+  /* "chronosmatch/engine.pyx":68
+ *     res.exit_time_ns = 0
  * 
  *     cdef int64_t remaining = quantity_lots             # <<<<<<<<<<<<<<
  *     cdef Py_ssize_t i, j, shift_len
@@ -3351,7 +3441,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
   __pyx_v_remaining = __pyx_v_quantity_lots;
 
-  /* "chronosmatch/engine.pyx":68
+  /* "chronosmatch/engine.pyx":73
  * 
  *     # Continuous matching against resting book in price-time priority
  *     while remaining > 0:             # <<<<<<<<<<<<<<
@@ -3364,7 +3454,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 
     if (!__pyx_t_2) break;
 
-    /* "chronosmatch/engine.pyx":69
+    /* "chronosmatch/engine.pyx":74
  *     # Continuous matching against resting book in price-time priority
  *     while remaining > 0:
  *         i = -1             # <<<<<<<<<<<<<<
@@ -3373,7 +3463,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
     __pyx_v_i = -1L;
 
-    /* "chronosmatch/engine.pyx":70
+    /* "chronosmatch/engine.pyx":75
  *     while remaining > 0:
  *         i = -1
  *         for j in range(core.count):             # <<<<<<<<<<<<<<
@@ -3387,7 +3477,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
     for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
       __pyx_v_j = __pyx_t_5;
 
-      /* "chronosmatch/engine.pyx":71
+      /* "chronosmatch/engine.pyx":76
  *         i = -1
  *         for j in range(core.count):
  *             if core.orders[j].side == side:             # <<<<<<<<<<<<<<
@@ -3399,7 +3489,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
       if (__pyx_t_2) {
 
 
-        /* "chronosmatch/engine.pyx":72
+        /* "chronosmatch/engine.pyx":77
  *         for j in range(core.count):
  *             if core.orders[j].side == side:
  *                 continue             # <<<<<<<<<<<<<<
@@ -3408,7 +3498,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
         goto __pyx_L5_continue;
 
-        /* "chronosmatch/engine.pyx":71
+        /* "chronosmatch/engine.pyx":76
  *         i = -1
  *         for j in range(core.count):
  *             if core.orders[j].side == side:             # <<<<<<<<<<<<<<
@@ -3417,7 +3507,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       }
 
-      /* "chronosmatch/engine.pyx":75
+      /* "chronosmatch/engine.pyx":80
  * 
  *             # Check price-crossing condition
  *             crosses = (order_type == 1 or             # <<<<<<<<<<<<<<
@@ -3435,7 +3525,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
         goto __pyx_L8_bool_binop_done;
       }
 
-      /* "chronosmatch/engine.pyx":76
+      /* "chronosmatch/engine.pyx":81
  *             # Check price-crossing condition
  *             crosses = (order_type == 1 or
  *                        (side == 0 and price_ticks >= core.orders[j].price_ticks) or             # <<<<<<<<<<<<<<
@@ -3462,7 +3552,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
       }
       __pyx_L10_next_or:;
 
-      /* "chronosmatch/engine.pyx":77
+      /* "chronosmatch/engine.pyx":82
  *             crosses = (order_type == 1 or
  *                        (side == 0 and price_ticks >= core.orders[j].price_ticks) or
  *                        (side == 1 and price_ticks <= core.orders[j].price_ticks))             # <<<<<<<<<<<<<<
@@ -3487,7 +3577,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
       __pyx_L8_bool_binop_done:;
       __pyx_v_crosses = __pyx_t_2;
 
-      /* "chronosmatch/engine.pyx":78
+      /* "chronosmatch/engine.pyx":83
  *                        (side == 0 and price_ticks >= core.orders[j].price_ticks) or
  *                        (side == 1 and price_ticks <= core.orders[j].price_ticks))
  *             if not crosses:             # <<<<<<<<<<<<<<
@@ -3499,7 +3589,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
       if (__pyx_t_2) {
 
 
-        /* "chronosmatch/engine.pyx":79
+        /* "chronosmatch/engine.pyx":84
  *                        (side == 1 and price_ticks <= core.orders[j].price_ticks))
  *             if not crosses:
  *                 continue             # <<<<<<<<<<<<<<
@@ -3508,7 +3598,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
         goto __pyx_L5_continue;
 
-        /* "chronosmatch/engine.pyx":78
+        /* "chronosmatch/engine.pyx":83
  *                        (side == 0 and price_ticks >= core.orders[j].price_ticks) or
  *                        (side == 1 and price_ticks <= core.orders[j].price_ticks))
  *             if not crosses:             # <<<<<<<<<<<<<<
@@ -3517,7 +3607,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       }
 
-      /* "chronosmatch/engine.pyx":81
+      /* "chronosmatch/engine.pyx":86
  *                 continue
  * 
  *             if i == -1:             # <<<<<<<<<<<<<<
@@ -3529,7 +3619,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
       if (__pyx_t_2) {
 
 
-        /* "chronosmatch/engine.pyx":82
+        /* "chronosmatch/engine.pyx":87
  * 
  *             if i == -1:
  *                 i = j             # <<<<<<<<<<<<<<
@@ -3538,7 +3628,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
         __pyx_v_i = __pyx_v_j;
 
-        /* "chronosmatch/engine.pyx":81
+        /* "chronosmatch/engine.pyx":86
  *                 continue
  * 
  *             if i == -1:             # <<<<<<<<<<<<<<
@@ -3548,7 +3638,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
         goto __pyx_L14;
       }
 
-      /* "chronosmatch/engine.pyx":83
+      /* "chronosmatch/engine.pyx":88
  *             if i == -1:
  *                 i = j
  *             elif side == 0 and core.orders[j].price_ticks < core.orders[i].price_ticks:             # <<<<<<<<<<<<<<
@@ -3574,7 +3664,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
       if (__pyx_t_2) {
 
 
-        /* "chronosmatch/engine.pyx":85
+        /* "chronosmatch/engine.pyx":90
  *             elif side == 0 and core.orders[j].price_ticks < core.orders[i].price_ticks:
  *                 # Better ask is lower price
  *                 i = j             # <<<<<<<<<<<<<<
@@ -3583,7 +3673,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
         __pyx_v_i = __pyx_v_j;
 
-        /* "chronosmatch/engine.pyx":83
+        /* "chronosmatch/engine.pyx":88
  *             if i == -1:
  *                 i = j
  *             elif side == 0 and core.orders[j].price_ticks < core.orders[i].price_ticks:             # <<<<<<<<<<<<<<
@@ -3593,7 +3683,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
         goto __pyx_L14;
       }
 
-      /* "chronosmatch/engine.pyx":86
+      /* "chronosmatch/engine.pyx":91
  *                 # Better ask is lower price
  *                 i = j
  *             elif side == 1 and core.orders[j].price_ticks > core.orders[i].price_ticks:             # <<<<<<<<<<<<<<
@@ -3619,7 +3709,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
       if (__pyx_t_2) {
 
 
-        /* "chronosmatch/engine.pyx":88
+        /* "chronosmatch/engine.pyx":93
  *             elif side == 1 and core.orders[j].price_ticks > core.orders[i].price_ticks:
  *                 # Better bid is higher price
  *                 i = j             # <<<<<<<<<<<<<<
@@ -3628,7 +3718,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
         __pyx_v_i = __pyx_v_j;
 
-        /* "chronosmatch/engine.pyx":86
+        /* "chronosmatch/engine.pyx":91
  *                 # Better ask is lower price
  *                 i = j
  *             elif side == 1 and core.orders[j].price_ticks > core.orders[i].price_ticks:             # <<<<<<<<<<<<<<
@@ -3641,7 +3731,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
     }
 
 
-    /* "chronosmatch/engine.pyx":91
+    /* "chronosmatch/engine.pyx":96
  *             # Arrival order (lower index j) wins if prices match, preserving time priority.
  * 
  *         if i == -1:             # <<<<<<<<<<<<<<
@@ -3653,7 +3743,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
     if (__pyx_t_2) {
 
 
-      /* "chronosmatch/engine.pyx":92
+      /* "chronosmatch/engine.pyx":97
  * 
  *         if i == -1:
  *             break             # <<<<<<<<<<<<<<
@@ -3662,7 +3752,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       goto __pyx_L4_break;
 
-      /* "chronosmatch/engine.pyx":91
+      /* "chronosmatch/engine.pyx":96
  *             # Arrival order (lower index j) wins if prices match, preserving time priority.
  * 
  *         if i == -1:             # <<<<<<<<<<<<<<
@@ -3671,7 +3761,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
     }
 
-    /* "chronosmatch/engine.pyx":94
+    /* "chronosmatch/engine.pyx":99
  *             break
  * 
  *         if res.fills == 0:             # <<<<<<<<<<<<<<
@@ -3683,7 +3773,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
     if (__pyx_t_2) {
 
 
-      /* "chronosmatch/engine.pyx":95
+      /* "chronosmatch/engine.pyx":100
  * 
  *         if res.fills == 0:
  *             res.first_maker_id = core.orders[i].order_id             # <<<<<<<<<<<<<<
@@ -3694,7 +3784,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 
       __pyx_v_res.first_maker_id = __pyx_t_7;
 
-      /* "chronosmatch/engine.pyx":94
+      /* "chronosmatch/engine.pyx":99
  *             break
  * 
  *         if res.fills == 0:             # <<<<<<<<<<<<<<
@@ -3703,7 +3793,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
     }
 
-    /* "chronosmatch/engine.pyx":97
+    /* "chronosmatch/engine.pyx":102
  *             res.first_maker_id = core.orders[i].order_id
  * 
  *         res.fills += 1             # <<<<<<<<<<<<<<
@@ -3712,7 +3802,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
     __pyx_v_res.fills = (__pyx_v_res.fills + 1);
 
-    /* "chronosmatch/engine.pyx":98
+    /* "chronosmatch/engine.pyx":103
  * 
  *         res.fills += 1
  *         core.last_trade_price = core.orders[i].price_ticks             # <<<<<<<<<<<<<<
@@ -3723,7 +3813,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 
     __pyx_v_core->last_trade_price = __pyx_t_1;
 
-    /* "chronosmatch/engine.pyx":99
+    /* "chronosmatch/engine.pyx":104
  *         res.fills += 1
  *         core.last_trade_price = core.orders[i].price_ticks
  *         res.last_trade_price = core.last_trade_price             # <<<<<<<<<<<<<<
@@ -3734,7 +3824,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 
     __pyx_v_res.last_trade_price = __pyx_t_1;
 
-    /* "chronosmatch/engine.pyx":101
+    /* "chronosmatch/engine.pyx":106
  *         res.last_trade_price = core.last_trade_price
  * 
  *         if core.orders[i].quantity_lots <= remaining:             # <<<<<<<<<<<<<<
@@ -3746,7 +3836,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
     if (__pyx_t_2) {
 
 
-      /* "chronosmatch/engine.pyx":102
+      /* "chronosmatch/engine.pyx":107
  * 
  *         if core.orders[i].quantity_lots <= remaining:
  *             remaining -= core.orders[i].quantity_lots             # <<<<<<<<<<<<<<
@@ -3755,7 +3845,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       __pyx_v_remaining = (__pyx_v_remaining - (__pyx_v_core->orders[__pyx_v_i]).quantity_lots);
 
-      /* "chronosmatch/engine.pyx":104
+      /* "chronosmatch/engine.pyx":109
  *             remaining -= core.orders[i].quantity_lots
  *             # Fast vectorized memory move to remove exhausted resting order
  *             shift_len = core.count - 1 - i             # <<<<<<<<<<<<<<
@@ -3764,7 +3854,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       __pyx_v_shift_len = ((__pyx_v_core->count - 1) - __pyx_v_i);
 
-      /* "chronosmatch/engine.pyx":105
+      /* "chronosmatch/engine.pyx":110
  *             # Fast vectorized memory move to remove exhausted resting order
  *             shift_len = core.count - 1 - i
  *             if shift_len > 0:             # <<<<<<<<<<<<<<
@@ -3776,7 +3866,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
       if (__pyx_t_2) {
 
 
-        /* "chronosmatch/engine.pyx":106
+        /* "chronosmatch/engine.pyx":111
  *             shift_len = core.count - 1 - i
  *             if shift_len > 0:
  *                 memmove(&core.orders[i], &core.orders[i + 1], shift_len * sizeof(LevelOrder))             # <<<<<<<<<<<<<<
@@ -3785,7 +3875,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
         (void)(memmove((&(__pyx_v_core->orders[__pyx_v_i])), (&(__pyx_v_core->orders[(__pyx_v_i + 1)])), (__pyx_v_shift_len * (sizeof(struct __pyx_t_12chronosmatch_6engine_LevelOrder)))));
 
-        /* "chronosmatch/engine.pyx":105
+        /* "chronosmatch/engine.pyx":110
  *             # Fast vectorized memory move to remove exhausted resting order
  *             shift_len = core.count - 1 - i
  *             if shift_len > 0:             # <<<<<<<<<<<<<<
@@ -3794,7 +3884,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       }
 
-      /* "chronosmatch/engine.pyx":107
+      /* "chronosmatch/engine.pyx":112
  *             if shift_len > 0:
  *                 memmove(&core.orders[i], &core.orders[i + 1], shift_len * sizeof(LevelOrder))
  *             core.count -= 1             # <<<<<<<<<<<<<<
@@ -3803,7 +3893,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       __pyx_v_core->count = (__pyx_v_core->count - 1);
 
-      /* "chronosmatch/engine.pyx":101
+      /* "chronosmatch/engine.pyx":106
  *         res.last_trade_price = core.last_trade_price
  * 
  *         if core.orders[i].quantity_lots <= remaining:             # <<<<<<<<<<<<<<
@@ -3813,7 +3903,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
       goto __pyx_L21;
     }
 
-    /* "chronosmatch/engine.pyx":109
+    /* "chronosmatch/engine.pyx":114
  *             core.count -= 1
  *         else:
  *             core.orders[i].quantity_lots -= remaining             # <<<<<<<<<<<<<<
@@ -3825,7 +3915,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
       __pyx_t_3 = __pyx_v_i;
       (__pyx_v_core->orders[__pyx_t_3]).quantity_lots = ((__pyx_v_core->orders[__pyx_t_3]).quantity_lots - __pyx_v_remaining);
 
-      /* "chronosmatch/engine.pyx":110
+      /* "chronosmatch/engine.pyx":115
  *         else:
  *             core.orders[i].quantity_lots -= remaining
  *             remaining = 0             # <<<<<<<<<<<<<<
@@ -3836,7 +3926,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
     }
     __pyx_L21:;
 
-    /* "chronosmatch/engine.pyx":111
+    /* "chronosmatch/engine.pyx":116
  *             core.orders[i].quantity_lots -= remaining
  *             remaining = 0
  *         core.trades += 1             # <<<<<<<<<<<<<<
@@ -3847,7 +3937,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
   }
   __pyx_L4_break:;
 
-  /* "chronosmatch/engine.pyx":114
+  /* "chronosmatch/engine.pyx":119
  * 
  *     # If unfilled residual remains and it is a limit order, append to book
  *     if remaining > 0 and order_type == 0:             # <<<<<<<<<<<<<<
@@ -3873,7 +3963,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
   if (__pyx_t_2) {
 
 
-    /* "chronosmatch/engine.pyx":115
+    /* "chronosmatch/engine.pyx":120
  *     # If unfilled residual remains and it is a limit order, append to book
  *     if remaining > 0 and order_type == 0:
  *         if core.count < core.capacity:             # <<<<<<<<<<<<<<
@@ -3885,7 +3975,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
     if (__pyx_t_2) {
 
 
-      /* "chronosmatch/engine.pyx":116
+      /* "chronosmatch/engine.pyx":121
  *     if remaining > 0 and order_type == 0:
  *         if core.count < core.capacity:
  *             i = core.count             # <<<<<<<<<<<<<<
@@ -3896,7 +3986,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 
       __pyx_v_i = __pyx_t_3;
 
-      /* "chronosmatch/engine.pyx":117
+      /* "chronosmatch/engine.pyx":122
  *         if core.count < core.capacity:
  *             i = core.count
  *             core.orders[i].order_id = order_id             # <<<<<<<<<<<<<<
@@ -3905,7 +3995,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       (__pyx_v_core->orders[__pyx_v_i]).order_id = __pyx_v_order_id;
 
-      /* "chronosmatch/engine.pyx":118
+      /* "chronosmatch/engine.pyx":123
  *             i = core.count
  *             core.orders[i].order_id = order_id
  *             core.orders[i].price_ticks = price_ticks             # <<<<<<<<<<<<<<
@@ -3914,7 +4004,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       (__pyx_v_core->orders[__pyx_v_i]).price_ticks = __pyx_v_price_ticks;
 
-      /* "chronosmatch/engine.pyx":119
+      /* "chronosmatch/engine.pyx":124
  *             core.orders[i].order_id = order_id
  *             core.orders[i].price_ticks = price_ticks
  *             core.orders[i].quantity_lots = remaining             # <<<<<<<<<<<<<<
@@ -3923,7 +4013,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       (__pyx_v_core->orders[__pyx_v_i]).quantity_lots = __pyx_v_remaining;
 
-      /* "chronosmatch/engine.pyx":120
+      /* "chronosmatch/engine.pyx":125
  *             core.orders[i].price_ticks = price_ticks
  *             core.orders[i].quantity_lots = remaining
  *             core.orders[i].side = side             # <<<<<<<<<<<<<<
@@ -3932,7 +4022,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       (__pyx_v_core->orders[__pyx_v_i]).side = __pyx_v_side;
 
-      /* "chronosmatch/engine.pyx":121
+      /* "chronosmatch/engine.pyx":126
  *             core.orders[i].quantity_lots = remaining
  *             core.orders[i].side = side
  *             core.count += 1             # <<<<<<<<<<<<<<
@@ -3941,7 +4031,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       __pyx_v_core->count = (__pyx_v_core->count + 1);
 
-      /* "chronosmatch/engine.pyx":122
+      /* "chronosmatch/engine.pyx":127
  *             core.orders[i].side = side
  *             core.count += 1
  *             res.resting_quantity = remaining             # <<<<<<<<<<<<<<
@@ -3950,7 +4040,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
       __pyx_v_res.resting_quantity = __pyx_v_remaining;
 
-      /* "chronosmatch/engine.pyx":115
+      /* "chronosmatch/engine.pyx":120
  *     # If unfilled residual remains and it is a limit order, append to book
  *     if remaining > 0 and order_type == 0:
  *         if core.count < core.capacity:             # <<<<<<<<<<<<<<
@@ -3960,7 +4050,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
       goto __pyx_L26;
     }
 
-    /* "chronosmatch/engine.pyx":125
+    /* "chronosmatch/engine.pyx":130
  *         else:
  *             # Signaled capacity limit reached
  *             res.resting_quantity = -1             # <<<<<<<<<<<<<<
@@ -3972,7 +4062,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
     }
     __pyx_L26:;
 
-    /* "chronosmatch/engine.pyx":114
+    /* "chronosmatch/engine.pyx":119
  * 
  *     # If unfilled residual remains and it is a limit order, append to book
  *     if remaining > 0 and order_type == 0:             # <<<<<<<<<<<<<<
@@ -3982,7 +4072,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
     goto __pyx_L23;
   }
 
-  /* "chronosmatch/engine.pyx":127
+  /* "chronosmatch/engine.pyx":132
  *             res.resting_quantity = -1
  *     else:
  *         res.resting_quantity = 0             # <<<<<<<<<<<<<<
@@ -3994,7 +4084,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
   }
   __pyx_L23:;
 
-  /* "chronosmatch/engine.pyx":129
+  /* "chronosmatch/engine.pyx":134
  *         res.resting_quantity = 0
  * 
  *     c_refresh_top(core)             # <<<<<<<<<<<<<<
@@ -4003,7 +4093,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
 */
   __pyx_f_12chronosmatch_6engine_c_refresh_top(__pyx_v_core);
 
-  /* "chronosmatch/engine.pyx":130
+  /* "chronosmatch/engine.pyx":135
  * 
  *     c_refresh_top(core)
  *     return res             # <<<<<<<<<<<<<<
@@ -4016,7 +4106,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
   }
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":54
+  /* "chronosmatch/engine.pyx":57
  *             core.best_ask = core.orders[i].price_ticks
  * 
  * cdef MatchResultData c_submit(BookCore* core, uint64_t order_id, int64_t price_ticks,             # <<<<<<<<<<<<<<
@@ -4035,7 +4125,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":132
+/* "chronosmatch/engine.pyx":137
  *     return res
  * 
  * cdef bint c_cancel(BookCore* core, uint64_t order_id) noexcept nogil:             # <<<<<<<<<<<<<<
@@ -4052,7 +4142,7 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
   Py_ssize_t __pyx_t_3;
   int __pyx_t_4;
 
-  /* "chronosmatch/engine.pyx":135
+  /* "chronosmatch/engine.pyx":140
  *     """Cancel an order by ID directly in C nogil."""
  *     cdef Py_ssize_t i, shift_len
  *     for i in range(core.count):             # <<<<<<<<<<<<<<
@@ -4066,7 +4156,7 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "chronosmatch/engine.pyx":136
+    /* "chronosmatch/engine.pyx":141
  *     cdef Py_ssize_t i, shift_len
  *     for i in range(core.count):
  *         if core.orders[i].order_id == order_id:             # <<<<<<<<<<<<<<
@@ -4078,7 +4168,7 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
     if (__pyx_t_4) {
 
 
-      /* "chronosmatch/engine.pyx":137
+      /* "chronosmatch/engine.pyx":142
  *     for i in range(core.count):
  *         if core.orders[i].order_id == order_id:
  *             shift_len = core.count - 1 - i             # <<<<<<<<<<<<<<
@@ -4087,7 +4177,7 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
 */
       __pyx_v_shift_len = ((__pyx_v_core->count - 1) - __pyx_v_i);
 
-      /* "chronosmatch/engine.pyx":138
+      /* "chronosmatch/engine.pyx":143
  *         if core.orders[i].order_id == order_id:
  *             shift_len = core.count - 1 - i
  *             if shift_len > 0:             # <<<<<<<<<<<<<<
@@ -4099,7 +4189,7 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
       if (__pyx_t_4) {
 
 
-        /* "chronosmatch/engine.pyx":139
+        /* "chronosmatch/engine.pyx":144
  *             shift_len = core.count - 1 - i
  *             if shift_len > 0:
  *                 memmove(&core.orders[i], &core.orders[i + 1], shift_len * sizeof(LevelOrder))             # <<<<<<<<<<<<<<
@@ -4108,7 +4198,7 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
 */
         (void)(memmove((&(__pyx_v_core->orders[__pyx_v_i])), (&(__pyx_v_core->orders[(__pyx_v_i + 1)])), (__pyx_v_shift_len * (sizeof(struct __pyx_t_12chronosmatch_6engine_LevelOrder)))));
 
-        /* "chronosmatch/engine.pyx":138
+        /* "chronosmatch/engine.pyx":143
  *         if core.orders[i].order_id == order_id:
  *             shift_len = core.count - 1 - i
  *             if shift_len > 0:             # <<<<<<<<<<<<<<
@@ -4117,7 +4207,7 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
 */
       }
 
-      /* "chronosmatch/engine.pyx":140
+      /* "chronosmatch/engine.pyx":145
  *             if shift_len > 0:
  *                 memmove(&core.orders[i], &core.orders[i + 1], shift_len * sizeof(LevelOrder))
  *             core.count -= 1             # <<<<<<<<<<<<<<
@@ -4126,7 +4216,7 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
 */
       __pyx_v_core->count = (__pyx_v_core->count - 1);
 
-      /* "chronosmatch/engine.pyx":141
+      /* "chronosmatch/engine.pyx":146
  *                 memmove(&core.orders[i], &core.orders[i + 1], shift_len * sizeof(LevelOrder))
  *             core.count -= 1
  *             c_refresh_top(core)             # <<<<<<<<<<<<<<
@@ -4135,7 +4225,7 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
 */
       __pyx_f_12chronosmatch_6engine_c_refresh_top(__pyx_v_core);
 
-      /* "chronosmatch/engine.pyx":142
+      /* "chronosmatch/engine.pyx":147
  *             core.count -= 1
  *             c_refresh_top(core)
  *             return True             # <<<<<<<<<<<<<<
@@ -4148,7 +4238,7 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
       }
       goto __pyx_L0;
 
-      /* "chronosmatch/engine.pyx":136
+      /* "chronosmatch/engine.pyx":141
  *     cdef Py_ssize_t i, shift_len
  *     for i in range(core.count):
  *         if core.orders[i].order_id == order_id:             # <<<<<<<<<<<<<<
@@ -4159,7 +4249,7 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
   }
 
 
-  /* "chronosmatch/engine.pyx":143
+  /* "chronosmatch/engine.pyx":148
  *             c_refresh_top(core)
  *             return True
  *     return False             # <<<<<<<<<<<<<<
@@ -4172,7 +4262,7 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
   }
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":132
+  /* "chronosmatch/engine.pyx":137
  *     return res
  * 
  * cdef bint c_cancel(BookCore* core, uint64_t order_id) noexcept nogil:             # <<<<<<<<<<<<<<
@@ -4187,27 +4277,29 @@ static int __pyx_f_12chronosmatch_6engine_c_cancel(struct __pyx_t_12chronosmatch
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":157
- *     cdef public int64_t last_trade_price
+/* "chronosmatch/engine.pyx":165
+ *     cdef public uint64_t latency_ns
  * 
  *     cdef inline void _set(self, uint64_t fills, uint64_t first_maker_id,             # <<<<<<<<<<<<<<
- *                           int64_t resting_quantity, int64_t last_trade_price) noexcept nogil:
- *         self.fills = fills
+ *                           int64_t resting_quantity, int64_t last_trade_price,
+ *                           uint64_t entry_time_ns, uint64_t exit_time_ns) noexcept nogil:
 */
 
-static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_11MatchResult__set(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, uint64_t __pyx_v_fills, uint64_t __pyx_v_first_maker_id, int64_t __pyx_v_resting_quantity, int64_t __pyx_v_last_trade_price) {
+static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_11MatchResult__set(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, uint64_t __pyx_v_fills, uint64_t __pyx_v_first_maker_id, int64_t __pyx_v_resting_quantity, int64_t __pyx_v_last_trade_price, uint64_t __pyx_v_entry_time_ns, uint64_t __pyx_v_exit_time_ns) {
+  uint64_t __pyx_t_1;
+  int __pyx_t_2;
 
-  /* "chronosmatch/engine.pyx":159
- *     cdef inline void _set(self, uint64_t fills, uint64_t first_maker_id,
- *                           int64_t resting_quantity, int64_t last_trade_price) noexcept nogil:
+  /* "chronosmatch/engine.pyx":168
+ *                           int64_t resting_quantity, int64_t last_trade_price,
+ *                           uint64_t entry_time_ns, uint64_t exit_time_ns) noexcept nogil:
  *         self.fills = fills             # <<<<<<<<<<<<<<
  *         self.first_maker_id = first_maker_id
  *         self.resting_quantity = resting_quantity
 */
   __pyx_v_self->fills = __pyx_v_fills;
 
-  /* "chronosmatch/engine.pyx":160
- *                           int64_t resting_quantity, int64_t last_trade_price) noexcept nogil:
+  /* "chronosmatch/engine.pyx":169
+ *                           uint64_t entry_time_ns, uint64_t exit_time_ns) noexcept nogil:
  *         self.fills = fills
  *         self.first_maker_id = first_maker_id             # <<<<<<<<<<<<<<
  *         self.resting_quantity = resting_quantity
@@ -4215,37 +4307,74 @@ static CYTHON_INLINE void __pyx_f_12chronosmatch_6engine_11MatchResult__set(stru
 */
   __pyx_v_self->first_maker_id = __pyx_v_first_maker_id;
 
-  /* "chronosmatch/engine.pyx":161
+  /* "chronosmatch/engine.pyx":170
  *         self.fills = fills
  *         self.first_maker_id = first_maker_id
  *         self.resting_quantity = resting_quantity             # <<<<<<<<<<<<<<
  *         self.last_trade_price = last_trade_price
- * 
+ *         self.entry_time_ns = entry_time_ns
 */
   __pyx_v_self->resting_quantity = __pyx_v_resting_quantity;
 
-  /* "chronosmatch/engine.pyx":162
+  /* "chronosmatch/engine.pyx":171
  *         self.first_maker_id = first_maker_id
  *         self.resting_quantity = resting_quantity
  *         self.last_trade_price = last_trade_price             # <<<<<<<<<<<<<<
- * 
- *     def __getitem__(self, str key):
+ *         self.entry_time_ns = entry_time_ns
+ *         self.exit_time_ns = exit_time_ns
 */
   __pyx_v_self->last_trade_price = __pyx_v_last_trade_price;
 
-  /* "chronosmatch/engine.pyx":157
- *     cdef public int64_t last_trade_price
+  /* "chronosmatch/engine.pyx":172
+ *         self.resting_quantity = resting_quantity
+ *         self.last_trade_price = last_trade_price
+ *         self.entry_time_ns = entry_time_ns             # <<<<<<<<<<<<<<
+ *         self.exit_time_ns = exit_time_ns
+ *         self.latency_ns = exit_time_ns - entry_time_ns if exit_time_ns >= entry_time_ns else 0
+*/
+  __pyx_v_self->entry_time_ns = __pyx_v_entry_time_ns;
+
+  /* "chronosmatch/engine.pyx":173
+ *         self.last_trade_price = last_trade_price
+ *         self.entry_time_ns = entry_time_ns
+ *         self.exit_time_ns = exit_time_ns             # <<<<<<<<<<<<<<
+ *         self.latency_ns = exit_time_ns - entry_time_ns if exit_time_ns >= entry_time_ns else 0
+ * 
+*/
+  __pyx_v_self->exit_time_ns = __pyx_v_exit_time_ns;
+
+  /* "chronosmatch/engine.pyx":174
+ *         self.entry_time_ns = entry_time_ns
+ *         self.exit_time_ns = exit_time_ns
+ *         self.latency_ns = exit_time_ns - entry_time_ns if exit_time_ns >= entry_time_ns else 0             # <<<<<<<<<<<<<<
+ * 
+ *     def __getitem__(self, str key):
+*/
+  __pyx_t_2 = (__pyx_v_exit_time_ns >= __pyx_v_entry_time_ns);
+
+  if (__pyx_t_2) {
+
+    __pyx_t_1 = (__pyx_v_exit_time_ns - __pyx_v_entry_time_ns);
+  } else {
+
+    __pyx_t_1 = 0;
+  }
+
+  __pyx_v_self->latency_ns = __pyx_t_1;
+
+  /* "chronosmatch/engine.pyx":165
+ *     cdef public uint64_t latency_ns
  * 
  *     cdef inline void _set(self, uint64_t fills, uint64_t first_maker_id,             # <<<<<<<<<<<<<<
- *                           int64_t resting_quantity, int64_t last_trade_price) noexcept nogil:
- *         self.fills = fills
+ *                           int64_t resting_quantity, int64_t last_trade_price,
+ *                           uint64_t entry_time_ns, uint64_t exit_time_ns) noexcept nogil:
 */
 
   /* function exit code */
 }
 
-/* "chronosmatch/engine.pyx":164
- *         self.last_trade_price = last_trade_price
+/* "chronosmatch/engine.pyx":176
+ *         self.latency_ns = exit_time_ns - entry_time_ns if exit_time_ns >= entry_time_ns else 0
  * 
  *     def __getitem__(self, str key):             # <<<<<<<<<<<<<<
  *         if key == "fills":
@@ -4263,7 +4392,7 @@ static PyObject *__pyx_pw_12chronosmatch_6engine_11MatchResult_1__getitem__(PyOb
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__getitem__ (wrapper)", 0);
   __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_key), (&PyUnicode_Type), 1, "key", 1))) __PYX_ERR(0, 164, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_key), (&PyUnicode_Type), 1, "key", 1))) __PYX_ERR(0, 176, __pyx_L1_error)
   __pyx_r = __pyx_pf_12chronosmatch_6engine_11MatchResult___getitem__(((struct __pyx_obj_12chronosmatch_6engine_MatchResult *)__pyx_v_self), ((PyObject*)__pyx_v_key));
 
   /* function exit code */
@@ -4283,31 +4412,33 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult___getitem__(struc
   int __pyx_t_1;
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
-  size_t __pyx_t_4;
+  int __pyx_t_4;
+  PyObject *__pyx_t_5 = NULL;
+  size_t __pyx_t_6;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__getitem__", 0);
 
-  /* "chronosmatch/engine.pyx":165
+  /* "chronosmatch/engine.pyx":177
  * 
  *     def __getitem__(self, str key):
  *         if key == "fills":             # <<<<<<<<<<<<<<
  *             return self.fills
  *         elif key == "first_maker_id":
 */
-  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_fills, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 165, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_fills, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 177, __pyx_L1_error)
   if (__pyx_t_1) {
 
 
-    /* "chronosmatch/engine.pyx":166
+    /* "chronosmatch/engine.pyx":178
  *     def __getitem__(self, str key):
  *         if key == "fills":
  *             return self.fills             # <<<<<<<<<<<<<<
  *         elif key == "first_maker_id":
  *             return self.first_maker_id
 */
-    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->fills); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 166, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->fills); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 178, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       PyObject *__pyx_temp;
@@ -4320,7 +4451,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult___getitem__(struc
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "chronosmatch/engine.pyx":165
+    /* "chronosmatch/engine.pyx":177
  * 
  *     def __getitem__(self, str key):
  *         if key == "fills":             # <<<<<<<<<<<<<<
@@ -4329,25 +4460,25 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult___getitem__(struc
 */
   }
 
-  /* "chronosmatch/engine.pyx":167
+  /* "chronosmatch/engine.pyx":179
  *         if key == "fills":
  *             return self.fills
  *         elif key == "first_maker_id":             # <<<<<<<<<<<<<<
  *             return self.first_maker_id
  *         elif key == "resting_quantity":
 */
-  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_first_maker_id, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 167, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_first_maker_id, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 179, __pyx_L1_error)
   if (__pyx_t_1) {
 
 
-    /* "chronosmatch/engine.pyx":168
+    /* "chronosmatch/engine.pyx":180
  *             return self.fills
  *         elif key == "first_maker_id":
  *             return self.first_maker_id             # <<<<<<<<<<<<<<
  *         elif key == "resting_quantity":
  *             return self.resting_quantity
 */
-    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->first_maker_id); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 168, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->first_maker_id); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 180, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       PyObject *__pyx_temp;
@@ -4360,7 +4491,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult___getitem__(struc
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "chronosmatch/engine.pyx":167
+    /* "chronosmatch/engine.pyx":179
  *         if key == "fills":
  *             return self.fills
  *         elif key == "first_maker_id":             # <<<<<<<<<<<<<<
@@ -4369,25 +4500,25 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult___getitem__(struc
 */
   }
 
-  /* "chronosmatch/engine.pyx":169
+  /* "chronosmatch/engine.pyx":181
  *         elif key == "first_maker_id":
  *             return self.first_maker_id
  *         elif key == "resting_quantity":             # <<<<<<<<<<<<<<
  *             return self.resting_quantity
  *         elif key == "last_trade_price":
 */
-  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_resting_quantity, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_resting_quantity, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 181, __pyx_L1_error)
   if (__pyx_t_1) {
 
 
-    /* "chronosmatch/engine.pyx":170
+    /* "chronosmatch/engine.pyx":182
  *             return self.first_maker_id
  *         elif key == "resting_quantity":
  *             return self.resting_quantity             # <<<<<<<<<<<<<<
  *         elif key == "last_trade_price":
  *             return self.last_trade_price
 */
-    __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->resting_quantity); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 170, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->resting_quantity); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 182, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       PyObject *__pyx_temp;
@@ -4400,7 +4531,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult___getitem__(struc
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "chronosmatch/engine.pyx":169
+    /* "chronosmatch/engine.pyx":181
  *         elif key == "first_maker_id":
  *             return self.first_maker_id
  *         elif key == "resting_quantity":             # <<<<<<<<<<<<<<
@@ -4409,25 +4540,25 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult___getitem__(struc
 */
   }
 
-  /* "chronosmatch/engine.pyx":171
+  /* "chronosmatch/engine.pyx":183
  *         elif key == "resting_quantity":
  *             return self.resting_quantity
  *         elif key == "last_trade_price":             # <<<<<<<<<<<<<<
  *             return self.last_trade_price
- *         raise KeyError(key)
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):
 */
-  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_last_trade_price, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 171, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_last_trade_price, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 183, __pyx_L1_error)
   if (__pyx_t_1) {
 
 
-    /* "chronosmatch/engine.pyx":172
+    /* "chronosmatch/engine.pyx":184
  *             return self.resting_quantity
  *         elif key == "last_trade_price":
  *             return self.last_trade_price             # <<<<<<<<<<<<<<
- *         raise KeyError(key)
- * 
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):
+ *             return self.entry_time_ns
 */
-    __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->last_trade_price); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 172, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->last_trade_price); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 184, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       PyObject *__pyx_temp;
@@ -4440,37 +4571,232 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult___getitem__(struc
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "chronosmatch/engine.pyx":171
+    /* "chronosmatch/engine.pyx":183
  *         elif key == "resting_quantity":
  *             return self.resting_quantity
  *         elif key == "last_trade_price":             # <<<<<<<<<<<<<<
  *             return self.last_trade_price
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):
+*/
+  }
+
+  /* "chronosmatch/engine.pyx":185
+ *         elif key == "last_trade_price":
+ *             return self.last_trade_price
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):             # <<<<<<<<<<<<<<
+ *             return self.entry_time_ns
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):
+*/
+  __Pyx_INCREF(__pyx_v_key);
+  __pyx_t_3 = __pyx_v_key;
+  __pyx_t_4 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_entry_time_ns, Py_EQ); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 185, __pyx_L1_error)
+  if (!__pyx_t_4) {
+
+  } else {
+
+    __pyx_t_1 = __pyx_t_4;
+
+    goto __pyx_L4_bool_binop_done;
+  }
+  __pyx_t_4 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_entry_time, Py_EQ); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 185, __pyx_L1_error)
+  if (!__pyx_t_4) {
+
+  } else {
+
+    __pyx_t_1 = __pyx_t_4;
+
+    goto __pyx_L4_bool_binop_done;
+  }
+  __pyx_t_4 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_entry_timestamp_ns, Py_EQ); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 185, __pyx_L1_error)
+
+  __pyx_t_1 = __pyx_t_4;
+
+  __pyx_L4_bool_binop_done:;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_4 = __pyx_t_1;
+
+
+  if (__pyx_t_4) {
+
+
+    /* "chronosmatch/engine.pyx":186
+ *             return self.last_trade_price
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):
+ *             return self.entry_time_ns             # <<<<<<<<<<<<<<
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):
+ *             return self.exit_time_ns
+*/
+    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->entry_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 186, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    {
+      PyObject *__pyx_temp;
+      {
+        __pyx_temp = __pyx_r;
+        __pyx_r = __pyx_t_2;
+      }
+      __Pyx_XDECREF(__pyx_temp);
+    }
+    __pyx_t_2 = 0;
+    goto __pyx_L0;
+
+    /* "chronosmatch/engine.pyx":185
+ *         elif key == "last_trade_price":
+ *             return self.last_trade_price
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):             # <<<<<<<<<<<<<<
+ *             return self.entry_time_ns
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):
+*/
+  }
+
+  /* "chronosmatch/engine.pyx":187
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):
+ *             return self.entry_time_ns
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):             # <<<<<<<<<<<<<<
+ *             return self.exit_time_ns
+ *         elif key in ("latency_ns", "latency"):
+*/
+  __Pyx_INCREF(__pyx_v_key);
+  __pyx_t_3 = __pyx_v_key;
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_exit_time_ns, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 187, __pyx_L1_error)
+  if (!__pyx_t_1) {
+
+  } else {
+
+    __pyx_t_4 = __pyx_t_1;
+
+    goto __pyx_L7_bool_binop_done;
+  }
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_exit_time, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 187, __pyx_L1_error)
+  if (!__pyx_t_1) {
+
+  } else {
+
+    __pyx_t_4 = __pyx_t_1;
+
+    goto __pyx_L7_bool_binop_done;
+  }
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_exit_timestamp_ns, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 187, __pyx_L1_error)
+
+  __pyx_t_4 = __pyx_t_1;
+
+  __pyx_L7_bool_binop_done:;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_4;
+
+
+  if (__pyx_t_1) {
+
+
+    /* "chronosmatch/engine.pyx":188
+ *             return self.entry_time_ns
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):
+ *             return self.exit_time_ns             # <<<<<<<<<<<<<<
+ *         elif key in ("latency_ns", "latency"):
+ *             return self.latency_ns
+*/
+    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->exit_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 188, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    {
+      PyObject *__pyx_temp;
+      {
+        __pyx_temp = __pyx_r;
+        __pyx_r = __pyx_t_2;
+      }
+      __Pyx_XDECREF(__pyx_temp);
+    }
+    __pyx_t_2 = 0;
+    goto __pyx_L0;
+
+    /* "chronosmatch/engine.pyx":187
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):
+ *             return self.entry_time_ns
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):             # <<<<<<<<<<<<<<
+ *             return self.exit_time_ns
+ *         elif key in ("latency_ns", "latency"):
+*/
+  }
+
+  /* "chronosmatch/engine.pyx":189
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):
+ *             return self.exit_time_ns
+ *         elif key in ("latency_ns", "latency"):             # <<<<<<<<<<<<<<
+ *             return self.latency_ns
+ *         raise KeyError(key)
+*/
+  __Pyx_INCREF(__pyx_v_key);
+  __pyx_t_3 = __pyx_v_key;
+  __pyx_t_4 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_latency_ns, Py_EQ); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 189, __pyx_L1_error)
+  if (!__pyx_t_4) {
+
+  } else {
+
+    __pyx_t_1 = __pyx_t_4;
+
+    goto __pyx_L10_bool_binop_done;
+  }
+  __pyx_t_4 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_latency, Py_EQ); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 189, __pyx_L1_error)
+
+  __pyx_t_1 = __pyx_t_4;
+
+  __pyx_L10_bool_binop_done:;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_4 = __pyx_t_1;
+
+
+  if (__pyx_t_4) {
+
+
+    /* "chronosmatch/engine.pyx":190
+ *             return self.exit_time_ns
+ *         elif key in ("latency_ns", "latency"):
+ *             return self.latency_ns             # <<<<<<<<<<<<<<
+ *         raise KeyError(key)
+ * 
+*/
+    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->latency_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 190, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    {
+      PyObject *__pyx_temp;
+      {
+        __pyx_temp = __pyx_r;
+        __pyx_r = __pyx_t_2;
+      }
+      __Pyx_XDECREF(__pyx_temp);
+    }
+    __pyx_t_2 = 0;
+    goto __pyx_L0;
+
+    /* "chronosmatch/engine.pyx":189
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):
+ *             return self.exit_time_ns
+ *         elif key in ("latency_ns", "latency"):             # <<<<<<<<<<<<<<
+ *             return self.latency_ns
  *         raise KeyError(key)
 */
   }
 
-  /* "chronosmatch/engine.pyx":173
- *         elif key == "last_trade_price":
- *             return self.last_trade_price
+  /* "chronosmatch/engine.pyx":191
+ *         elif key in ("latency_ns", "latency"):
+ *             return self.latency_ns
  *         raise KeyError(key)             # <<<<<<<<<<<<<<
  * 
  *     def get(self, str key, default=None):
 */
-  __pyx_t_3 = NULL;
-  __pyx_t_4 = 1;
+  __pyx_t_5 = NULL;
+  __pyx_t_6 = 1;
   {
-    PyObject *__pyx_callargs[2] = {__pyx_t_3, __pyx_v_key};
-    __pyx_t_2 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_KeyError)), __pyx_callargs+__pyx_t_4, (2-__pyx_t_4) | (__pyx_t_4*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
-    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 173, __pyx_L1_error)
+    PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_v_key};
+    __pyx_t_2 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_KeyError)), __pyx_callargs+__pyx_t_6, (2-__pyx_t_6) | (__pyx_t_6*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 191, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
   }
   __Pyx_Raise(__pyx_t_2, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __PYX_ERR(0, 173, __pyx_L1_error)
+  __PYX_ERR(0, 191, __pyx_L1_error)
 
-  /* "chronosmatch/engine.pyx":164
- *         self.last_trade_price = last_trade_price
+  /* "chronosmatch/engine.pyx":176
+ *         self.latency_ns = exit_time_ns - entry_time_ns if exit_time_ns >= entry_time_ns else 0
  * 
  *     def __getitem__(self, str key):             # <<<<<<<<<<<<<<
  *         if key == "fills":
@@ -4481,6 +4807,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult___getitem__(struc
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_5);
   __Pyx_AddTraceback("chronosmatch.engine.MatchResult.__getitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -4489,7 +4816,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult___getitem__(struc
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":175
+/* "chronosmatch/engine.pyx":193
  *         raise KeyError(key)
  * 
  *     def get(self, str key, default=None):             # <<<<<<<<<<<<<<
@@ -4537,35 +4864,35 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_key,&__pyx_mstate_global->__pyx_n_u_default,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len < 0)) __PYX_ERR(0, 175, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len < 0)) __PYX_ERR(0, 193, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  2:
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 175, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 193, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 175, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 193, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "get", 0) < (0)) __PYX_ERR(0, 175, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "get", 0) < (0)) __PYX_ERR(0, 193, __pyx_L3_error)
       if (!values[1]) values[1] = __Pyx_NewRef(((PyObject *)Py_None));
       for (Py_ssize_t i = __pyx_nargs; i < 1; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("get", 0, 1, 2, i); __PYX_ERR(0, 175, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("get", 0, 1, 2, i); __PYX_ERR(0, 193, __pyx_L3_error) }
       }
     } else {
       switch (__pyx_nargs) {
         case  2:
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 175, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 193, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 175, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 193, __pyx_L3_error)
         break;
         default: goto __pyx_L5_argtuple_error;
       }
@@ -4576,7 +4903,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("get", 0, 1, 2, __pyx_nargs); __PYX_ERR(0, 175, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("get", 0, 1, 2, __pyx_nargs); __PYX_ERR(0, 193, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4587,7 +4914,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_key), (&PyUnicode_Type), 1, "key", 1))) __PYX_ERR(0, 175, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_key), (&PyUnicode_Type), 1, "key", 1))) __PYX_ERR(0, 193, __pyx_L1_error)
   __pyx_r = __pyx_pf_12chronosmatch_6engine_11MatchResult_2get(((struct __pyx_obj_12chronosmatch_6engine_MatchResult *)__pyx_v_self), __pyx_v_key, __pyx_v_default);
 
   /* function exit code */
@@ -4612,30 +4939,32 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_2get(struct __pyx
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_t_4;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get", 0);
 
-  /* "chronosmatch/engine.pyx":176
+  /* "chronosmatch/engine.pyx":194
  * 
  *     def get(self, str key, default=None):
  *         if key == "fills":             # <<<<<<<<<<<<<<
  *             return self.fills
  *         elif key == "first_maker_id":
 */
-  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_fills, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 176, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_fills, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 194, __pyx_L1_error)
   if (__pyx_t_1) {
 
 
-    /* "chronosmatch/engine.pyx":177
+    /* "chronosmatch/engine.pyx":195
  *     def get(self, str key, default=None):
  *         if key == "fills":
  *             return self.fills             # <<<<<<<<<<<<<<
  *         elif key == "first_maker_id":
  *             return self.first_maker_id
 */
-    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->fills); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 177, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->fills); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 195, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       PyObject *__pyx_temp;
@@ -4648,7 +4977,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_2get(struct __pyx
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "chronosmatch/engine.pyx":176
+    /* "chronosmatch/engine.pyx":194
  * 
  *     def get(self, str key, default=None):
  *         if key == "fills":             # <<<<<<<<<<<<<<
@@ -4657,25 +4986,25 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_2get(struct __pyx
 */
   }
 
-  /* "chronosmatch/engine.pyx":178
+  /* "chronosmatch/engine.pyx":196
  *         if key == "fills":
  *             return self.fills
  *         elif key == "first_maker_id":             # <<<<<<<<<<<<<<
  *             return self.first_maker_id
  *         elif key == "resting_quantity":
 */
-  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_first_maker_id, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 178, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_first_maker_id, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 196, __pyx_L1_error)
   if (__pyx_t_1) {
 
 
-    /* "chronosmatch/engine.pyx":179
+    /* "chronosmatch/engine.pyx":197
  *             return self.fills
  *         elif key == "first_maker_id":
  *             return self.first_maker_id             # <<<<<<<<<<<<<<
  *         elif key == "resting_quantity":
  *             return self.resting_quantity
 */
-    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->first_maker_id); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->first_maker_id); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 197, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       PyObject *__pyx_temp;
@@ -4688,7 +5017,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_2get(struct __pyx
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "chronosmatch/engine.pyx":178
+    /* "chronosmatch/engine.pyx":196
  *         if key == "fills":
  *             return self.fills
  *         elif key == "first_maker_id":             # <<<<<<<<<<<<<<
@@ -4697,25 +5026,25 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_2get(struct __pyx
 */
   }
 
-  /* "chronosmatch/engine.pyx":180
+  /* "chronosmatch/engine.pyx":198
  *         elif key == "first_maker_id":
  *             return self.first_maker_id
  *         elif key == "resting_quantity":             # <<<<<<<<<<<<<<
  *             return self.resting_quantity
  *         elif key == "last_trade_price":
 */
-  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_resting_quantity, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 180, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_resting_quantity, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 198, __pyx_L1_error)
   if (__pyx_t_1) {
 
 
-    /* "chronosmatch/engine.pyx":181
+    /* "chronosmatch/engine.pyx":199
  *             return self.first_maker_id
  *         elif key == "resting_quantity":
  *             return self.resting_quantity             # <<<<<<<<<<<<<<
  *         elif key == "last_trade_price":
  *             return self.last_trade_price
 */
-    __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->resting_quantity); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->resting_quantity); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 199, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       PyObject *__pyx_temp;
@@ -4728,7 +5057,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_2get(struct __pyx
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "chronosmatch/engine.pyx":180
+    /* "chronosmatch/engine.pyx":198
  *         elif key == "first_maker_id":
  *             return self.first_maker_id
  *         elif key == "resting_quantity":             # <<<<<<<<<<<<<<
@@ -4737,25 +5066,25 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_2get(struct __pyx
 */
   }
 
-  /* "chronosmatch/engine.pyx":182
+  /* "chronosmatch/engine.pyx":200
  *         elif key == "resting_quantity":
  *             return self.resting_quantity
  *         elif key == "last_trade_price":             # <<<<<<<<<<<<<<
  *             return self.last_trade_price
- *         return default
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):
 */
-  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_last_trade_price, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 182, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_v_key, __pyx_mstate_global->__pyx_n_u_last_trade_price, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 200, __pyx_L1_error)
   if (__pyx_t_1) {
 
 
-    /* "chronosmatch/engine.pyx":183
+    /* "chronosmatch/engine.pyx":201
  *             return self.resting_quantity
  *         elif key == "last_trade_price":
  *             return self.last_trade_price             # <<<<<<<<<<<<<<
- *         return default
- * 
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):
+ *             return self.entry_time_ns
 */
-    __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->last_trade_price); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 183, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->last_trade_price); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 201, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       PyObject *__pyx_temp;
@@ -4768,18 +5097,213 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_2get(struct __pyx
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "chronosmatch/engine.pyx":182
+    /* "chronosmatch/engine.pyx":200
  *         elif key == "resting_quantity":
  *             return self.resting_quantity
  *         elif key == "last_trade_price":             # <<<<<<<<<<<<<<
  *             return self.last_trade_price
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):
+*/
+  }
+
+  /* "chronosmatch/engine.pyx":202
+ *         elif key == "last_trade_price":
+ *             return self.last_trade_price
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):             # <<<<<<<<<<<<<<
+ *             return self.entry_time_ns
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):
+*/
+  __Pyx_INCREF(__pyx_v_key);
+  __pyx_t_3 = __pyx_v_key;
+  __pyx_t_4 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_entry_time_ns, Py_EQ); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 202, __pyx_L1_error)
+  if (!__pyx_t_4) {
+
+  } else {
+
+    __pyx_t_1 = __pyx_t_4;
+
+    goto __pyx_L4_bool_binop_done;
+  }
+  __pyx_t_4 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_entry_time, Py_EQ); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 202, __pyx_L1_error)
+  if (!__pyx_t_4) {
+
+  } else {
+
+    __pyx_t_1 = __pyx_t_4;
+
+    goto __pyx_L4_bool_binop_done;
+  }
+  __pyx_t_4 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_entry_timestamp_ns, Py_EQ); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 202, __pyx_L1_error)
+
+  __pyx_t_1 = __pyx_t_4;
+
+  __pyx_L4_bool_binop_done:;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_4 = __pyx_t_1;
+
+
+  if (__pyx_t_4) {
+
+
+    /* "chronosmatch/engine.pyx":203
+ *             return self.last_trade_price
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):
+ *             return self.entry_time_ns             # <<<<<<<<<<<<<<
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):
+ *             return self.exit_time_ns
+*/
+    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->entry_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 203, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    {
+      PyObject *__pyx_temp;
+      {
+        __pyx_temp = __pyx_r;
+        __pyx_r = __pyx_t_2;
+      }
+      __Pyx_XDECREF(__pyx_temp);
+    }
+    __pyx_t_2 = 0;
+    goto __pyx_L0;
+
+    /* "chronosmatch/engine.pyx":202
+ *         elif key == "last_trade_price":
+ *             return self.last_trade_price
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):             # <<<<<<<<<<<<<<
+ *             return self.entry_time_ns
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):
+*/
+  }
+
+  /* "chronosmatch/engine.pyx":204
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):
+ *             return self.entry_time_ns
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):             # <<<<<<<<<<<<<<
+ *             return self.exit_time_ns
+ *         elif key in ("latency_ns", "latency"):
+*/
+  __Pyx_INCREF(__pyx_v_key);
+  __pyx_t_3 = __pyx_v_key;
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_exit_time_ns, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 204, __pyx_L1_error)
+  if (!__pyx_t_1) {
+
+  } else {
+
+    __pyx_t_4 = __pyx_t_1;
+
+    goto __pyx_L7_bool_binop_done;
+  }
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_exit_time, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 204, __pyx_L1_error)
+  if (!__pyx_t_1) {
+
+  } else {
+
+    __pyx_t_4 = __pyx_t_1;
+
+    goto __pyx_L7_bool_binop_done;
+  }
+  __pyx_t_1 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_exit_timestamp_ns, Py_EQ); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 204, __pyx_L1_error)
+
+  __pyx_t_4 = __pyx_t_1;
+
+  __pyx_L7_bool_binop_done:;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_1 = __pyx_t_4;
+
+
+  if (__pyx_t_1) {
+
+
+    /* "chronosmatch/engine.pyx":205
+ *             return self.entry_time_ns
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):
+ *             return self.exit_time_ns             # <<<<<<<<<<<<<<
+ *         elif key in ("latency_ns", "latency"):
+ *             return self.latency_ns
+*/
+    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->exit_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 205, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    {
+      PyObject *__pyx_temp;
+      {
+        __pyx_temp = __pyx_r;
+        __pyx_r = __pyx_t_2;
+      }
+      __Pyx_XDECREF(__pyx_temp);
+    }
+    __pyx_t_2 = 0;
+    goto __pyx_L0;
+
+    /* "chronosmatch/engine.pyx":204
+ *         elif key in ("entry_time_ns", "entry_time", "entry_timestamp_ns"):
+ *             return self.entry_time_ns
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):             # <<<<<<<<<<<<<<
+ *             return self.exit_time_ns
+ *         elif key in ("latency_ns", "latency"):
+*/
+  }
+
+  /* "chronosmatch/engine.pyx":206
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):
+ *             return self.exit_time_ns
+ *         elif key in ("latency_ns", "latency"):             # <<<<<<<<<<<<<<
+ *             return self.latency_ns
+ *         return default
+*/
+  __Pyx_INCREF(__pyx_v_key);
+  __pyx_t_3 = __pyx_v_key;
+  __pyx_t_4 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_latency_ns, Py_EQ); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 206, __pyx_L1_error)
+  if (!__pyx_t_4) {
+
+  } else {
+
+    __pyx_t_1 = __pyx_t_4;
+
+    goto __pyx_L10_bool_binop_done;
+  }
+  __pyx_t_4 = __Pyx_PyObject_CompareBoolEq_str_str(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_latency, Py_EQ); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 206, __pyx_L1_error)
+
+  __pyx_t_1 = __pyx_t_4;
+
+  __pyx_L10_bool_binop_done:;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_4 = __pyx_t_1;
+
+
+  if (__pyx_t_4) {
+
+
+    /* "chronosmatch/engine.pyx":207
+ *             return self.exit_time_ns
+ *         elif key in ("latency_ns", "latency"):
+ *             return self.latency_ns             # <<<<<<<<<<<<<<
+ *         return default
+ * 
+*/
+    __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->latency_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 207, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    {
+      PyObject *__pyx_temp;
+      {
+        __pyx_temp = __pyx_r;
+        __pyx_r = __pyx_t_2;
+      }
+      __Pyx_XDECREF(__pyx_temp);
+    }
+    __pyx_t_2 = 0;
+    goto __pyx_L0;
+
+    /* "chronosmatch/engine.pyx":206
+ *         elif key in ("exit_time_ns", "exit_time", "exit_timestamp_ns"):
+ *             return self.exit_time_ns
+ *         elif key in ("latency_ns", "latency"):             # <<<<<<<<<<<<<<
+ *             return self.latency_ns
  *         return default
 */
   }
 
-  /* "chronosmatch/engine.pyx":184
- *         elif key == "last_trade_price":
- *             return self.last_trade_price
+  /* "chronosmatch/engine.pyx":208
+ *         elif key in ("latency_ns", "latency"):
+ *             return self.latency_ns
  *         return default             # <<<<<<<<<<<<<<
  * 
  *     def __repr__(self):
@@ -4795,7 +5319,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_2get(struct __pyx
   }
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":175
+  /* "chronosmatch/engine.pyx":193
  *         raise KeyError(key)
  * 
  *     def get(self, str key, default=None):             # <<<<<<<<<<<<<<
@@ -4806,6 +5330,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_2get(struct __pyx
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
   __Pyx_AddTraceback("chronosmatch.engine.MatchResult.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -4814,12 +5339,12 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_2get(struct __pyx
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":186
+/* "chronosmatch/engine.pyx":210
  *         return default
  * 
  *     def __repr__(self):             # <<<<<<<<<<<<<<
  *         return (f"<MatchResult fills={self.fills} first_maker_id={self.first_maker_id} "
- *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price}>")
+ *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price} "
 */
 
 /* Python wrapper */
@@ -4844,87 +5369,121 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_4__repr__(struct 
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5[9];
-  Py_ssize_t __pyx_t_6;
-  int __pyx_t_7;
-  PyObject *__pyx_t_8 = NULL;
+  PyObject *__pyx_t_5 = NULL;
+  PyObject *__pyx_t_6 = NULL;
+  PyObject *__pyx_t_7 = NULL;
+  PyObject *__pyx_t_8[15];
+  Py_ssize_t __pyx_t_9;
+  int __pyx_t_10;
+  PyObject *__pyx_t_11 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__repr__", 0);
 
-  /* "chronosmatch/engine.pyx":187
+  /* "chronosmatch/engine.pyx":211
  * 
  *     def __repr__(self):
  *         return (f"<MatchResult fills={self.fills} first_maker_id={self.first_maker_id} "             # <<<<<<<<<<<<<<
- *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price}>")
- * 
+ *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price} "
+ *                 f"entry_time_ns={self.entry_time_ns} exit_time_ns={self.exit_time_ns} "
 */
-  __pyx_t_1 = __Pyx_PyUnicode_From_uint64_t(__pyx_v_self->fills, 0, ' ', 'd'); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 187, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyUnicode_From_uint64_t(__pyx_v_self->fills, 0, ' ', 'd'); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyUnicode_From_uint64_t(__pyx_v_self->first_maker_id, 0, ' ', 'd'); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 187, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyUnicode_From_uint64_t(__pyx_v_self->first_maker_id, 0, ' ', 'd'); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
 
-  /* "chronosmatch/engine.pyx":188
+  /* "chronosmatch/engine.pyx":212
  *     def __repr__(self):
  *         return (f"<MatchResult fills={self.fills} first_maker_id={self.first_maker_id} "
- *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price}>")             # <<<<<<<<<<<<<<
+ *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price} "             # <<<<<<<<<<<<<<
+ *                 f"entry_time_ns={self.entry_time_ns} exit_time_ns={self.exit_time_ns} "
+ *                 f"latency_ns={self.latency_ns}>")
+*/
+  __pyx_t_3 = __Pyx_PyUnicode_From_int64_t(__pyx_v_self->resting_quantity, 0, ' ', 'd'); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = __Pyx_PyUnicode_From_int64_t(__pyx_v_self->last_trade_price, 0, ' ', 'd'); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 212, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+
+  /* "chronosmatch/engine.pyx":213
+ *         return (f"<MatchResult fills={self.fills} first_maker_id={self.first_maker_id} "
+ *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price} "
+ *                 f"entry_time_ns={self.entry_time_ns} exit_time_ns={self.exit_time_ns} "             # <<<<<<<<<<<<<<
+ *                 f"latency_ns={self.latency_ns}>")
+ * 
+*/
+  __pyx_t_5 = __Pyx_PyUnicode_From_uint64_t(__pyx_v_self->entry_time_ns, 0, ' ', 'd'); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 213, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_6 = __Pyx_PyUnicode_From_uint64_t(__pyx_v_self->exit_time_ns, 0, ' ', 'd'); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 213, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
+
+  /* "chronosmatch/engine.pyx":214
+ *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price} "
+ *                 f"entry_time_ns={self.entry_time_ns} exit_time_ns={self.exit_time_ns} "
+ *                 f"latency_ns={self.latency_ns}>")             # <<<<<<<<<<<<<<
  * 
  *     def as_dict(self):
 */
-  __pyx_t_3 = __Pyx_PyUnicode_From_int64_t(__pyx_v_self->resting_quantity, 0, ' ', 'd'); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 188, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyUnicode_From_int64_t(__pyx_v_self->last_trade_price, 0, ' ', 'd'); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 188, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5[0] = __pyx_mstate_global->__pyx_kp_u_MatchResult_fills;
-  __pyx_t_5[1] = __pyx_t_1;
-  __pyx_t_5[2] = __pyx_mstate_global->__pyx_kp_u_first_maker_id_2;
-  __pyx_t_5[3] = __pyx_t_2;
-  __pyx_t_5[4] = __pyx_mstate_global->__pyx_kp_u_resting_quantity_2;
-  __pyx_t_5[5] = __pyx_t_3;
-  __pyx_t_5[6] = __pyx_mstate_global->__pyx_kp_u_last_trade_price_2;
-  __pyx_t_5[7] = __pyx_t_4;
-  __pyx_t_5[8] = __pyx_mstate_global->__pyx_kp_u_;
+  __pyx_t_7 = __Pyx_PyUnicode_From_uint64_t(__pyx_v_self->latency_ns, 0, ' ', 'd'); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 214, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_t_8[0] = __pyx_mstate_global->__pyx_kp_u_MatchResult_fills;
+  __pyx_t_8[1] = __pyx_t_1;
+  __pyx_t_8[2] = __pyx_mstate_global->__pyx_kp_u_first_maker_id_2;
+  __pyx_t_8[3] = __pyx_t_2;
+  __pyx_t_8[4] = __pyx_mstate_global->__pyx_kp_u_resting_quantity_2;
+  __pyx_t_8[5] = __pyx_t_3;
+  __pyx_t_8[6] = __pyx_mstate_global->__pyx_kp_u_last_trade_price_2;
+  __pyx_t_8[7] = __pyx_t_4;
+  __pyx_t_8[8] = __pyx_mstate_global->__pyx_kp_u_entry_time_ns_2;
+  __pyx_t_8[9] = __pyx_t_5;
+  __pyx_t_8[10] = __pyx_mstate_global->__pyx_kp_u_exit_time_ns_2;
+  __pyx_t_8[11] = __pyx_t_6;
+  __pyx_t_8[12] = __pyx_mstate_global->__pyx_kp_u_latency_ns_2;
+  __pyx_t_8[13] = __pyx_t_7;
+  __pyx_t_8[14] = __pyx_mstate_global->__pyx_kp_u_;
 
-  /* "chronosmatch/engine.pyx":187
+  /* "chronosmatch/engine.pyx":211
  * 
  *     def __repr__(self):
  *         return (f"<MatchResult fills={self.fills} first_maker_id={self.first_maker_id} "             # <<<<<<<<<<<<<<
- *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price}>")
- * 
+ *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price} "
+ *                 f"entry_time_ns={self.entry_time_ns} exit_time_ns={self.exit_time_ns} "
 */
-  __pyx_t_6 = 72;
+  __pyx_t_9 = 113;
   #if __Pyx_PyUnicode_Join_CAN_USE_KIND_AND_LENGTH
-  for (Py_ssize_t i=1; i <= 7; i += 2) {
-    Py_ssize_t l = __Pyx_PyUnicode_GET_LENGTH(__pyx_t_5[i]);
-    __pyx_t_6 += l;
+  for (Py_ssize_t i=1; i <= 13; i += 2) {
+    Py_ssize_t l = __Pyx_PyUnicode_GET_LENGTH(__pyx_t_8[i]);
+    __pyx_t_9 += l;
   }
   #endif
-  __pyx_t_7 = 0;
-  __pyx_t_8 = __Pyx_PyUnicode_Join(__pyx_t_5, 9, __pyx_t_6, __pyx_t_7);
-  if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 187, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
+  __pyx_t_10 = 0;
+  __pyx_t_11 = __Pyx_PyUnicode_Join(__pyx_t_8, 15, __pyx_t_9, __pyx_t_10);
+  if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 211, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_11);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   {
     PyObject *__pyx_temp;
     {
       __pyx_temp = __pyx_r;
-      __pyx_r = __pyx_t_8;
+      __pyx_r = __pyx_t_11;
     }
     __Pyx_XDECREF(__pyx_temp);
   }
-  __pyx_t_8 = 0;
+  __pyx_t_11 = 0;
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":186
+  /* "chronosmatch/engine.pyx":210
  *         return default
  * 
  *     def __repr__(self):             # <<<<<<<<<<<<<<
  *         return (f"<MatchResult fills={self.fills} first_maker_id={self.first_maker_id} "
- *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price}>")
+ *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price} "
 */
 
   /* function exit code */
@@ -4933,7 +5492,10 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_4__repr__(struct 
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_8);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_11);
   __Pyx_AddTraceback("chronosmatch.engine.MatchResult.__repr__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -4942,8 +5504,8 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_4__repr__(struct 
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":190
- *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price}>")
+/* "chronosmatch/engine.pyx":216
+ *                 f"latency_ns={self.latency_ns}>")
  * 
  *     def as_dict(self):             # <<<<<<<<<<<<<<
  *         return {
@@ -5002,54 +5564,90 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_6as_dict(struct _
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("as_dict", 0);
 
-  /* "chronosmatch/engine.pyx":192
+  /* "chronosmatch/engine.pyx":218
  *     def as_dict(self):
  *         return {
  *             "fills": self.fills,             # <<<<<<<<<<<<<<
  *             "first_maker_id": self.first_maker_id,
  *             "resting_quantity": self.resting_quantity,
 */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 192, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 218, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->fills); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 192, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->fills); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 218, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_fills, __pyx_t_2) < (0)) __PYX_ERR(0, 192, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_fills, __pyx_t_2) < (0)) __PYX_ERR(0, 218, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "chronosmatch/engine.pyx":193
+  /* "chronosmatch/engine.pyx":219
  *         return {
  *             "fills": self.fills,
  *             "first_maker_id": self.first_maker_id,             # <<<<<<<<<<<<<<
  *             "resting_quantity": self.resting_quantity,
- *             "last_trade_price": self.last_trade_price
+ *             "last_trade_price": self.last_trade_price,
 */
-  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->first_maker_id); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 193, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->first_maker_id); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 219, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_first_maker_id, __pyx_t_2) < (0)) __PYX_ERR(0, 192, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_first_maker_id, __pyx_t_2) < (0)) __PYX_ERR(0, 218, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "chronosmatch/engine.pyx":194
+  /* "chronosmatch/engine.pyx":220
  *             "fills": self.fills,
  *             "first_maker_id": self.first_maker_id,
  *             "resting_quantity": self.resting_quantity,             # <<<<<<<<<<<<<<
- *             "last_trade_price": self.last_trade_price
- *         }
+ *             "last_trade_price": self.last_trade_price,
+ *             "entry_time_ns": self.entry_time_ns,
 */
-  __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->resting_quantity); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 194, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->resting_quantity); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 220, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_resting_quantity, __pyx_t_2) < (0)) __PYX_ERR(0, 192, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_resting_quantity, __pyx_t_2) < (0)) __PYX_ERR(0, 218, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "chronosmatch/engine.pyx":195
+  /* "chronosmatch/engine.pyx":221
  *             "first_maker_id": self.first_maker_id,
  *             "resting_quantity": self.resting_quantity,
- *             "last_trade_price": self.last_trade_price             # <<<<<<<<<<<<<<
+ *             "last_trade_price": self.last_trade_price,             # <<<<<<<<<<<<<<
+ *             "entry_time_ns": self.entry_time_ns,
+ *             "exit_time_ns": self.exit_time_ns,
+*/
+  __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->last_trade_price); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 221, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_last_trade_price, __pyx_t_2) < (0)) __PYX_ERR(0, 218, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "chronosmatch/engine.pyx":222
+ *             "resting_quantity": self.resting_quantity,
+ *             "last_trade_price": self.last_trade_price,
+ *             "entry_time_ns": self.entry_time_ns,             # <<<<<<<<<<<<<<
+ *             "exit_time_ns": self.exit_time_ns,
+ *             "latency_ns": self.latency_ns
+*/
+  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->entry_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 222, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_entry_time_ns, __pyx_t_2) < (0)) __PYX_ERR(0, 218, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "chronosmatch/engine.pyx":223
+ *             "last_trade_price": self.last_trade_price,
+ *             "entry_time_ns": self.entry_time_ns,
+ *             "exit_time_ns": self.exit_time_ns,             # <<<<<<<<<<<<<<
+ *             "latency_ns": self.latency_ns
+ *         }
+*/
+  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->exit_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 223, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_exit_time_ns, __pyx_t_2) < (0)) __PYX_ERR(0, 218, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "chronosmatch/engine.pyx":224
+ *             "entry_time_ns": self.entry_time_ns,
+ *             "exit_time_ns": self.exit_time_ns,
+ *             "latency_ns": self.latency_ns             # <<<<<<<<<<<<<<
  *         }
  * 
 */
-  __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->last_trade_price); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 195, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->latency_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 224, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_last_trade_price, __pyx_t_2) < (0)) __PYX_ERR(0, 192, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_latency_ns, __pyx_t_2) < (0)) __PYX_ERR(0, 218, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   {
     PyObject *__pyx_temp;
@@ -5062,8 +5660,8 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_6as_dict(struct _
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":190
- *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price}>")
+  /* "chronosmatch/engine.pyx":216
+ *                 f"latency_ns={self.latency_ns}>")
  * 
  *     def as_dict(self):             # <<<<<<<<<<<<<<
  *         return {
@@ -5082,7 +5680,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_6as_dict(struct _
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":152
+/* "chronosmatch/engine.pyx":157
  *     Collector (gc.is_tracked() is False) and cannot trigger GC cycles during trading.
  *     """
  *     cdef public uint64_t fills             # <<<<<<<<<<<<<<
@@ -5121,7 +5719,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_5fills___get__(st
       __Pyx_INCREF(__pyx_t_1);
       __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
       /*try:*/ {
-        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->fills); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 152, __pyx_L4_error)
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->fills); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 157, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_2);
         {
           PyObject *__pyx_temp;
@@ -5194,7 +5792,7 @@ static int __pyx_pf_12chronosmatch_6engine_11MatchResult_5fills_2__set__(struct 
       __Pyx_INCREF(__pyx_t_1);
       __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
       /*try:*/ {
-        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 152, __pyx_L4_error)
+        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 157, __pyx_L4_error)
         __pyx_v_self->fills = __pyx_t_2;
       }
       /*finally:*/ {
@@ -5224,7 +5822,7 @@ static int __pyx_pf_12chronosmatch_6engine_11MatchResult_5fills_2__set__(struct 
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":153
+/* "chronosmatch/engine.pyx":158
  *     """
  *     cdef public uint64_t fills
  *     cdef public uint64_t first_maker_id             # <<<<<<<<<<<<<<
@@ -5263,7 +5861,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_14first_maker_id_
       __Pyx_INCREF(__pyx_t_1);
       __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
       /*try:*/ {
-        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->first_maker_id); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 153, __pyx_L4_error)
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->first_maker_id); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 158, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_2);
         {
           PyObject *__pyx_temp;
@@ -5336,7 +5934,7 @@ static int __pyx_pf_12chronosmatch_6engine_11MatchResult_14first_maker_id_2__set
       __Pyx_INCREF(__pyx_t_1);
       __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
       /*try:*/ {
-        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 153, __pyx_L4_error)
+        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 158, __pyx_L4_error)
         __pyx_v_self->first_maker_id = __pyx_t_2;
       }
       /*finally:*/ {
@@ -5366,12 +5964,12 @@ static int __pyx_pf_12chronosmatch_6engine_11MatchResult_14first_maker_id_2__set
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":154
+/* "chronosmatch/engine.pyx":159
  *     cdef public uint64_t fills
  *     cdef public uint64_t first_maker_id
  *     cdef public int64_t resting_quantity             # <<<<<<<<<<<<<<
  *     cdef public int64_t last_trade_price
- * 
+ *     cdef public uint64_t entry_time_ns
 */
 
 /* Python wrapper */
@@ -5405,7 +6003,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_16resting_quantit
       __Pyx_INCREF(__pyx_t_1);
       __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
       /*try:*/ {
-        __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->resting_quantity); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 154, __pyx_L4_error)
+        __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->resting_quantity); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 159, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_2);
         {
           PyObject *__pyx_temp;
@@ -5478,7 +6076,7 @@ static int __pyx_pf_12chronosmatch_6engine_11MatchResult_16resting_quantity_2__s
       __Pyx_INCREF(__pyx_t_1);
       __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
       /*try:*/ {
-        __pyx_t_2 = __Pyx_PyLong_As_int64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 154, __pyx_L4_error)
+        __pyx_t_2 = __Pyx_PyLong_As_int64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 159, __pyx_L4_error)
         __pyx_v_self->resting_quantity = __pyx_t_2;
       }
       /*finally:*/ {
@@ -5508,12 +6106,12 @@ static int __pyx_pf_12chronosmatch_6engine_11MatchResult_16resting_quantity_2__s
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":155
+/* "chronosmatch/engine.pyx":160
  *     cdef public uint64_t first_maker_id
  *     cdef public int64_t resting_quantity
  *     cdef public int64_t last_trade_price             # <<<<<<<<<<<<<<
- * 
- *     cdef inline void _set(self, uint64_t fills, uint64_t first_maker_id,
+ *     cdef public uint64_t entry_time_ns
+ *     cdef public uint64_t exit_time_ns
 */
 
 /* Python wrapper */
@@ -5547,7 +6145,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_16last_trade_pric
       __Pyx_INCREF(__pyx_t_1);
       __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
       /*try:*/ {
-        __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->last_trade_price); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 155, __pyx_L4_error)
+        __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->last_trade_price); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 160, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_2);
         {
           PyObject *__pyx_temp;
@@ -5620,7 +6218,7 @@ static int __pyx_pf_12chronosmatch_6engine_11MatchResult_16last_trade_price_2__s
       __Pyx_INCREF(__pyx_t_1);
       __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
       /*try:*/ {
-        __pyx_t_2 = __Pyx_PyLong_As_int64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 155, __pyx_L4_error)
+        __pyx_t_2 = __Pyx_PyLong_As_int64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 160, __pyx_L4_error)
         __pyx_v_self->last_trade_price = __pyx_t_2;
       }
       /*finally:*/ {
@@ -5643,6 +6241,432 @@ static int __pyx_pf_12chronosmatch_6engine_11MatchResult_16last_trade_price_2__s
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_AddTraceback("chronosmatch.engine.MatchResult.last_trade_price.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "chronosmatch/engine.pyx":161
+ *     cdef public int64_t resting_quantity
+ *     cdef public int64_t last_trade_price
+ *     cdef public uint64_t entry_time_ns             # <<<<<<<<<<<<<<
+ *     cdef public uint64_t exit_time_ns
+ *     cdef public uint64_t latency_ns
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_12chronosmatch_6engine_11MatchResult_13entry_time_ns_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_12chronosmatch_6engine_11MatchResult_13entry_time_ns_1__get__(PyObject *__pyx_v_self) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_11MatchResult_13entry_time_ns___get__(((struct __pyx_obj_12chronosmatch_6engine_MatchResult *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_13entry_time_ns___get__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->entry_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 161, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        {
+          PyObject *__pyx_temp;
+          {
+            __pyx_temp = __pyx_r;
+            __pyx_r = __pyx_t_2;
+          }
+          __Pyx_XDECREF(__pyx_temp);
+        }
+        __pyx_t_2 = 0;
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+        goto __pyx_L3_return;
+      }
+      /*finally:*/ {
+        __pyx_L3_return: {
+          __pyx_t_3 = __pyx_r;
+          __pyx_r = 0;
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          __pyx_r = __pyx_t_3;
+          __pyx_t_3 = 0;
+          goto __pyx_L0;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("chronosmatch.engine.MatchResult.entry_time_ns.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_12chronosmatch_6engine_11MatchResult_13entry_time_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_12chronosmatch_6engine_11MatchResult_13entry_time_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_11MatchResult_13entry_time_ns_2__set__(((struct __pyx_obj_12chronosmatch_6engine_MatchResult *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_12chronosmatch_6engine_11MatchResult_13entry_time_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  uint64_t __pyx_t_2;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 161, __pyx_L4_error)
+        __pyx_v_self->entry_time_ns = __pyx_t_2;
+      }
+      /*finally:*/ {
+        /*normal exit:*/{
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L5;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+        __pyx_L5:;
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("chronosmatch.engine.MatchResult.entry_time_ns.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "chronosmatch/engine.pyx":162
+ *     cdef public int64_t last_trade_price
+ *     cdef public uint64_t entry_time_ns
+ *     cdef public uint64_t exit_time_ns             # <<<<<<<<<<<<<<
+ *     cdef public uint64_t latency_ns
+ * 
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_12chronosmatch_6engine_11MatchResult_12exit_time_ns_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_12chronosmatch_6engine_11MatchResult_12exit_time_ns_1__get__(PyObject *__pyx_v_self) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_11MatchResult_12exit_time_ns___get__(((struct __pyx_obj_12chronosmatch_6engine_MatchResult *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_12exit_time_ns___get__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->exit_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 162, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        {
+          PyObject *__pyx_temp;
+          {
+            __pyx_temp = __pyx_r;
+            __pyx_r = __pyx_t_2;
+          }
+          __Pyx_XDECREF(__pyx_temp);
+        }
+        __pyx_t_2 = 0;
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+        goto __pyx_L3_return;
+      }
+      /*finally:*/ {
+        __pyx_L3_return: {
+          __pyx_t_3 = __pyx_r;
+          __pyx_r = 0;
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          __pyx_r = __pyx_t_3;
+          __pyx_t_3 = 0;
+          goto __pyx_L0;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("chronosmatch.engine.MatchResult.exit_time_ns.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_12chronosmatch_6engine_11MatchResult_12exit_time_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_12chronosmatch_6engine_11MatchResult_12exit_time_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_11MatchResult_12exit_time_ns_2__set__(((struct __pyx_obj_12chronosmatch_6engine_MatchResult *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_12chronosmatch_6engine_11MatchResult_12exit_time_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  uint64_t __pyx_t_2;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 162, __pyx_L4_error)
+        __pyx_v_self->exit_time_ns = __pyx_t_2;
+      }
+      /*finally:*/ {
+        /*normal exit:*/{
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L5;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+        __pyx_L5:;
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("chronosmatch.engine.MatchResult.exit_time_ns.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "chronosmatch/engine.pyx":163
+ *     cdef public uint64_t entry_time_ns
+ *     cdef public uint64_t exit_time_ns
+ *     cdef public uint64_t latency_ns             # <<<<<<<<<<<<<<
+ * 
+ *     cdef inline void _set(self, uint64_t fills, uint64_t first_maker_id,
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_12chronosmatch_6engine_11MatchResult_10latency_ns_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_12chronosmatch_6engine_11MatchResult_10latency_ns_1__get__(PyObject *__pyx_v_self) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_11MatchResult_10latency_ns___get__(((struct __pyx_obj_12chronosmatch_6engine_MatchResult *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_10latency_ns___get__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->latency_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 163, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        {
+          PyObject *__pyx_temp;
+          {
+            __pyx_temp = __pyx_r;
+            __pyx_r = __pyx_t_2;
+          }
+          __Pyx_XDECREF(__pyx_temp);
+        }
+        __pyx_t_2 = 0;
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+        goto __pyx_L3_return;
+      }
+      /*finally:*/ {
+        __pyx_L3_return: {
+          __pyx_t_3 = __pyx_r;
+          __pyx_r = 0;
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          __pyx_r = __pyx_t_3;
+          __pyx_t_3 = 0;
+          goto __pyx_L0;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("chronosmatch.engine.MatchResult.latency_ns.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_12chronosmatch_6engine_11MatchResult_10latency_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_12chronosmatch_6engine_11MatchResult_10latency_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_11MatchResult_10latency_ns_2__set__(((struct __pyx_obj_12chronosmatch_6engine_MatchResult *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_12chronosmatch_6engine_11MatchResult_10latency_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  uint64_t __pyx_t_2;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 163, __pyx_L4_error)
+        __pyx_v_self->latency_ns = __pyx_t_2;
+      }
+      /*finally:*/ {
+        /*normal exit:*/{
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L5;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+        __pyx_L5:;
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("chronosmatch.engine.MatchResult.latency_ns.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
 
@@ -5710,8 +6734,11 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_8__reduce_cython_
   PyObject *__pyx_t_4 = NULL;
   PyObject *__pyx_t_5 = NULL;
   PyObject *__pyx_t_6 = NULL;
-  int __pyx_t_7;
-  int __pyx_t_8;
+  PyObject *__pyx_t_7 = NULL;
+  PyObject *__pyx_t_8 = NULL;
+  PyObject *__pyx_t_9 = NULL;
+  int __pyx_t_10;
+  int __pyx_t_11;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -5721,7 +6748,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_8__reduce_cython_
  *     cdef object _dict
  *     cdef bint use_setstate
  *     with CRITICAL_SECTION(self):             # <<<<<<<<<<<<<<
- *         state = (self.fills, self.first_maker_id, self.last_trade_price, self.resting_quantity)
+ *         state = (self.entry_time_ns, self.exit_time_ns, self.fills, self.first_maker_id, self.last_trade_price, self.latency_ns, self.resting_quantity)
  *         _dict = getattr(self, '__dict__', None)
 */
   {
@@ -5734,53 +6761,68 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_8__reduce_cython_
         /* "(tree fragment)":6
  *     cdef bint use_setstate
  *     with CRITICAL_SECTION(self):
- *         state = (self.fills, self.first_maker_id, self.last_trade_price, self.resting_quantity)             # <<<<<<<<<<<<<<
+ *         state = (self.entry_time_ns, self.exit_time_ns, self.fills, self.first_maker_id, self.last_trade_price, self.latency_ns, self.resting_quantity)             # <<<<<<<<<<<<<<
  *         _dict = getattr(self, '__dict__', None)
  *     if _dict is not None and _dict:
 */
-        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->fills); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 6, __pyx_L4_error)
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->entry_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 6, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_2);
-        __pyx_t_3 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->first_maker_id); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 6, __pyx_L4_error)
+        __pyx_t_3 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->exit_time_ns); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 6, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_4 = __Pyx_PyLong_From_int64_t(__pyx_v_self->last_trade_price); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 6, __pyx_L4_error)
+        __pyx_t_4 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->fills); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 6, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyLong_From_int64_t(__pyx_v_self->resting_quantity); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 6, __pyx_L4_error)
+        __pyx_t_5 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->first_maker_id); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 6, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_6 = PyTuple_New(4); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 6, __pyx_L4_error)
+        __pyx_t_6 = __Pyx_PyLong_From_int64_t(__pyx_v_self->last_trade_price); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 6, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_6);
+        __pyx_t_7 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->latency_ns); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 6, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_7);
+        __pyx_t_8 = __Pyx_PyLong_From_int64_t(__pyx_v_self->resting_quantity); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 6, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_8);
+        __pyx_t_9 = PyTuple_New(7); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 6, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_9);
         __Pyx_GIVEREF(__pyx_t_2);
-        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_2) != (0)) __PYX_ERR(1, 6, __pyx_L4_error);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_2) != (0)) __PYX_ERR(1, 6, __pyx_L4_error);
         __Pyx_GIVEREF(__pyx_t_3);
-        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_3) != (0)) __PYX_ERR(1, 6, __pyx_L4_error);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_t_3) != (0)) __PYX_ERR(1, 6, __pyx_L4_error);
         __Pyx_GIVEREF(__pyx_t_4);
-        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 2, __pyx_t_4) != (0)) __PYX_ERR(1, 6, __pyx_L4_error);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 2, __pyx_t_4) != (0)) __PYX_ERR(1, 6, __pyx_L4_error);
         __Pyx_GIVEREF(__pyx_t_5);
-        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 3, __pyx_t_5) != (0)) __PYX_ERR(1, 6, __pyx_L4_error);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 3, __pyx_t_5) != (0)) __PYX_ERR(1, 6, __pyx_L4_error);
+        __Pyx_GIVEREF(__pyx_t_6);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 4, __pyx_t_6) != (0)) __PYX_ERR(1, 6, __pyx_L4_error);
+        __Pyx_GIVEREF(__pyx_t_7);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 5, __pyx_t_7) != (0)) __PYX_ERR(1, 6, __pyx_L4_error);
+        __Pyx_GIVEREF(__pyx_t_8);
+        if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 6, __pyx_t_8) != (0)) __PYX_ERR(1, 6, __pyx_L4_error);
         __pyx_t_2 = 0;
         __pyx_t_3 = 0;
         __pyx_t_4 = 0;
         __pyx_t_5 = 0;
-        __pyx_v_state = ((PyObject*)__pyx_t_6);
         __pyx_t_6 = 0;
+        __pyx_t_7 = 0;
+        __pyx_t_8 = 0;
+        __pyx_v_state = ((PyObject*)__pyx_t_9);
+        __pyx_t_9 = 0;
 
         /* "(tree fragment)":7
  *     with CRITICAL_SECTION(self):
- *         state = (self.fills, self.first_maker_id, self.last_trade_price, self.resting_quantity)
+ *         state = (self.entry_time_ns, self.exit_time_ns, self.fills, self.first_maker_id, self.last_trade_price, self.latency_ns, self.resting_quantity)
  *         _dict = getattr(self, '__dict__', None)             # <<<<<<<<<<<<<<
  *     if _dict is not None and _dict:
  *         state += (_dict,)
 */
-        __pyx_t_6 = __Pyx_GetAttr3(((PyObject *)__pyx_v_self), __pyx_mstate_global->__pyx_n_u_dict, Py_None); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 7, __pyx_L4_error)
-        __Pyx_GOTREF(__pyx_t_6);
-        __pyx_v__dict = __pyx_t_6;
-        __pyx_t_6 = 0;
+        __pyx_t_9 = __Pyx_GetAttr3(((PyObject *)__pyx_v_self), __pyx_mstate_global->__pyx_n_u_dict, Py_None); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 7, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        __pyx_v__dict = __pyx_t_9;
+        __pyx_t_9 = 0;
       }
 
       /* "(tree fragment)":5
  *     cdef object _dict
  *     cdef bint use_setstate
  *     with CRITICAL_SECTION(self):             # <<<<<<<<<<<<<<
- *         state = (self.fills, self.first_maker_id, self.last_trade_price, self.resting_quantity)
+ *         state = (self.entry_time_ns, self.exit_time_ns, self.fills, self.first_maker_id, self.last_trade_price, self.latency_ns, self.resting_quantity)
  *         _dict = getattr(self, '__dict__', None)
 */
       /*finally:*/ {
@@ -5798,27 +6840,27 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_8__reduce_cython_
   }
 
   /* "(tree fragment)":8
- *         state = (self.fills, self.first_maker_id, self.last_trade_price, self.resting_quantity)
+ *         state = (self.entry_time_ns, self.exit_time_ns, self.fills, self.first_maker_id, self.last_trade_price, self.latency_ns, self.resting_quantity)
  *         _dict = getattr(self, '__dict__', None)
  *     if _dict is not None and _dict:             # <<<<<<<<<<<<<<
  *         state += (_dict,)
  *         use_setstate = True
 */
-  __pyx_t_8 = (__pyx_v__dict != Py_None);
-  if (__pyx_t_8) {
+  __pyx_t_11 = (__pyx_v__dict != Py_None);
+  if (__pyx_t_11) {
 
   } else {
 
-    __pyx_t_7 = __pyx_t_8;
+    __pyx_t_10 = __pyx_t_11;
 
     goto __pyx_L7_bool_binop_done;
   }
-  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_v__dict); if (unlikely((__pyx_t_8 < 0))) __PYX_ERR(1, 8, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyObject_IsTrue(__pyx_v__dict); if (unlikely((__pyx_t_11 < 0))) __PYX_ERR(1, 8, __pyx_L1_error)
 
-  __pyx_t_7 = __pyx_t_8;
+  __pyx_t_10 = __pyx_t_11;
 
   __pyx_L7_bool_binop_done:;
-  if (__pyx_t_7) {
+  if (__pyx_t_10) {
 
 
     /* "(tree fragment)":9
@@ -5833,11 +6875,11 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_8__reduce_cython_
     __Pyx_INCREF(__pyx_v__dict);
     __Pyx_GIVEREF(__pyx_v__dict);
     if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_v__dict) != (0)) __PYX_ERR(1, 9, __pyx_L1_error);
-    __pyx_t_6 = PyNumber_InPlaceAdd(__pyx_v_state, __pyx_t_1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 9, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_9 = PyNumber_InPlaceAdd(__pyx_v_state, __pyx_t_1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 9, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF_SET(__pyx_v_state, ((PyObject*)__pyx_t_6));
-    __pyx_t_6 = 0;
+    __Pyx_DECREF_SET(__pyx_v_state, ((PyObject*)__pyx_t_9));
+    __pyx_t_9 = 0;
 
     /* "(tree fragment)":10
  *     if _dict is not None and _dict:
@@ -5849,7 +6891,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_8__reduce_cython_
     __pyx_v_use_setstate = 1;
 
     /* "(tree fragment)":8
- *         state = (self.fills, self.first_maker_id, self.last_trade_price, self.resting_quantity)
+ *         state = (self.entry_time_ns, self.exit_time_ns, self.fills, self.first_maker_id, self.last_trade_price, self.latency_ns, self.resting_quantity)
  *         _dict = getattr(self, '__dict__', None)
  *     if _dict is not None and _dict:             # <<<<<<<<<<<<<<
  *         state += (_dict,)
@@ -5863,7 +6905,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_8__reduce_cython_
  *     else:
  *         use_setstate = False             # <<<<<<<<<<<<<<
  *     if use_setstate:
- *         return __pyx_unpickle_MatchResult, (type(self), 0x81e6f4e, None), state
+ *         return __pyx_unpickle_MatchResult, (type(self), 0x3e9a3bc, None), state
 */
   /*else*/ {
     __pyx_v_use_setstate = 0;
@@ -5874,7 +6916,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_8__reduce_cython_
  *     else:
  *         use_setstate = False
  *     if use_setstate:             # <<<<<<<<<<<<<<
- *         return __pyx_unpickle_MatchResult, (type(self), 0x81e6f4e, None), state
+ *         return __pyx_unpickle_MatchResult, (type(self), 0x3e9a3bc, None), state
  *     else:
 */
   if (__pyx_v_use_setstate) {
@@ -5882,92 +6924,92 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_8__reduce_cython_
     /* "(tree fragment)":14
  *         use_setstate = False
  *     if use_setstate:
- *         return __pyx_unpickle_MatchResult, (type(self), 0x81e6f4e, None), state             # <<<<<<<<<<<<<<
+ *         return __pyx_unpickle_MatchResult, (type(self), 0x3e9a3bc, None), state             # <<<<<<<<<<<<<<
  *     else:
- *         return __pyx_unpickle_MatchResult, (type(self), 0x81e6f4e, state)
+ *         return __pyx_unpickle_MatchResult, (type(self), 0x3e9a3bc, state)
 */
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_pyx_unpickle_MatchResult); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 14, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
+    __Pyx_GetModuleGlobalName(__pyx_t_9, __pyx_mstate_global->__pyx_n_u_pyx_unpickle_MatchResult); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 14, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
     __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 14, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_INCREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
     __Pyx_GIVEREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
     if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, ((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self)))) != (0)) __PYX_ERR(1, 14, __pyx_L1_error);
-    __Pyx_INCREF(__pyx_mstate_global->__pyx_int_136212302);
-    __Pyx_GIVEREF(__pyx_mstate_global->__pyx_int_136212302);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_mstate_global->__pyx_int_136212302) != (0)) __PYX_ERR(1, 14, __pyx_L1_error);
+    __Pyx_INCREF(__pyx_mstate_global->__pyx_int_65643452);
+    __Pyx_GIVEREF(__pyx_mstate_global->__pyx_int_65643452);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_mstate_global->__pyx_int_65643452) != (0)) __PYX_ERR(1, 14, __pyx_L1_error);
     __Pyx_INCREF(Py_None);
     __Pyx_GIVEREF(Py_None);
     if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 2, Py_None) != (0)) __PYX_ERR(1, 14, __pyx_L1_error);
-    __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 14, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_GIVEREF(__pyx_t_6);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6) != (0)) __PYX_ERR(1, 14, __pyx_L1_error);
+    __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 14, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_8);
+    __Pyx_GIVEREF(__pyx_t_9);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_9) != (0)) __PYX_ERR(1, 14, __pyx_L1_error);
     __Pyx_GIVEREF(__pyx_t_1);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_1) != (0)) __PYX_ERR(1, 14, __pyx_L1_error);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_t_1) != (0)) __PYX_ERR(1, 14, __pyx_L1_error);
     __Pyx_INCREF(__pyx_v_state);
     __Pyx_GIVEREF(__pyx_v_state);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_v_state) != (0)) __PYX_ERR(1, 14, __pyx_L1_error);
-    __pyx_t_6 = 0;
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_8, 2, __pyx_v_state) != (0)) __PYX_ERR(1, 14, __pyx_L1_error);
+    __pyx_t_9 = 0;
     __pyx_t_1 = 0;
     {
       PyObject *__pyx_temp;
       {
         __pyx_temp = __pyx_r;
-        __pyx_r = __pyx_t_5;
+        __pyx_r = __pyx_t_8;
       }
       __Pyx_XDECREF(__pyx_temp);
     }
-    __pyx_t_5 = 0;
+    __pyx_t_8 = 0;
     goto __pyx_L0;
 
     /* "(tree fragment)":13
  *     else:
  *         use_setstate = False
  *     if use_setstate:             # <<<<<<<<<<<<<<
- *         return __pyx_unpickle_MatchResult, (type(self), 0x81e6f4e, None), state
+ *         return __pyx_unpickle_MatchResult, (type(self), 0x3e9a3bc, None), state
  *     else:
 */
   }
 
   /* "(tree fragment)":16
- *         return __pyx_unpickle_MatchResult, (type(self), 0x81e6f4e, None), state
+ *         return __pyx_unpickle_MatchResult, (type(self), 0x3e9a3bc, None), state
  *     else:
- *         return __pyx_unpickle_MatchResult, (type(self), 0x81e6f4e, state)             # <<<<<<<<<<<<<<
+ *         return __pyx_unpickle_MatchResult, (type(self), 0x3e9a3bc, state)             # <<<<<<<<<<<<<<
  * def __setstate_cython__(self, __pyx_state):
  *     __pyx_unpickle_MatchResult__set_state(self, __pyx_state)
 */
   /*else*/ {
-    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_mstate_global->__pyx_n_u_pyx_unpickle_MatchResult); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 16, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_GetModuleGlobalName(__pyx_t_8, __pyx_mstate_global->__pyx_n_u_pyx_unpickle_MatchResult); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 16, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 16, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_INCREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
     __Pyx_GIVEREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
     if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, ((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self)))) != (0)) __PYX_ERR(1, 16, __pyx_L1_error);
-    __Pyx_INCREF(__pyx_mstate_global->__pyx_int_136212302);
-    __Pyx_GIVEREF(__pyx_mstate_global->__pyx_int_136212302);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_mstate_global->__pyx_int_136212302) != (0)) __PYX_ERR(1, 16, __pyx_L1_error);
+    __Pyx_INCREF(__pyx_mstate_global->__pyx_int_65643452);
+    __Pyx_GIVEREF(__pyx_mstate_global->__pyx_int_65643452);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_mstate_global->__pyx_int_65643452) != (0)) __PYX_ERR(1, 16, __pyx_L1_error);
     __Pyx_INCREF(__pyx_v_state);
     __Pyx_GIVEREF(__pyx_v_state);
     if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 2, __pyx_v_state) != (0)) __PYX_ERR(1, 16, __pyx_L1_error);
-    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 16, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_GIVEREF(__pyx_t_5);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5) != (0)) __PYX_ERR(1, 16, __pyx_L1_error);
+    __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 16, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
+    __Pyx_GIVEREF(__pyx_t_8);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_8) != (0)) __PYX_ERR(1, 16, __pyx_L1_error);
     __Pyx_GIVEREF(__pyx_t_1);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_1) != (0)) __PYX_ERR(1, 16, __pyx_L1_error);
-    __pyx_t_5 = 0;
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_t_1) != (0)) __PYX_ERR(1, 16, __pyx_L1_error);
+    __pyx_t_8 = 0;
     __pyx_t_1 = 0;
     {
       PyObject *__pyx_temp;
       {
         __pyx_temp = __pyx_r;
-        __pyx_r = __pyx_t_6;
+        __pyx_r = __pyx_t_9;
       }
       __Pyx_XDECREF(__pyx_temp);
     }
-    __pyx_t_6 = 0;
+    __pyx_t_9 = 0;
     goto __pyx_L0;
   }
 
@@ -5985,6 +7027,9 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_8__reduce_cython_
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_8);
+  __Pyx_XDECREF(__pyx_t_9);
   __Pyx_AddTraceback("chronosmatch.engine.MatchResult.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -5998,7 +7043,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_8__reduce_cython_
 
 /* "(tree fragment)":17
  *     else:
- *         return __pyx_unpickle_MatchResult, (type(self), 0x81e6f4e, state)
+ *         return __pyx_unpickle_MatchResult, (type(self), 0x3e9a3bc, state)
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     __pyx_unpickle_MatchResult__set_state(self, __pyx_state)
 */
@@ -6099,7 +7144,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_10__setstate_cyth
   __Pyx_RefNannySetupContext("__setstate_cython__", 0);
 
   /* "(tree fragment)":18
- *         return __pyx_unpickle_MatchResult, (type(self), 0x81e6f4e, state)
+ *         return __pyx_unpickle_MatchResult, (type(self), 0x3e9a3bc, state)
  * def __setstate_cython__(self, __pyx_state):
  *     __pyx_unpickle_MatchResult__set_state(self, __pyx_state)             # <<<<<<<<<<<<<<
 */
@@ -6117,7 +7162,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_10__setstate_cyth
 
   /* "(tree fragment)":17
  *     else:
- *         return __pyx_unpickle_MatchResult, (type(self), 0x81e6f4e, state)
+ *         return __pyx_unpickle_MatchResult, (type(self), 0x3e9a3bc, state)
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     __pyx_unpickle_MatchResult__set_state(self, __pyx_state)
 */
@@ -6136,8 +7181,8 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_11MatchResult_10__setstate_cyth
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":208
- *     cdef MatchResultData last_result
+/* "chronosmatch/engine.pyx":244
+ *     cdef public uint64_t last_trade_latency_ns
  * 
  *     def __cinit__(self, Py_ssize_t capacity=131072):             # <<<<<<<<<<<<<<
  *         if capacity < 1:
@@ -6182,37 +7227,37 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_capacity,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL_TPNEW(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len < 0)) __PYX_ERR(0, 208, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len < 0)) __PYX_ERR(0, 244, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL_TPNEW(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 208, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 244, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "__cinit__", 0) < (0)) __PYX_ERR(0, 208, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "__cinit__", 0) < (0)) __PYX_ERR(0, 244, __pyx_L3_error)
     } else {
       switch (__pyx_nargs) {
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL_TPNEW(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 208, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 244, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
     }
     if (values[0]) {
-      __pyx_v_capacity = __Pyx_PyIndex_AsSsize_t(values[0]); if (unlikely((__pyx_v_capacity == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 208, __pyx_L3_error)
+      __pyx_v_capacity = __Pyx_PyIndex_AsSsize_t(values[0]); if (unlikely((__pyx_v_capacity == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 244, __pyx_L3_error)
     } else {
       __pyx_v_capacity = ((Py_ssize_t)0x20000);
     }
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 0, 1, __pyx_nargs); __PYX_ERR(0, 208, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 0, 1, __pyx_nargs); __PYX_ERR(0, 244, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -6246,7 +7291,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "chronosmatch/engine.pyx":209
+  /* "chronosmatch/engine.pyx":245
  * 
  *     def __cinit__(self, Py_ssize_t capacity=131072):
  *         if capacity < 1:             # <<<<<<<<<<<<<<
@@ -6258,7 +7303,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
   if (unlikely(__pyx_t_1)) {
 
 
-    /* "chronosmatch/engine.pyx":210
+    /* "chronosmatch/engine.pyx":246
  *     def __cinit__(self, Py_ssize_t capacity=131072):
  *         if capacity < 1:
  *             raise ValueError("capacity must be positive")             # <<<<<<<<<<<<<<
@@ -6271,14 +7316,14 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
       PyObject *__pyx_callargs[2] = {__pyx_t_3, __pyx_mstate_global->__pyx_kp_u_capacity_must_be_positive};
       __pyx_t_2 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_ValueError)), __pyx_callargs+__pyx_t_4, (2-__pyx_t_4) | (__pyx_t_4*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-      if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 210, __pyx_L1_error)
+      if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 246, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
     }
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(0, 210, __pyx_L1_error)
+    __PYX_ERR(0, 246, __pyx_L1_error)
 
-    /* "chronosmatch/engine.pyx":209
+    /* "chronosmatch/engine.pyx":245
  * 
  *     def __cinit__(self, Py_ssize_t capacity=131072):
  *         if capacity < 1:             # <<<<<<<<<<<<<<
@@ -6287,7 +7332,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
 */
   }
 
-  /* "chronosmatch/engine.pyx":211
+  /* "chronosmatch/engine.pyx":247
  *         if capacity < 1:
  *             raise ValueError("capacity must be positive")
  *         self.core.orders = <LevelOrder*>malloc(capacity * sizeof(LevelOrder))             # <<<<<<<<<<<<<<
@@ -6296,7 +7341,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
 */
   __pyx_v_self->core.orders = ((struct __pyx_t_12chronosmatch_6engine_LevelOrder *)malloc((__pyx_v_capacity * (sizeof(struct __pyx_t_12chronosmatch_6engine_LevelOrder)))));
 
-  /* "chronosmatch/engine.pyx":212
+  /* "chronosmatch/engine.pyx":248
  *             raise ValueError("capacity must be positive")
  *         self.core.orders = <LevelOrder*>malloc(capacity * sizeof(LevelOrder))
  *         if self.core.orders == NULL:             # <<<<<<<<<<<<<<
@@ -6308,7 +7353,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
   if (unlikely(__pyx_t_1)) {
 
 
-    /* "chronosmatch/engine.pyx":213
+    /* "chronosmatch/engine.pyx":249
  *         self.core.orders = <LevelOrder*>malloc(capacity * sizeof(LevelOrder))
  *         if self.core.orders == NULL:
  *             raise MemoryError("Failed to allocate order memory for Book")             # <<<<<<<<<<<<<<
@@ -6321,14 +7366,14 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
       PyObject *__pyx_callargs[2] = {__pyx_t_3, __pyx_mstate_global->__pyx_kp_u_Failed_to_allocate_order_memory};
       __pyx_t_2 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_MemoryError)), __pyx_callargs+__pyx_t_4, (2-__pyx_t_4) | (__pyx_t_4*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-      if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 213, __pyx_L1_error)
+      if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 249, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
     }
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(0, 213, __pyx_L1_error)
+    __PYX_ERR(0, 249, __pyx_L1_error)
 
-    /* "chronosmatch/engine.pyx":212
+    /* "chronosmatch/engine.pyx":248
  *             raise ValueError("capacity must be positive")
  *         self.core.orders = <LevelOrder*>malloc(capacity * sizeof(LevelOrder))
  *         if self.core.orders == NULL:             # <<<<<<<<<<<<<<
@@ -6337,7 +7382,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
 */
   }
 
-  /* "chronosmatch/engine.pyx":214
+  /* "chronosmatch/engine.pyx":250
  *         if self.core.orders == NULL:
  *             raise MemoryError("Failed to allocate order memory for Book")
  *         self.core.capacity = capacity             # <<<<<<<<<<<<<<
@@ -6346,7 +7391,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
 */
   __pyx_v_self->core.capacity = __pyx_v_capacity;
 
-  /* "chronosmatch/engine.pyx":215
+  /* "chronosmatch/engine.pyx":251
  *             raise MemoryError("Failed to allocate order memory for Book")
  *         self.core.capacity = capacity
  *         self.core.count = 0             # <<<<<<<<<<<<<<
@@ -6355,7 +7400,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
 */
   __pyx_v_self->core.count = 0;
 
-  /* "chronosmatch/engine.pyx":216
+  /* "chronosmatch/engine.pyx":252
  *         self.core.capacity = capacity
  *         self.core.count = 0
  *         self.core.trades = 0             # <<<<<<<<<<<<<<
@@ -6364,7 +7409,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
 */
   __pyx_v_self->core.trades = 0;
 
-  /* "chronosmatch/engine.pyx":217
+  /* "chronosmatch/engine.pyx":253
  *         self.core.count = 0
  *         self.core.trades = 0
  *         self.core.last_trade_price = 0             # <<<<<<<<<<<<<<
@@ -6373,7 +7418,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
 */
   __pyx_v_self->core.last_trade_price = 0;
 
-  /* "chronosmatch/engine.pyx":218
+  /* "chronosmatch/engine.pyx":254
  *         self.core.trades = 0
  *         self.core.last_trade_price = 0
  *         self.core.best_bid = 0             # <<<<<<<<<<<<<<
@@ -6382,7 +7427,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
 */
   __pyx_v_self->core.best_bid = 0;
 
-  /* "chronosmatch/engine.pyx":219
+  /* "chronosmatch/engine.pyx":255
  *         self.core.last_trade_price = 0
  *         self.core.best_bid = 0
  *         self.core.best_ask = 0             # <<<<<<<<<<<<<<
@@ -6391,7 +7436,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
 */
   __pyx_v_self->core.best_ask = 0;
 
-  /* "chronosmatch/engine.pyx":220
+  /* "chronosmatch/engine.pyx":256
  *         self.core.best_bid = 0
  *         self.core.best_ask = 0
  *         self.last_result.fills = 0             # <<<<<<<<<<<<<<
@@ -6400,7 +7445,7 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
 */
   __pyx_v_self->last_result.fills = 0;
 
-  /* "chronosmatch/engine.pyx":221
+  /* "chronosmatch/engine.pyx":257
  *         self.core.best_ask = 0
  *         self.last_result.fills = 0
  *         self.last_result.first_maker_id = 0             # <<<<<<<<<<<<<<
@@ -6409,26 +7454,107 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
 */
   __pyx_v_self->last_result.first_maker_id = 0;
 
-  /* "chronosmatch/engine.pyx":222
+  /* "chronosmatch/engine.pyx":258
  *         self.last_result.fills = 0
  *         self.last_result.first_maker_id = 0
  *         self.last_result.resting_quantity = 0             # <<<<<<<<<<<<<<
  *         self.last_result.last_trade_price = 0
- * 
+ *         self.last_result.entry_time_ns = 0
 */
   __pyx_v_self->last_result.resting_quantity = 0;
 
-  /* "chronosmatch/engine.pyx":223
+  /* "chronosmatch/engine.pyx":259
  *         self.last_result.first_maker_id = 0
  *         self.last_result.resting_quantity = 0
  *         self.last_result.last_trade_price = 0             # <<<<<<<<<<<<<<
- * 
- *     def __dealloc__(self):
+ *         self.last_result.entry_time_ns = 0
+ *         self.last_result.exit_time_ns = 0
 */
   __pyx_v_self->last_result.last_trade_price = 0;
 
-  /* "chronosmatch/engine.pyx":208
- *     cdef MatchResultData last_result
+  /* "chronosmatch/engine.pyx":260
+ *         self.last_result.resting_quantity = 0
+ *         self.last_result.last_trade_price = 0
+ *         self.last_result.entry_time_ns = 0             # <<<<<<<<<<<<<<
+ *         self.last_result.exit_time_ns = 0
+ *         self.last_entry_time_ns = 0
+*/
+  __pyx_v_self->last_result.entry_time_ns = 0;
+
+  /* "chronosmatch/engine.pyx":261
+ *         self.last_result.last_trade_price = 0
+ *         self.last_result.entry_time_ns = 0
+ *         self.last_result.exit_time_ns = 0             # <<<<<<<<<<<<<<
+ *         self.last_entry_time_ns = 0
+ *         self.last_exit_time_ns = 0
+*/
+  __pyx_v_self->last_result.exit_time_ns = 0;
+
+  /* "chronosmatch/engine.pyx":262
+ *         self.last_result.entry_time_ns = 0
+ *         self.last_result.exit_time_ns = 0
+ *         self.last_entry_time_ns = 0             # <<<<<<<<<<<<<<
+ *         self.last_exit_time_ns = 0
+ *         self.last_latency_ns = 0
+*/
+  __pyx_v_self->last_entry_time_ns = 0;
+
+  /* "chronosmatch/engine.pyx":263
+ *         self.last_result.exit_time_ns = 0
+ *         self.last_entry_time_ns = 0
+ *         self.last_exit_time_ns = 0             # <<<<<<<<<<<<<<
+ *         self.last_latency_ns = 0
+ *         self.total_latency_ns = 0
+*/
+  __pyx_v_self->last_exit_time_ns = 0;
+
+  /* "chronosmatch/engine.pyx":264
+ *         self.last_entry_time_ns = 0
+ *         self.last_exit_time_ns = 0
+ *         self.last_latency_ns = 0             # <<<<<<<<<<<<<<
+ *         self.total_latency_ns = 0
+ *         self.last_trade_entry_time_ns = 0
+*/
+  __pyx_v_self->last_latency_ns = 0;
+
+  /* "chronosmatch/engine.pyx":265
+ *         self.last_exit_time_ns = 0
+ *         self.last_latency_ns = 0
+ *         self.total_latency_ns = 0             # <<<<<<<<<<<<<<
+ *         self.last_trade_entry_time_ns = 0
+ *         self.last_trade_exit_time_ns = 0
+*/
+  __pyx_v_self->total_latency_ns = 0;
+
+  /* "chronosmatch/engine.pyx":266
+ *         self.last_latency_ns = 0
+ *         self.total_latency_ns = 0
+ *         self.last_trade_entry_time_ns = 0             # <<<<<<<<<<<<<<
+ *         self.last_trade_exit_time_ns = 0
+ *         self.last_trade_latency_ns = 0
+*/
+  __pyx_v_self->last_trade_entry_time_ns = 0;
+
+  /* "chronosmatch/engine.pyx":267
+ *         self.total_latency_ns = 0
+ *         self.last_trade_entry_time_ns = 0
+ *         self.last_trade_exit_time_ns = 0             # <<<<<<<<<<<<<<
+ *         self.last_trade_latency_ns = 0
+ * 
+*/
+  __pyx_v_self->last_trade_exit_time_ns = 0;
+
+  /* "chronosmatch/engine.pyx":268
+ *         self.last_trade_entry_time_ns = 0
+ *         self.last_trade_exit_time_ns = 0
+ *         self.last_trade_latency_ns = 0             # <<<<<<<<<<<<<<
+ * 
+ *     def __dealloc__(self):
+*/
+  __pyx_v_self->last_trade_latency_ns = 0;
+
+  /* "chronosmatch/engine.pyx":244
+ *     cdef public uint64_t last_trade_latency_ns
  * 
  *     def __cinit__(self, Py_ssize_t capacity=131072):             # <<<<<<<<<<<<<<
  *         if capacity < 1:
@@ -6449,8 +7575,8 @@ static int __pyx_pf_12chronosmatch_6engine_4Book___cinit__(struct __pyx_obj_12ch
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":225
- *         self.last_result.last_trade_price = 0
+/* "chronosmatch/engine.pyx":270
+ *         self.last_trade_latency_ns = 0
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         if self.core.orders != NULL:
@@ -6473,7 +7599,7 @@ static void __pyx_pw_12chronosmatch_6engine_4Book_3__dealloc__(PyObject *__pyx_v
 static void __pyx_pf_12chronosmatch_6engine_4Book_2__dealloc__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self) {
   int __pyx_t_1;
 
-  /* "chronosmatch/engine.pyx":226
+  /* "chronosmatch/engine.pyx":271
  * 
  *     def __dealloc__(self):
  *         if self.core.orders != NULL:             # <<<<<<<<<<<<<<
@@ -6485,7 +7611,7 @@ static void __pyx_pf_12chronosmatch_6engine_4Book_2__dealloc__(struct __pyx_obj_
   if (__pyx_t_1) {
 
 
-    /* "chronosmatch/engine.pyx":227
+    /* "chronosmatch/engine.pyx":272
  *     def __dealloc__(self):
  *         if self.core.orders != NULL:
  *             free(self.core.orders)             # <<<<<<<<<<<<<<
@@ -6494,7 +7620,7 @@ static void __pyx_pf_12chronosmatch_6engine_4Book_2__dealloc__(struct __pyx_obj_
 */
     free(__pyx_v_self->core.orders);
 
-    /* "chronosmatch/engine.pyx":228
+    /* "chronosmatch/engine.pyx":273
  *         if self.core.orders != NULL:
  *             free(self.core.orders)
  *             self.core.orders = NULL             # <<<<<<<<<<<<<<
@@ -6503,7 +7629,7 @@ static void __pyx_pf_12chronosmatch_6engine_4Book_2__dealloc__(struct __pyx_obj_
 */
     __pyx_v_self->core.orders = NULL;
 
-    /* "chronosmatch/engine.pyx":226
+    /* "chronosmatch/engine.pyx":271
  * 
  *     def __dealloc__(self):
  *         if self.core.orders != NULL:             # <<<<<<<<<<<<<<
@@ -6512,8 +7638,8 @@ static void __pyx_pf_12chronosmatch_6engine_4Book_2__dealloc__(struct __pyx_obj_
 */
   }
 
-  /* "chronosmatch/engine.pyx":225
- *         self.last_result.last_trade_price = 0
+  /* "chronosmatch/engine.pyx":270
+ *         self.last_trade_latency_ns = 0
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         if self.core.orders != NULL:
@@ -6524,7 +7650,7 @@ static void __pyx_pf_12chronosmatch_6engine_4Book_2__dealloc__(struct __pyx_obj_
 
 }
 
-/* "chronosmatch/engine.pyx":230
+/* "chronosmatch/engine.pyx":275
  *             self.core.orders = NULL
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -6556,14 +7682,14 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_8best_bid___get__(struct 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "chronosmatch/engine.pyx":232
+  /* "chronosmatch/engine.pyx":277
  *     @property
  *     def best_bid(self):
  *         return self.core.best_bid             # <<<<<<<<<<<<<<
  * 
  *     @property
 */
-  __pyx_t_1 = __Pyx_PyLong_From_int64_t(__pyx_v_self->core.best_bid); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 232, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyLong_From_int64_t(__pyx_v_self->core.best_bid); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 277, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   {
     PyObject *__pyx_temp;
@@ -6576,7 +7702,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_8best_bid___get__(struct 
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":230
+  /* "chronosmatch/engine.pyx":275
  *             self.core.orders = NULL
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -6595,7 +7721,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_8best_bid___get__(struct 
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":234
+/* "chronosmatch/engine.pyx":279
  *         return self.core.best_bid
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -6627,14 +7753,14 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_8best_ask___get__(struct 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "chronosmatch/engine.pyx":236
+  /* "chronosmatch/engine.pyx":281
  *     @property
  *     def best_ask(self):
  *         return self.core.best_ask             # <<<<<<<<<<<<<<
  * 
  *     @property
 */
-  __pyx_t_1 = __Pyx_PyLong_From_int64_t(__pyx_v_self->core.best_ask); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyLong_From_int64_t(__pyx_v_self->core.best_ask); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 281, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   {
     PyObject *__pyx_temp;
@@ -6647,7 +7773,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_8best_ask___get__(struct 
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":234
+  /* "chronosmatch/engine.pyx":279
  *         return self.core.best_bid
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -6666,7 +7792,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_8best_ask___get__(struct 
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":238
+/* "chronosmatch/engine.pyx":283
  *         return self.core.best_ask
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -6698,14 +7824,14 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_16last_trade_price___get_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "chronosmatch/engine.pyx":240
+  /* "chronosmatch/engine.pyx":285
  *     @property
  *     def last_trade_price(self):
  *         return self.core.last_trade_price             # <<<<<<<<<<<<<<
  * 
  *     @property
 */
-  __pyx_t_1 = __Pyx_PyLong_From_int64_t(__pyx_v_self->core.last_trade_price); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 240, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyLong_From_int64_t(__pyx_v_self->core.last_trade_price); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 285, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   {
     PyObject *__pyx_temp;
@@ -6718,7 +7844,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_16last_trade_price___get_
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":238
+  /* "chronosmatch/engine.pyx":283
  *         return self.core.best_ask
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -6737,7 +7863,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_16last_trade_price___get_
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":242
+/* "chronosmatch/engine.pyx":287
  *         return self.core.last_trade_price
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -6769,14 +7895,14 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_6trades___get__(struct __
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "chronosmatch/engine.pyx":244
+  /* "chronosmatch/engine.pyx":289
  *     @property
  *     def trades(self):
  *         return self.core.trades             # <<<<<<<<<<<<<<
  * 
  *     @property
 */
-  __pyx_t_1 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->core.trades); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 244, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->core.trades); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 289, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   {
     PyObject *__pyx_temp;
@@ -6789,7 +7915,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_6trades___get__(struct __
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":242
+  /* "chronosmatch/engine.pyx":287
  *         return self.core.last_trade_price
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -6808,7 +7934,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_6trades___get__(struct __
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":246
+/* "chronosmatch/engine.pyx":291
  *         return self.core.trades
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -6840,14 +7966,14 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_5count___get__(struct __p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "chronosmatch/engine.pyx":248
+  /* "chronosmatch/engine.pyx":293
  *     @property
  *     def count(self):
  *         return self.core.count             # <<<<<<<<<<<<<<
  * 
  *     cdef MatchResultData _c_submit(self, uint64_t order_id, int64_t price_ticks, int64_t quantity_lots,
 */
-  __pyx_t_1 = PyLong_FromSsize_t(__pyx_v_self->core.count); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 248, __pyx_L1_error)
+  __pyx_t_1 = PyLong_FromSsize_t(__pyx_v_self->core.count); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 293, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   {
     PyObject *__pyx_temp;
@@ -6860,7 +7986,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_5count___get__(struct __p
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":246
+  /* "chronosmatch/engine.pyx":291
  *         return self.core.trades
  * 
  *     @property             # <<<<<<<<<<<<<<
@@ -6879,7 +8005,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_5count___get__(struct __p
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":250
+/* "chronosmatch/engine.pyx":295
  *         return self.core.count
  * 
  *     cdef MatchResultData _c_submit(self, uint64_t order_id, int64_t price_ticks, int64_t quantity_lots,             # <<<<<<<<<<<<<<
@@ -6890,7 +8016,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_5count___get__(struct __p
 static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosmatch_6engine_4Book__c_submit(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, uint64_t __pyx_v_order_id, int64_t __pyx_v_price_ticks, int64_t __pyx_v_quantity_lots, uint8_t __pyx_v_side, uint8_t __pyx_v_order_type) {
   struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_r;
 
-  /* "chronosmatch/engine.pyx":253
+  /* "chronosmatch/engine.pyx":298
  *                                   uint8_t side, uint8_t order_type) noexcept nogil:
  *         """Internal pure C matching routine."""
  *         return c_submit(&self.core, order_id, price_ticks, quantity_lots, side, order_type)             # <<<<<<<<<<<<<<
@@ -6903,7 +8029,7 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
   }
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":250
+  /* "chronosmatch/engine.pyx":295
  *         return self.core.count
  * 
  *     cdef MatchResultData _c_submit(self, uint64_t order_id, int64_t price_ticks, int64_t quantity_lots,             # <<<<<<<<<<<<<<
@@ -6916,11 +8042,11 @@ static struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_f_12chronosma
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":255
+/* "chronosmatch/engine.pyx":300
  *         return c_submit(&self.core, order_id, price_ticks, quantity_lots, side, order_type)
  * 
  *     cpdef MatchResult submit(self, uint64_t order_id, int64_t price_ticks, int64_t quantity_lots,             # <<<<<<<<<<<<<<
- *                              uint8_t side, uint8_t order_type=0):
+ *                              uint8_t side, uint8_t order_type=0, uint64_t entry_time_ns=0):
  *         """Submit limit or market order to the book, executing matching with nogil.
 */
 
@@ -6933,7 +8059,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 ); /*proto*/
 static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmatch_6engine_4Book_submit(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, uint64_t __pyx_v_order_id, int64_t __pyx_v_price_ticks, int64_t __pyx_v_quantity_lots, uint8_t __pyx_v_side, int __pyx_skip_dispatch, struct __pyx_opt_args_12chronosmatch_6engine_4Book_submit *__pyx_optional_args) {
   uint8_t __pyx_v_order_type = ((uint8_t)0);
+  uint64_t __pyx_v_entry_time_ns = ((uint64_t)0);
+  uint64_t __pyx_v_t_entry;
   struct __pyx_t_12chronosmatch_6engine_MatchResultData __pyx_v_res;
+  uint64_t __pyx_v_t_exit;
+  uint64_t __pyx_v_latency;
   struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v_out = 0;
   struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -6946,9 +8076,12 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
   PyObject *__pyx_t_7 = NULL;
   PyObject *__pyx_t_8 = NULL;
   PyObject *__pyx_t_9 = NULL;
-  size_t __pyx_t_10;
-  int __pyx_t_11;
-  int __pyx_t_12;
+  PyObject *__pyx_t_10 = NULL;
+  size_t __pyx_t_11;
+  uint64_t __pyx_t_12;
+  int __pyx_t_13;
+  uint64_t __pyx_t_14;
+  int __pyx_t_15;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -6956,6 +8089,9 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
       __pyx_v_order_type = __pyx_optional_args->order_type;
+      if (__pyx_optional_args->__pyx_n > 1) {
+        __pyx_v_entry_time_ns = __pyx_optional_args->entry_time_ns;
+      }
     }
   }
   /* Check if called by wrapper */
@@ -6974,23 +8110,25 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_typedict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_mstate_global->__pyx_n_u_submit); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 255, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_mstate_global->__pyx_n_u_submit); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 300, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (!__Pyx_IsSameCFunction(__pyx_t_1, (void(*)(void)) __pyx_pw_12chronosmatch_6engine_4Book_5submit)) {
         __pyx_t_3 = NULL;
         __Pyx_INCREF(__pyx_t_1);
         __pyx_t_4 = __pyx_t_1; 
-        __pyx_t_5 = __Pyx_PyLong_From_uint64_t(__pyx_v_order_id); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 255, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyLong_From_uint64_t(__pyx_v_order_id); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 300, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_6 = __Pyx_PyLong_From_int64_t(__pyx_v_price_ticks); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 255, __pyx_L1_error)
+        __pyx_t_6 = __Pyx_PyLong_From_int64_t(__pyx_v_price_ticks); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 300, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
-        __pyx_t_7 = __Pyx_PyLong_From_int64_t(__pyx_v_quantity_lots); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 255, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyLong_From_int64_t(__pyx_v_quantity_lots); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 300, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_8 = __Pyx_PyLong_From_uint8_t(__pyx_v_side); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 255, __pyx_L1_error)
+        __pyx_t_8 = __Pyx_PyLong_From_uint8_t(__pyx_v_side); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 300, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_9 = __Pyx_PyLong_From_uint8_t(__pyx_v_order_type); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 255, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyLong_From_uint8_t(__pyx_v_order_type); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 300, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
-        __pyx_t_10 = 1;
+        __pyx_t_10 = __Pyx_PyLong_From_uint64_t(__pyx_v_entry_time_ns); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 300, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_10);
+        __pyx_t_11 = 1;
         #if CYTHON_UNPACK_METHODS
         if (unlikely(PyMethod_Check(__pyx_t_4))) {
           __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_4);
@@ -6999,23 +8137,24 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
           __Pyx_INCREF(__pyx_t_3);
           __Pyx_INCREF(__pyx__function);
           __Pyx_DECREF_SET(__pyx_t_4, __pyx__function);
-          __pyx_t_10 = 0;
+          __pyx_t_11 = 0;
         }
         #endif
         {
-          PyObject *__pyx_callargs[6] = {__pyx_t_3, __pyx_t_5, __pyx_t_6, __pyx_t_7, __pyx_t_8, __pyx_t_9};
-          __pyx_t_2 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_4, __pyx_callargs+__pyx_t_10, (6-__pyx_t_10) | (__pyx_t_10*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+          PyObject *__pyx_callargs[7] = {__pyx_t_3, __pyx_t_5, __pyx_t_6, __pyx_t_7, __pyx_t_8, __pyx_t_9, __pyx_t_10};
+          __pyx_t_2 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_4, __pyx_callargs+__pyx_t_11, (7-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
           __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+          __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 255, __pyx_L1_error)
+          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 300, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
         }
-        if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_MatchResult))))) __PYX_ERR(0, 255, __pyx_L1_error)
+        if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_MatchResult))))) __PYX_ERR(0, 300, __pyx_L1_error)
         {
           struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_temp;
           {
@@ -7041,64 +8180,112 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
     #endif
   }
 
-  /* "chronosmatch/engine.pyx":263
+  /* "chronosmatch/engine.pyx":310
+ *         the Python Garbage Collector is never invoked during a trade.
  *         """
+ *         cdef uint64_t t_entry = entry_time_ns if entry_time_ns != 0 else <uint64_t>time.perf_counter_ns()             # <<<<<<<<<<<<<<
+ *         cdef MatchResultData res
+ *         if quantity_lots <= 0 or side > 1 or order_type > 1:
+*/
+  __pyx_t_13 = (__pyx_v_entry_time_ns != 0);
+
+  if (__pyx_t_13) {
+
+    __pyx_t_12 = __pyx_v_entry_time_ns;
+  } else {
+    __pyx_t_2 = NULL;
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_mstate_global->__pyx_n_u_time); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 310, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_mstate_global->__pyx_n_u_perf_counter_ns); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 310, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_10);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_11 = 1;
+    #if CYTHON_UNPACK_METHODS
+    if (unlikely(PyMethod_Check(__pyx_t_10))) {
+      __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_10);
+      assert(__pyx_t_2);
+      PyObject* __pyx__function = PyMethod_GET_FUNCTION(__pyx_t_10);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(__pyx__function);
+      __Pyx_DECREF_SET(__pyx_t_10, __pyx__function);
+      __pyx_t_11 = 0;
+    }
+    #endif
+    {
+      PyObject *__pyx_callargs[2] = {__pyx_t_2, NULL};
+      __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_10, __pyx_callargs+__pyx_t_11, (1-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+      __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 310, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
+    }
+    __pyx_t_14 = __Pyx_PyLong_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_14 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 310, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+    __pyx_t_12 = ((uint64_t)__pyx_t_14);
+
+  }
+
+  __pyx_v_t_entry = __pyx_t_12;
+
+  /* "chronosmatch/engine.pyx":312
+ *         cdef uint64_t t_entry = entry_time_ns if entry_time_ns != 0 else <uint64_t>time.perf_counter_ns()
  *         cdef MatchResultData res
  *         if quantity_lots <= 0 or side > 1 or order_type > 1:             # <<<<<<<<<<<<<<
  *             raise ValueError("invalid order fields")
  *         if order_type == 0 and price_ticks <= 0:
 */
-  __pyx_t_12 = (__pyx_v_quantity_lots <= 0);
+  __pyx_t_15 = (__pyx_v_quantity_lots <= 0);
 
-  if (!__pyx_t_12) {
-
-  } else {
-
-    __pyx_t_11 = __pyx_t_12;
-
-    goto __pyx_L4_bool_binop_done;
-  }
-  __pyx_t_12 = (__pyx_v_side > 1);
-
-  if (!__pyx_t_12) {
+  if (!__pyx_t_15) {
 
   } else {
 
-    __pyx_t_11 = __pyx_t_12;
+    __pyx_t_13 = __pyx_t_15;
 
     goto __pyx_L4_bool_binop_done;
   }
-  __pyx_t_12 = (__pyx_v_order_type > 1);
+  __pyx_t_15 = (__pyx_v_side > 1);
+
+  if (!__pyx_t_15) {
+
+  } else {
+
+    __pyx_t_13 = __pyx_t_15;
+
+    goto __pyx_L4_bool_binop_done;
+  }
+  __pyx_t_15 = (__pyx_v_order_type > 1);
 
 
-  __pyx_t_11 = __pyx_t_12;
+  __pyx_t_13 = __pyx_t_15;
 
   __pyx_L4_bool_binop_done:;
-  if (unlikely(__pyx_t_11)) {
+  if (unlikely(__pyx_t_13)) {
 
 
-    /* "chronosmatch/engine.pyx":264
+    /* "chronosmatch/engine.pyx":313
  *         cdef MatchResultData res
  *         if quantity_lots <= 0 or side > 1 or order_type > 1:
  *             raise ValueError("invalid order fields")             # <<<<<<<<<<<<<<
  *         if order_type == 0 and price_ticks <= 0:
  *             raise ValueError("limit order price must be positive")
 */
-    __pyx_t_2 = NULL;
-    __pyx_t_10 = 1;
+    __pyx_t_10 = NULL;
+    __pyx_t_11 = 1;
     {
-      PyObject *__pyx_callargs[2] = {__pyx_t_2, __pyx_mstate_global->__pyx_kp_u_invalid_order_fields};
-      __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_ValueError)), __pyx_callargs+__pyx_t_10, (2-__pyx_t_10) | (__pyx_t_10*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
-      __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 264, __pyx_L1_error)
+      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_mstate_global->__pyx_kp_u_invalid_order_fields};
+      __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_ValueError)), __pyx_callargs+__pyx_t_11, (2-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 313, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
     }
     __Pyx_Raise(__pyx_t_1, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_ERR(0, 264, __pyx_L1_error)
+    __PYX_ERR(0, 313, __pyx_L1_error)
 
-    /* "chronosmatch/engine.pyx":263
- *         """
+    /* "chronosmatch/engine.pyx":312
+ *         cdef uint64_t t_entry = entry_time_ns if entry_time_ns != 0 else <uint64_t>time.perf_counter_ns()
  *         cdef MatchResultData res
  *         if quantity_lots <= 0 or side > 1 or order_type > 1:             # <<<<<<<<<<<<<<
  *             raise ValueError("invalid order fields")
@@ -7106,53 +8293,53 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
 */
   }
 
-  /* "chronosmatch/engine.pyx":265
+  /* "chronosmatch/engine.pyx":314
  *         if quantity_lots <= 0 or side > 1 or order_type > 1:
  *             raise ValueError("invalid order fields")
  *         if order_type == 0 and price_ticks <= 0:             # <<<<<<<<<<<<<<
  *             raise ValueError("limit order price must be positive")
  * 
 */
-  __pyx_t_12 = (__pyx_v_order_type == 0);
+  __pyx_t_15 = (__pyx_v_order_type == 0);
 
-  if (__pyx_t_12) {
+  if (__pyx_t_15) {
 
   } else {
 
-    __pyx_t_11 = __pyx_t_12;
+    __pyx_t_13 = __pyx_t_15;
 
     goto __pyx_L8_bool_binop_done;
   }
-  __pyx_t_12 = (__pyx_v_price_ticks <= 0);
+  __pyx_t_15 = (__pyx_v_price_ticks <= 0);
 
 
-  __pyx_t_11 = __pyx_t_12;
+  __pyx_t_13 = __pyx_t_15;
 
   __pyx_L8_bool_binop_done:;
-  if (unlikely(__pyx_t_11)) {
+  if (unlikely(__pyx_t_13)) {
 
 
-    /* "chronosmatch/engine.pyx":266
+    /* "chronosmatch/engine.pyx":315
  *             raise ValueError("invalid order fields")
  *         if order_type == 0 and price_ticks <= 0:
  *             raise ValueError("limit order price must be positive")             # <<<<<<<<<<<<<<
  * 
  *         with nogil:
 */
-    __pyx_t_2 = NULL;
-    __pyx_t_10 = 1;
+    __pyx_t_10 = NULL;
+    __pyx_t_11 = 1;
     {
-      PyObject *__pyx_callargs[2] = {__pyx_t_2, __pyx_mstate_global->__pyx_kp_u_limit_order_price_must_be_positi};
-      __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_ValueError)), __pyx_callargs+__pyx_t_10, (2-__pyx_t_10) | (__pyx_t_10*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
-      __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 266, __pyx_L1_error)
+      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_mstate_global->__pyx_kp_u_limit_order_price_must_be_positi};
+      __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_ValueError)), __pyx_callargs+__pyx_t_11, (2-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 315, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
     }
     __Pyx_Raise(__pyx_t_1, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_ERR(0, 266, __pyx_L1_error)
+    __PYX_ERR(0, 315, __pyx_L1_error)
 
-    /* "chronosmatch/engine.pyx":265
+    /* "chronosmatch/engine.pyx":314
  *         if quantity_lots <= 0 or side > 1 or order_type > 1:
  *             raise ValueError("invalid order fields")
  *         if order_type == 0 and price_ticks <= 0:             # <<<<<<<<<<<<<<
@@ -7161,7 +8348,7 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
 */
   }
 
-  /* "chronosmatch/engine.pyx":268
+  /* "chronosmatch/engine.pyx":317
  *             raise ValueError("limit order price must be positive")
  * 
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -7174,7 +8361,7 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
       __Pyx_FastGIL_Remember();
       /*try:*/ {
 
-        /* "chronosmatch/engine.pyx":269
+        /* "chronosmatch/engine.pyx":318
  * 
  *         with nogil:
  *             res = c_submit(&self.core, order_id, price_ticks, quantity_lots, side, order_type)             # <<<<<<<<<<<<<<
@@ -7184,7 +8371,7 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
         __pyx_v_res = __pyx_f_12chronosmatch_6engine_c_submit((&__pyx_v_self->core), __pyx_v_order_id, __pyx_v_price_ticks, __pyx_v_quantity_lots, __pyx_v_side, __pyx_v_order_type);
       }
 
-      /* "chronosmatch/engine.pyx":268
+      /* "chronosmatch/engine.pyx":317
  *             raise ValueError("limit order price must be positive")
  * 
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -7201,39 +8388,39 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
       }
   }
 
-  /* "chronosmatch/engine.pyx":271
+  /* "chronosmatch/engine.pyx":320
  *             res = c_submit(&self.core, order_id, price_ticks, quantity_lots, side, order_type)
  * 
  *         if res.resting_quantity == -1:             # <<<<<<<<<<<<<<
  *             raise OverflowError("order book capacity reached")
  * 
 */
-  __pyx_t_11 = (__pyx_v_res.resting_quantity == -1L);
+  __pyx_t_13 = (__pyx_v_res.resting_quantity == -1L);
 
-  if (unlikely(__pyx_t_11)) {
+  if (unlikely(__pyx_t_13)) {
 
 
-    /* "chronosmatch/engine.pyx":272
+    /* "chronosmatch/engine.pyx":321
  * 
  *         if res.resting_quantity == -1:
  *             raise OverflowError("order book capacity reached")             # <<<<<<<<<<<<<<
  * 
- *         self.last_result = res
+ *         cdef uint64_t t_exit = <uint64_t>time.perf_counter_ns()
 */
-    __pyx_t_2 = NULL;
-    __pyx_t_10 = 1;
+    __pyx_t_10 = NULL;
+    __pyx_t_11 = 1;
     {
-      PyObject *__pyx_callargs[2] = {__pyx_t_2, __pyx_mstate_global->__pyx_kp_u_order_book_capacity_reached};
-      __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_OverflowError)), __pyx_callargs+__pyx_t_10, (2-__pyx_t_10) | (__pyx_t_10*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
-      __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 272, __pyx_L1_error)
+      PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_mstate_global->__pyx_kp_u_order_book_capacity_reached};
+      __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_OverflowError)), __pyx_callargs+__pyx_t_11, (2-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 321, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
     }
     __Pyx_Raise(__pyx_t_1, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_ERR(0, 272, __pyx_L1_error)
+    __PYX_ERR(0, 321, __pyx_L1_error)
 
-    /* "chronosmatch/engine.pyx":271
+    /* "chronosmatch/engine.pyx":320
  *             res = c_submit(&self.core, order_id, price_ticks, quantity_lots, side, order_type)
  * 
  *         if res.resting_quantity == -1:             # <<<<<<<<<<<<<<
@@ -7242,39 +8429,198 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
 */
   }
 
-  /* "chronosmatch/engine.pyx":274
+  /* "chronosmatch/engine.pyx":323
  *             raise OverflowError("order book capacity reached")
  * 
+ *         cdef uint64_t t_exit = <uint64_t>time.perf_counter_ns()             # <<<<<<<<<<<<<<
+ *         cdef uint64_t latency = t_exit - t_entry if t_exit >= t_entry else 0
+ * 
+*/
+  __pyx_t_10 = NULL;
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_mstate_global->__pyx_n_u_time); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 323, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_mstate_global->__pyx_n_u_perf_counter_ns); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 323, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_11 = 1;
+  #if CYTHON_UNPACK_METHODS
+  if (unlikely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_4);
+    assert(__pyx_t_10);
+    PyObject* __pyx__function = PyMethod_GET_FUNCTION(__pyx_t_4);
+    __Pyx_INCREF(__pyx_t_10);
+    __Pyx_INCREF(__pyx__function);
+    __Pyx_DECREF_SET(__pyx_t_4, __pyx__function);
+    __pyx_t_11 = 0;
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_10, NULL};
+    __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_4, __pyx_callargs+__pyx_t_11, (1-__pyx_t_11) | (__pyx_t_11*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
+    __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 323, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+  }
+  __pyx_t_12 = __Pyx_PyLong_As_uint64_t(__pyx_t_1); if (unlikely((__pyx_t_12 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 323, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_t_exit = ((uint64_t)__pyx_t_12);
+
+
+  /* "chronosmatch/engine.pyx":324
+ * 
+ *         cdef uint64_t t_exit = <uint64_t>time.perf_counter_ns()
+ *         cdef uint64_t latency = t_exit - t_entry if t_exit >= t_entry else 0             # <<<<<<<<<<<<<<
+ * 
+ *         res.entry_time_ns = t_entry
+*/
+  __pyx_t_13 = (__pyx_v_t_exit >= __pyx_v_t_entry);
+
+  if (__pyx_t_13) {
+
+    __pyx_t_12 = (__pyx_v_t_exit - __pyx_v_t_entry);
+  } else {
+
+    __pyx_t_12 = 0;
+  }
+
+  __pyx_v_latency = __pyx_t_12;
+
+  /* "chronosmatch/engine.pyx":326
+ *         cdef uint64_t latency = t_exit - t_entry if t_exit >= t_entry else 0
+ * 
+ *         res.entry_time_ns = t_entry             # <<<<<<<<<<<<<<
+ *         res.exit_time_ns = t_exit
+ * 
+*/
+  __pyx_v_res.entry_time_ns = __pyx_v_t_entry;
+
+  /* "chronosmatch/engine.pyx":327
+ * 
+ *         res.entry_time_ns = t_entry
+ *         res.exit_time_ns = t_exit             # <<<<<<<<<<<<<<
+ * 
+ *         self.last_result = res
+*/
+  __pyx_v_res.exit_time_ns = __pyx_v_t_exit;
+
+  /* "chronosmatch/engine.pyx":329
+ *         res.exit_time_ns = t_exit
+ * 
  *         self.last_result = res             # <<<<<<<<<<<<<<
- *         cdef MatchResult out = MatchResult.__new__(MatchResult)
- *         out._set(res.fills, res.first_maker_id, res.resting_quantity, res.last_trade_price)
+ *         self.last_entry_time_ns = t_entry
+ *         self.last_exit_time_ns = t_exit
 */
   __pyx_v_self->last_result = __pyx_v_res;
 
-  /* "chronosmatch/engine.pyx":275
+  /* "chronosmatch/engine.pyx":330
  * 
  *         self.last_result = res
+ *         self.last_entry_time_ns = t_entry             # <<<<<<<<<<<<<<
+ *         self.last_exit_time_ns = t_exit
+ *         self.last_latency_ns = latency
+*/
+  __pyx_v_self->last_entry_time_ns = __pyx_v_t_entry;
+
+  /* "chronosmatch/engine.pyx":331
+ *         self.last_result = res
+ *         self.last_entry_time_ns = t_entry
+ *         self.last_exit_time_ns = t_exit             # <<<<<<<<<<<<<<
+ *         self.last_latency_ns = latency
+ *         self.total_latency_ns += latency
+*/
+  __pyx_v_self->last_exit_time_ns = __pyx_v_t_exit;
+
+  /* "chronosmatch/engine.pyx":332
+ *         self.last_entry_time_ns = t_entry
+ *         self.last_exit_time_ns = t_exit
+ *         self.last_latency_ns = latency             # <<<<<<<<<<<<<<
+ *         self.total_latency_ns += latency
+ * 
+*/
+  __pyx_v_self->last_latency_ns = __pyx_v_latency;
+
+  /* "chronosmatch/engine.pyx":333
+ *         self.last_exit_time_ns = t_exit
+ *         self.last_latency_ns = latency
+ *         self.total_latency_ns += latency             # <<<<<<<<<<<<<<
+ * 
+ *         if res.fills > 0:
+*/
+  __pyx_v_self->total_latency_ns = (__pyx_v_self->total_latency_ns + __pyx_v_latency);
+
+  /* "chronosmatch/engine.pyx":335
+ *         self.total_latency_ns += latency
+ * 
+ *         if res.fills > 0:             # <<<<<<<<<<<<<<
+ *             self.last_trade_entry_time_ns = t_entry
+ *             self.last_trade_exit_time_ns = t_exit
+*/
+  __pyx_t_13 = (__pyx_v_res.fills > 0);
+
+  if (__pyx_t_13) {
+
+
+    /* "chronosmatch/engine.pyx":336
+ * 
+ *         if res.fills > 0:
+ *             self.last_trade_entry_time_ns = t_entry             # <<<<<<<<<<<<<<
+ *             self.last_trade_exit_time_ns = t_exit
+ *             self.last_trade_latency_ns = latency
+*/
+    __pyx_v_self->last_trade_entry_time_ns = __pyx_v_t_entry;
+
+    /* "chronosmatch/engine.pyx":337
+ *         if res.fills > 0:
+ *             self.last_trade_entry_time_ns = t_entry
+ *             self.last_trade_exit_time_ns = t_exit             # <<<<<<<<<<<<<<
+ *             self.last_trade_latency_ns = latency
+ * 
+*/
+    __pyx_v_self->last_trade_exit_time_ns = __pyx_v_t_exit;
+
+    /* "chronosmatch/engine.pyx":338
+ *             self.last_trade_entry_time_ns = t_entry
+ *             self.last_trade_exit_time_ns = t_exit
+ *             self.last_trade_latency_ns = latency             # <<<<<<<<<<<<<<
+ * 
+ *         cdef MatchResult out = MatchResult.__new__(MatchResult)
+*/
+    __pyx_v_self->last_trade_latency_ns = __pyx_v_latency;
+
+    /* "chronosmatch/engine.pyx":335
+ *         self.total_latency_ns += latency
+ * 
+ *         if res.fills > 0:             # <<<<<<<<<<<<<<
+ *             self.last_trade_entry_time_ns = t_entry
+ *             self.last_trade_exit_time_ns = t_exit
+*/
+  }
+
+  /* "chronosmatch/engine.pyx":340
+ *             self.last_trade_latency_ns = latency
+ * 
  *         cdef MatchResult out = MatchResult.__new__(MatchResult)             # <<<<<<<<<<<<<<
- *         out._set(res.fills, res.first_maker_id, res.resting_quantity, res.last_trade_price)
+ *         out._set(res.fills, res.first_maker_id, res.resting_quantity, res.last_trade_price, t_entry, t_exit)
  *         return out
 */
-  __pyx_t_1 = ((PyObject *)__pyx_tp_new_12chronosmatch_6engine_MatchResult(((PyTypeObject *)__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_MatchResult), __pyx_mstate_global->__pyx_empty_tuple, NULL)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 275, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_tp_new_12chronosmatch_6engine_MatchResult(((PyTypeObject *)__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_MatchResult), __pyx_mstate_global->__pyx_empty_tuple, NULL)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 340, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_out = ((struct __pyx_obj_12chronosmatch_6engine_MatchResult *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "chronosmatch/engine.pyx":276
- *         self.last_result = res
+  /* "chronosmatch/engine.pyx":341
+ * 
  *         cdef MatchResult out = MatchResult.__new__(MatchResult)
- *         out._set(res.fills, res.first_maker_id, res.resting_quantity, res.last_trade_price)             # <<<<<<<<<<<<<<
+ *         out._set(res.fills, res.first_maker_id, res.resting_quantity, res.last_trade_price, t_entry, t_exit)             # <<<<<<<<<<<<<<
  *         return out
  * 
 */
-  __pyx_f_12chronosmatch_6engine_11MatchResult__set(__pyx_v_out, __pyx_v_res.fills, __pyx_v_res.first_maker_id, __pyx_v_res.resting_quantity, __pyx_v_res.last_trade_price);
+  __pyx_f_12chronosmatch_6engine_11MatchResult__set(__pyx_v_out, __pyx_v_res.fills, __pyx_v_res.first_maker_id, __pyx_v_res.resting_quantity, __pyx_v_res.last_trade_price, __pyx_v_t_entry, __pyx_v_t_exit);
 
-  /* "chronosmatch/engine.pyx":277
+  /* "chronosmatch/engine.pyx":342
  *         cdef MatchResult out = MatchResult.__new__(MatchResult)
- *         out._set(res.fills, res.first_maker_id, res.resting_quantity, res.last_trade_price)
+ *         out._set(res.fills, res.first_maker_id, res.resting_quantity, res.last_trade_price, t_entry, t_exit)
  *         return out             # <<<<<<<<<<<<<<
  * 
  * 
@@ -7290,11 +8636,11 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
   }
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":255
+  /* "chronosmatch/engine.pyx":300
  *         return c_submit(&self.core, order_id, price_ticks, quantity_lots, side, order_type)
  * 
  *     cpdef MatchResult submit(self, uint64_t order_id, int64_t price_ticks, int64_t quantity_lots,             # <<<<<<<<<<<<<<
- *                              uint8_t side, uint8_t order_type=0):
+ *                              uint8_t side, uint8_t order_type=0, uint64_t entry_time_ns=0):
  *         """Submit limit or market order to the book, executing matching with nogil.
 */
 
@@ -7309,9 +8655,13 @@ static struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_f_12chronosmat
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_XDECREF(__pyx_t_8);
   __Pyx_XDECREF(__pyx_t_9);
+  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("chronosmatch.engine.Book.submit", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
+
+
+
 
   __Pyx_XDECREF((PyObject *)__pyx_v_out);
   __Pyx_XGIVEREF((PyObject *)__pyx_r);
@@ -7327,7 +8677,7 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_12chronosmatch_6engine_4Book_4submit, "Submit limit or market order to the book, executing matching with nogil.\n        \n        Returns a non-GC-tracked MatchResult (Py_TPFLAGS_HAVE_GC is unset), guaranteeing\n        the Python Garbage Collector is never invoked during a trade.\n        ");
+PyDoc_STRVAR(__pyx_doc_12chronosmatch_6engine_4Book_4submit, "Submit limit or market order to the book, executing matching with nogil.\n        \n        Captures exact nanosecond timestamps upon entering and exiting the engine\n        using time.perf_counter_ns().\n        \n        Returns a non-GC-tracked MatchResult (Py_TPFLAGS_HAVE_GC is unset), guaranteeing\n        the Python Garbage Collector is never invoked during a trade.\n        ");
 static PyMethodDef __pyx_mdef_12chronosmatch_6engine_4Book_5submit = {"submit", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_12chronosmatch_6engine_4Book_5submit, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_12chronosmatch_6engine_4Book_4submit};
 static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_5submit(PyObject *__pyx_v_self, 
 #if CYTHON_VECTORCALL
@@ -7341,11 +8691,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   int64_t __pyx_v_quantity_lots;
   uint8_t __pyx_v_side;
   uint8_t __pyx_v_order_type;
+  uint64_t __pyx_v_entry_time_ns;
   #if !CYTHON_VECTORCALL
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   #endif
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
-  PyObject* values[5] = {0,0,0,0,0};
+  PyObject* values[6] = {0,0,0,0,0,0};
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -7361,71 +8712,84 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   #endif
   __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
   {
-    PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_order_id,&__pyx_mstate_global->__pyx_n_u_price_ticks,&__pyx_mstate_global->__pyx_n_u_quantity_lots,&__pyx_mstate_global->__pyx_n_u_side,&__pyx_mstate_global->__pyx_n_u_order_type,0};
+    PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_order_id,&__pyx_mstate_global->__pyx_n_u_price_ticks,&__pyx_mstate_global->__pyx_n_u_quantity_lots,&__pyx_mstate_global->__pyx_n_u_side,&__pyx_mstate_global->__pyx_n_u_order_type,&__pyx_mstate_global->__pyx_n_u_entry_time_ns,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len < 0)) __PYX_ERR(0, 255, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len < 0)) __PYX_ERR(0, 300, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
+        case  6:
+        values[5] = __Pyx_ArgRef_FASTCALL(__pyx_args, 5);
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 300, __pyx_L3_error)
+        CYTHON_FALLTHROUGH;
         case  5:
         values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 255, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 300, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  4:
         values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 255, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 300, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  3:
         values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 255, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 300, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  2:
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 255, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 300, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 255, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 300, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "submit", 0) < (0)) __PYX_ERR(0, 255, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "submit", 0) < (0)) __PYX_ERR(0, 300, __pyx_L3_error)
       for (Py_ssize_t i = __pyx_nargs; i < 4; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("submit", 0, 4, 5, i); __PYX_ERR(0, 255, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("submit", 0, 4, 6, i); __PYX_ERR(0, 300, __pyx_L3_error) }
       }
     } else {
       switch (__pyx_nargs) {
+        case  6:
+        values[5] = __Pyx_ArgRef_FASTCALL(__pyx_args, 5);
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[5])) __PYX_ERR(0, 300, __pyx_L3_error)
+        CYTHON_FALLTHROUGH;
         case  5:
         values[4] = __Pyx_ArgRef_FASTCALL(__pyx_args, 4);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 255, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[4])) __PYX_ERR(0, 300, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  4:
         values[3] = __Pyx_ArgRef_FASTCALL(__pyx_args, 3);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 255, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[3])) __PYX_ERR(0, 300, __pyx_L3_error)
         values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 255, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 300, __pyx_L3_error)
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 255, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 300, __pyx_L3_error)
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 255, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 300, __pyx_L3_error)
         break;
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_order_id = __Pyx_PyLong_As_uint64_t(values[0]); if (unlikely((__pyx_v_order_id == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 255, __pyx_L3_error)
-    __pyx_v_price_ticks = __Pyx_PyLong_As_int64_t(values[1]); if (unlikely((__pyx_v_price_ticks == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 255, __pyx_L3_error)
-    __pyx_v_quantity_lots = __Pyx_PyLong_As_int64_t(values[2]); if (unlikely((__pyx_v_quantity_lots == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 255, __pyx_L3_error)
-    __pyx_v_side = __Pyx_PyLong_As_uint8_t(values[3]); if (unlikely((__pyx_v_side == ((uint8_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 256, __pyx_L3_error)
+    __pyx_v_order_id = __Pyx_PyLong_As_uint64_t(values[0]); if (unlikely((__pyx_v_order_id == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 300, __pyx_L3_error)
+    __pyx_v_price_ticks = __Pyx_PyLong_As_int64_t(values[1]); if (unlikely((__pyx_v_price_ticks == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 300, __pyx_L3_error)
+    __pyx_v_quantity_lots = __Pyx_PyLong_As_int64_t(values[2]); if (unlikely((__pyx_v_quantity_lots == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 300, __pyx_L3_error)
+    __pyx_v_side = __Pyx_PyLong_As_uint8_t(values[3]); if (unlikely((__pyx_v_side == ((uint8_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 301, __pyx_L3_error)
     if (values[4]) {
-      __pyx_v_order_type = __Pyx_PyLong_As_uint8_t(values[4]); if (unlikely((__pyx_v_order_type == ((uint8_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 256, __pyx_L3_error)
+      __pyx_v_order_type = __Pyx_PyLong_As_uint8_t(values[4]); if (unlikely((__pyx_v_order_type == ((uint8_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 301, __pyx_L3_error)
     } else {
       __pyx_v_order_type = ((uint8_t)0);
+    }
+    if (values[5]) {
+      __pyx_v_entry_time_ns = __Pyx_PyLong_As_uint64_t(values[5]); if (unlikely((__pyx_v_entry_time_ns == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 301, __pyx_L3_error)
+    } else {
+      __pyx_v_entry_time_ns = ((uint64_t)0);
     }
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("submit", 0, 4, 5, __pyx_nargs); __PYX_ERR(0, 255, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("submit", 0, 4, 6, __pyx_nargs); __PYX_ERR(0, 300, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -7436,7 +8800,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_4submit(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self), __pyx_v_order_id, __pyx_v_price_ticks, __pyx_v_quantity_lots, __pyx_v_side, __pyx_v_order_type);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_4submit(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self), __pyx_v_order_id, __pyx_v_price_ticks, __pyx_v_quantity_lots, __pyx_v_side, __pyx_v_order_type, __pyx_v_entry_time_ns);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -7447,11 +8811,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
 
 
+
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_4submit(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, uint64_t __pyx_v_order_id, int64_t __pyx_v_price_ticks, int64_t __pyx_v_quantity_lots, uint8_t __pyx_v_side, uint8_t __pyx_v_order_type) {
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_4submit(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, uint64_t __pyx_v_order_id, int64_t __pyx_v_price_ticks, int64_t __pyx_v_quantity_lots, uint8_t __pyx_v_side, uint8_t __pyx_v_order_type, uint64_t __pyx_v_entry_time_ns) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -7460,9 +8825,10 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_4submit(struct __pyx_obj_
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("submit", 0);
-  __pyx_t_2.__pyx_n = 1;
+  __pyx_t_2.__pyx_n = 2;
   __pyx_t_2.order_type = __pyx_v_order_type;
-  __pyx_t_1 = ((PyObject *)__pyx_vtabptr_12chronosmatch_6engine_Book->submit(__pyx_v_self, __pyx_v_order_id, __pyx_v_price_ticks, __pyx_v_quantity_lots, __pyx_v_side, 1, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 255, __pyx_L1_error)
+  __pyx_t_2.entry_time_ns = __pyx_v_entry_time_ns;
+  __pyx_t_1 = ((PyObject *)__pyx_vtabptr_12chronosmatch_6engine_Book->submit(__pyx_v_self, __pyx_v_order_id, __pyx_v_price_ticks, __pyx_v_quantity_lots, __pyx_v_side, 1, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 300, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   {
     PyObject *__pyx_temp;
@@ -7486,7 +8852,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_4submit(struct __pyx_obj_
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":280
+/* "chronosmatch/engine.pyx":345
  * 
  * 
  *     cdef bint _c_cancel(self, uint64_t order_id) noexcept nogil:             # <<<<<<<<<<<<<<
@@ -7497,7 +8863,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_4submit(struct __pyx_obj_
 static int __pyx_f_12chronosmatch_6engine_4Book__c_cancel(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, uint64_t __pyx_v_order_id) {
   int __pyx_r;
 
-  /* "chronosmatch/engine.pyx":282
+  /* "chronosmatch/engine.pyx":347
  *     cdef bint _c_cancel(self, uint64_t order_id) noexcept nogil:
  *         """Cancel an order by ID directly in C nogil."""
  *         return c_cancel(&self.core, order_id)             # <<<<<<<<<<<<<<
@@ -7510,7 +8876,7 @@ static int __pyx_f_12chronosmatch_6engine_4Book__c_cancel(struct __pyx_obj_12chr
   }
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":280
+  /* "chronosmatch/engine.pyx":345
  * 
  * 
  *     cdef bint _c_cancel(self, uint64_t order_id) noexcept nogil:             # <<<<<<<<<<<<<<
@@ -7523,7 +8889,7 @@ static int __pyx_f_12chronosmatch_6engine_4Book__c_cancel(struct __pyx_obj_12chr
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":284
+/* "chronosmatch/engine.pyx":349
  *         return c_cancel(&self.core, order_id)
  * 
  *     cpdef bint cancel(self, uint64_t order_id):             # <<<<<<<<<<<<<<
@@ -7569,13 +8935,13 @@ static int __pyx_f_12chronosmatch_6engine_4Book_cancel(struct __pyx_obj_12chrono
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_typedict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_mstate_global->__pyx_n_u_cancel); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 284, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_mstate_global->__pyx_n_u_cancel); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 349, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (!__Pyx_IsSameCFunction(__pyx_t_1, (void(*)(void)) __pyx_pw_12chronosmatch_6engine_4Book_7cancel)) {
         __pyx_t_3 = NULL;
         __Pyx_INCREF(__pyx_t_1);
         __pyx_t_4 = __pyx_t_1; 
-        __pyx_t_5 = __Pyx_PyLong_From_uint64_t(__pyx_v_order_id); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 284, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyLong_From_uint64_t(__pyx_v_order_id); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 349, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
         __pyx_t_6 = 1;
         #if CYTHON_UNPACK_METHODS
@@ -7595,10 +8961,10 @@ static int __pyx_f_12chronosmatch_6engine_4Book_cancel(struct __pyx_obj_12chrono
           __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 284, __pyx_L1_error)
+          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 349, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
         }
-        __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 284, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 349, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         {
           __pyx_r = __pyx_t_7;
@@ -7619,7 +8985,7 @@ static int __pyx_f_12chronosmatch_6engine_4Book_cancel(struct __pyx_obj_12chrono
     #endif
   }
 
-  /* "chronosmatch/engine.pyx":287
+  /* "chronosmatch/engine.pyx":352
  *         """Cancel an existing order by order_id."""
  *         cdef bint success
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -7632,7 +8998,7 @@ static int __pyx_f_12chronosmatch_6engine_4Book_cancel(struct __pyx_obj_12chrono
       __Pyx_FastGIL_Remember();
       /*try:*/ {
 
-        /* "chronosmatch/engine.pyx":288
+        /* "chronosmatch/engine.pyx":353
  *         cdef bint success
  *         with nogil:
  *             success = c_cancel(&self.core, order_id)             # <<<<<<<<<<<<<<
@@ -7642,7 +9008,7 @@ static int __pyx_f_12chronosmatch_6engine_4Book_cancel(struct __pyx_obj_12chrono
         __pyx_v_success = __pyx_f_12chronosmatch_6engine_c_cancel((&__pyx_v_self->core), __pyx_v_order_id);
       }
 
-      /* "chronosmatch/engine.pyx":287
+      /* "chronosmatch/engine.pyx":352
  *         """Cancel an existing order by order_id."""
  *         cdef bint success
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -7659,7 +9025,7 @@ static int __pyx_f_12chronosmatch_6engine_4Book_cancel(struct __pyx_obj_12chrono
       }
   }
 
-  /* "chronosmatch/engine.pyx":289
+  /* "chronosmatch/engine.pyx":354
  *         with nogil:
  *             success = c_cancel(&self.core, order_id)
  *         return success             # <<<<<<<<<<<<<<
@@ -7672,7 +9038,7 @@ static int __pyx_f_12chronosmatch_6engine_4Book_cancel(struct __pyx_obj_12chrono
   }
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":284
+  /* "chronosmatch/engine.pyx":349
  *         return c_cancel(&self.core, order_id)
  * 
  *     cpdef bint cancel(self, uint64_t order_id):             # <<<<<<<<<<<<<<
@@ -7736,32 +9102,32 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_order_id,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len < 0)) __PYX_ERR(0, 284, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len < 0)) __PYX_ERR(0, 349, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 284, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 349, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "cancel", 0) < (0)) __PYX_ERR(0, 284, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "cancel", 0) < (0)) __PYX_ERR(0, 349, __pyx_L3_error)
       for (Py_ssize_t i = __pyx_nargs; i < 1; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("cancel", 1, 1, 1, i); __PYX_ERR(0, 284, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("cancel", 1, 1, 1, i); __PYX_ERR(0, 349, __pyx_L3_error) }
       }
     } else if (unlikely(__pyx_nargs != 1)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 284, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 349, __pyx_L3_error)
     }
-    __pyx_v_order_id = __Pyx_PyLong_As_uint64_t(values[0]); if (unlikely((__pyx_v_order_id == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 284, __pyx_L3_error)
+    __pyx_v_order_id = __Pyx_PyLong_As_uint64_t(values[0]); if (unlikely((__pyx_v_order_id == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 349, __pyx_L3_error)
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cancel", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 284, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cancel", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 349, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -7792,8 +9158,8 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_6cancel(struct __pyx_obj_
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("cancel", 0);
-  __pyx_t_1 = __pyx_f_12chronosmatch_6engine_4Book_cancel(__pyx_v_self, __pyx_v_order_id, 1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 284, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyBool_FromLong(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 284, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_12chronosmatch_6engine_4Book_cancel(__pyx_v_self, __pyx_v_order_id, 1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 349, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBool_FromLong(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
 
   {
@@ -7818,7 +9184,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_6cancel(struct __pyx_obj_
   return __pyx_r;
 }
 
-/* "chronosmatch/engine.pyx":291
+/* "chronosmatch/engine.pyx":356
  *         return success
  * 
  *     cpdef snapshot(self):             # <<<<<<<<<<<<<<
@@ -7861,7 +9227,7 @@ static PyObject *__pyx_f_12chronosmatch_6engine_4Book_snapshot(struct __pyx_obj_
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_typedict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_mstate_global->__pyx_n_u_snapshot); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 291, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_mstate_global->__pyx_n_u_snapshot); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 356, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (!__Pyx_IsSameCFunction(__pyx_t_1, (void(*)(void)) __pyx_pw_12chronosmatch_6engine_4Book_9snapshot)) {
         __pyx_t_3 = NULL;
@@ -7884,7 +9250,7 @@ static PyObject *__pyx_f_12chronosmatch_6engine_4Book_snapshot(struct __pyx_obj_
           __pyx_t_2 = __Pyx_PyObject_FastCall((PyObject*)__pyx_t_4, __pyx_callargs+__pyx_t_5, (1-__pyx_t_5) | (__pyx_t_5*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
           __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 291, __pyx_L1_error)
+          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 356, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
         }
         {
@@ -7912,65 +9278,137 @@ static PyObject *__pyx_f_12chronosmatch_6engine_4Book_snapshot(struct __pyx_obj_
     #endif
   }
 
-  /* "chronosmatch/engine.pyx":294
+  /* "chronosmatch/engine.pyx":359
  *         """Returns snapshot of current top-of-book and trading metrics."""
  *         return {
  *             "best_bid": self.core.best_bid,             # <<<<<<<<<<<<<<
  *             "best_ask": self.core.best_ask,
  *             "resting_orders": self.core.count,
 */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 294, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(11); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 359, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->core.best_bid); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 294, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->core.best_bid); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 359, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_best_bid, __pyx_t_2) < (0)) __PYX_ERR(0, 294, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_best_bid, __pyx_t_2) < (0)) __PYX_ERR(0, 359, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "chronosmatch/engine.pyx":295
+  /* "chronosmatch/engine.pyx":360
  *         return {
  *             "best_bid": self.core.best_bid,
  *             "best_ask": self.core.best_ask,             # <<<<<<<<<<<<<<
  *             "resting_orders": self.core.count,
  *             "trades": self.core.trades,
 */
-  __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->core.best_ask); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 295, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->core.best_ask); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 360, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_best_ask, __pyx_t_2) < (0)) __PYX_ERR(0, 294, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_best_ask, __pyx_t_2) < (0)) __PYX_ERR(0, 359, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "chronosmatch/engine.pyx":296
+  /* "chronosmatch/engine.pyx":361
  *             "best_bid": self.core.best_bid,
  *             "best_ask": self.core.best_ask,
  *             "resting_orders": self.core.count,             # <<<<<<<<<<<<<<
  *             "trades": self.core.trades,
- *             "last_trade_price": self.core.last_trade_price
+ *             "last_trade_price": self.core.last_trade_price,
 */
-  __pyx_t_2 = PyLong_FromSsize_t(__pyx_v_self->core.count); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 296, __pyx_L1_error)
+  __pyx_t_2 = PyLong_FromSsize_t(__pyx_v_self->core.count); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 361, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_resting_orders, __pyx_t_2) < (0)) __PYX_ERR(0, 294, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_resting_orders, __pyx_t_2) < (0)) __PYX_ERR(0, 359, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "chronosmatch/engine.pyx":297
+  /* "chronosmatch/engine.pyx":362
  *             "best_ask": self.core.best_ask,
  *             "resting_orders": self.core.count,
  *             "trades": self.core.trades,             # <<<<<<<<<<<<<<
- *             "last_trade_price": self.core.last_trade_price
- *         }
+ *             "last_trade_price": self.core.last_trade_price,
+ *             "last_entry_time_ns": self.last_entry_time_ns,
 */
-  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->core.trades); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 297, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->core.trades); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 362, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_trades, __pyx_t_2) < (0)) __PYX_ERR(0, 294, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_trades, __pyx_t_2) < (0)) __PYX_ERR(0, 359, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "chronosmatch/engine.pyx":298
+  /* "chronosmatch/engine.pyx":363
  *             "resting_orders": self.core.count,
  *             "trades": self.core.trades,
- *             "last_trade_price": self.core.last_trade_price             # <<<<<<<<<<<<<<
+ *             "last_trade_price": self.core.last_trade_price,             # <<<<<<<<<<<<<<
+ *             "last_entry_time_ns": self.last_entry_time_ns,
+ *             "last_exit_time_ns": self.last_exit_time_ns,
+*/
+  __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->core.last_trade_price); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 363, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_last_trade_price, __pyx_t_2) < (0)) __PYX_ERR(0, 359, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "chronosmatch/engine.pyx":364
+ *             "trades": self.core.trades,
+ *             "last_trade_price": self.core.last_trade_price,
+ *             "last_entry_time_ns": self.last_entry_time_ns,             # <<<<<<<<<<<<<<
+ *             "last_exit_time_ns": self.last_exit_time_ns,
+ *             "last_latency_ns": self.last_latency_ns,
+*/
+  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->last_entry_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 364, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_last_entry_time_ns, __pyx_t_2) < (0)) __PYX_ERR(0, 359, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "chronosmatch/engine.pyx":365
+ *             "last_trade_price": self.core.last_trade_price,
+ *             "last_entry_time_ns": self.last_entry_time_ns,
+ *             "last_exit_time_ns": self.last_exit_time_ns,             # <<<<<<<<<<<<<<
+ *             "last_latency_ns": self.last_latency_ns,
+ *             "last_trade_entry_time_ns": self.last_trade_entry_time_ns,
+*/
+  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->last_exit_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 365, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_last_exit_time_ns, __pyx_t_2) < (0)) __PYX_ERR(0, 359, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "chronosmatch/engine.pyx":366
+ *             "last_entry_time_ns": self.last_entry_time_ns,
+ *             "last_exit_time_ns": self.last_exit_time_ns,
+ *             "last_latency_ns": self.last_latency_ns,             # <<<<<<<<<<<<<<
+ *             "last_trade_entry_time_ns": self.last_trade_entry_time_ns,
+ *             "last_trade_exit_time_ns": self.last_trade_exit_time_ns,
+*/
+  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->last_latency_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 366, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_last_latency_ns, __pyx_t_2) < (0)) __PYX_ERR(0, 359, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "chronosmatch/engine.pyx":367
+ *             "last_exit_time_ns": self.last_exit_time_ns,
+ *             "last_latency_ns": self.last_latency_ns,
+ *             "last_trade_entry_time_ns": self.last_trade_entry_time_ns,             # <<<<<<<<<<<<<<
+ *             "last_trade_exit_time_ns": self.last_trade_exit_time_ns,
+ *             "last_trade_latency_ns": self.last_trade_latency_ns,
+*/
+  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->last_trade_entry_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 367, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_last_trade_entry_time_ns, __pyx_t_2) < (0)) __PYX_ERR(0, 359, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "chronosmatch/engine.pyx":368
+ *             "last_latency_ns": self.last_latency_ns,
+ *             "last_trade_entry_time_ns": self.last_trade_entry_time_ns,
+ *             "last_trade_exit_time_ns": self.last_trade_exit_time_ns,             # <<<<<<<<<<<<<<
+ *             "last_trade_latency_ns": self.last_trade_latency_ns,
  *         }
 */
-  __pyx_t_2 = __Pyx_PyLong_From_int64_t(__pyx_v_self->core.last_trade_price); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 298, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->last_trade_exit_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 368, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_last_trade_price, __pyx_t_2) < (0)) __PYX_ERR(0, 294, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_last_trade_exit_time_ns, __pyx_t_2) < (0)) __PYX_ERR(0, 359, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "chronosmatch/engine.pyx":369
+ *             "last_trade_entry_time_ns": self.last_trade_entry_time_ns,
+ *             "last_trade_exit_time_ns": self.last_trade_exit_time_ns,
+ *             "last_trade_latency_ns": self.last_trade_latency_ns,             # <<<<<<<<<<<<<<
+ *         }
+*/
+  __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->last_trade_latency_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 369, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_last_trade_latency_ns, __pyx_t_2) < (0)) __PYX_ERR(0, 359, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   {
     PyObject *__pyx_temp;
@@ -7983,7 +9421,7 @@ static PyObject *__pyx_f_12chronosmatch_6engine_4Book_snapshot(struct __pyx_obj_
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "chronosmatch/engine.pyx":291
+  /* "chronosmatch/engine.pyx":356
  *         return success
  * 
  *     cpdef snapshot(self):             # <<<<<<<<<<<<<<
@@ -8056,7 +9494,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_8snapshot(struct __pyx_ob
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("snapshot", 0);
-  __pyx_t_1 = __pyx_f_12chronosmatch_6engine_4Book_snapshot(__pyx_v_self, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 291, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_12chronosmatch_6engine_4Book_snapshot(__pyx_v_self, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   {
     PyObject *__pyx_temp;
@@ -8076,6 +9514,1000 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_8snapshot(struct __pyx_ob
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "chronosmatch/engine.pyx":236
+ *     cdef BookCore core
+ *     cdef MatchResultData last_result
+ *     cdef public uint64_t last_entry_time_ns             # <<<<<<<<<<<<<<
+ *     cdef public uint64_t last_exit_time_ns
+ *     cdef public uint64_t last_latency_ns
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_18last_entry_time_ns_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_18last_entry_time_ns_1__get__(PyObject *__pyx_v_self) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_18last_entry_time_ns___get__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_18last_entry_time_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->last_entry_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 236, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        {
+          PyObject *__pyx_temp;
+          {
+            __pyx_temp = __pyx_r;
+            __pyx_r = __pyx_t_2;
+          }
+          __Pyx_XDECREF(__pyx_temp);
+        }
+        __pyx_t_2 = 0;
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+        goto __pyx_L3_return;
+      }
+      /*finally:*/ {
+        __pyx_L3_return: {
+          __pyx_t_3 = __pyx_r;
+          __pyx_r = 0;
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          __pyx_r = __pyx_t_3;
+          __pyx_t_3 = 0;
+          goto __pyx_L0;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.last_entry_time_ns.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_12chronosmatch_6engine_4Book_18last_entry_time_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_12chronosmatch_6engine_4Book_18last_entry_time_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_18last_entry_time_ns_2__set__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_12chronosmatch_6engine_4Book_18last_entry_time_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  uint64_t __pyx_t_2;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 236, __pyx_L4_error)
+        __pyx_v_self->last_entry_time_ns = __pyx_t_2;
+      }
+      /*finally:*/ {
+        /*normal exit:*/{
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L5;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+        __pyx_L5:;
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.last_entry_time_ns.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "chronosmatch/engine.pyx":237
+ *     cdef MatchResultData last_result
+ *     cdef public uint64_t last_entry_time_ns
+ *     cdef public uint64_t last_exit_time_ns             # <<<<<<<<<<<<<<
+ *     cdef public uint64_t last_latency_ns
+ *     cdef public uint64_t total_latency_ns
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_17last_exit_time_ns_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_17last_exit_time_ns_1__get__(PyObject *__pyx_v_self) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_17last_exit_time_ns___get__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_17last_exit_time_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->last_exit_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 237, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        {
+          PyObject *__pyx_temp;
+          {
+            __pyx_temp = __pyx_r;
+            __pyx_r = __pyx_t_2;
+          }
+          __Pyx_XDECREF(__pyx_temp);
+        }
+        __pyx_t_2 = 0;
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+        goto __pyx_L3_return;
+      }
+      /*finally:*/ {
+        __pyx_L3_return: {
+          __pyx_t_3 = __pyx_r;
+          __pyx_r = 0;
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          __pyx_r = __pyx_t_3;
+          __pyx_t_3 = 0;
+          goto __pyx_L0;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.last_exit_time_ns.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_12chronosmatch_6engine_4Book_17last_exit_time_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_12chronosmatch_6engine_4Book_17last_exit_time_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_17last_exit_time_ns_2__set__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_12chronosmatch_6engine_4Book_17last_exit_time_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  uint64_t __pyx_t_2;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 237, __pyx_L4_error)
+        __pyx_v_self->last_exit_time_ns = __pyx_t_2;
+      }
+      /*finally:*/ {
+        /*normal exit:*/{
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L5;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+        __pyx_L5:;
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.last_exit_time_ns.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "chronosmatch/engine.pyx":238
+ *     cdef public uint64_t last_entry_time_ns
+ *     cdef public uint64_t last_exit_time_ns
+ *     cdef public uint64_t last_latency_ns             # <<<<<<<<<<<<<<
+ *     cdef public uint64_t total_latency_ns
+ *     cdef public uint64_t last_trade_entry_time_ns
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_15last_latency_ns_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_15last_latency_ns_1__get__(PyObject *__pyx_v_self) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_15last_latency_ns___get__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_15last_latency_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->last_latency_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 238, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        {
+          PyObject *__pyx_temp;
+          {
+            __pyx_temp = __pyx_r;
+            __pyx_r = __pyx_t_2;
+          }
+          __Pyx_XDECREF(__pyx_temp);
+        }
+        __pyx_t_2 = 0;
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+        goto __pyx_L3_return;
+      }
+      /*finally:*/ {
+        __pyx_L3_return: {
+          __pyx_t_3 = __pyx_r;
+          __pyx_r = 0;
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          __pyx_r = __pyx_t_3;
+          __pyx_t_3 = 0;
+          goto __pyx_L0;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.last_latency_ns.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_12chronosmatch_6engine_4Book_15last_latency_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_12chronosmatch_6engine_4Book_15last_latency_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_15last_latency_ns_2__set__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_12chronosmatch_6engine_4Book_15last_latency_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  uint64_t __pyx_t_2;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 238, __pyx_L4_error)
+        __pyx_v_self->last_latency_ns = __pyx_t_2;
+      }
+      /*finally:*/ {
+        /*normal exit:*/{
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L5;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+        __pyx_L5:;
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.last_latency_ns.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "chronosmatch/engine.pyx":239
+ *     cdef public uint64_t last_exit_time_ns
+ *     cdef public uint64_t last_latency_ns
+ *     cdef public uint64_t total_latency_ns             # <<<<<<<<<<<<<<
+ *     cdef public uint64_t last_trade_entry_time_ns
+ *     cdef public uint64_t last_trade_exit_time_ns
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_16total_latency_ns_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_16total_latency_ns_1__get__(PyObject *__pyx_v_self) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_16total_latency_ns___get__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_16total_latency_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->total_latency_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 239, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        {
+          PyObject *__pyx_temp;
+          {
+            __pyx_temp = __pyx_r;
+            __pyx_r = __pyx_t_2;
+          }
+          __Pyx_XDECREF(__pyx_temp);
+        }
+        __pyx_t_2 = 0;
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+        goto __pyx_L3_return;
+      }
+      /*finally:*/ {
+        __pyx_L3_return: {
+          __pyx_t_3 = __pyx_r;
+          __pyx_r = 0;
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          __pyx_r = __pyx_t_3;
+          __pyx_t_3 = 0;
+          goto __pyx_L0;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.total_latency_ns.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_12chronosmatch_6engine_4Book_16total_latency_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_12chronosmatch_6engine_4Book_16total_latency_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_16total_latency_ns_2__set__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_12chronosmatch_6engine_4Book_16total_latency_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  uint64_t __pyx_t_2;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 239, __pyx_L4_error)
+        __pyx_v_self->total_latency_ns = __pyx_t_2;
+      }
+      /*finally:*/ {
+        /*normal exit:*/{
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L5;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+        __pyx_L5:;
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.total_latency_ns.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "chronosmatch/engine.pyx":240
+ *     cdef public uint64_t last_latency_ns
+ *     cdef public uint64_t total_latency_ns
+ *     cdef public uint64_t last_trade_entry_time_ns             # <<<<<<<<<<<<<<
+ *     cdef public uint64_t last_trade_exit_time_ns
+ *     cdef public uint64_t last_trade_latency_ns
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_24last_trade_entry_time_ns_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_24last_trade_entry_time_ns_1__get__(PyObject *__pyx_v_self) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_24last_trade_entry_time_ns___get__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_24last_trade_entry_time_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->last_trade_entry_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 240, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        {
+          PyObject *__pyx_temp;
+          {
+            __pyx_temp = __pyx_r;
+            __pyx_r = __pyx_t_2;
+          }
+          __Pyx_XDECREF(__pyx_temp);
+        }
+        __pyx_t_2 = 0;
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+        goto __pyx_L3_return;
+      }
+      /*finally:*/ {
+        __pyx_L3_return: {
+          __pyx_t_3 = __pyx_r;
+          __pyx_r = 0;
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          __pyx_r = __pyx_t_3;
+          __pyx_t_3 = 0;
+          goto __pyx_L0;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.last_trade_entry_time_ns.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_12chronosmatch_6engine_4Book_24last_trade_entry_time_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_12chronosmatch_6engine_4Book_24last_trade_entry_time_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_24last_trade_entry_time_ns_2__set__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_12chronosmatch_6engine_4Book_24last_trade_entry_time_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  uint64_t __pyx_t_2;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 240, __pyx_L4_error)
+        __pyx_v_self->last_trade_entry_time_ns = __pyx_t_2;
+      }
+      /*finally:*/ {
+        /*normal exit:*/{
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L5;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+        __pyx_L5:;
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.last_trade_entry_time_ns.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "chronosmatch/engine.pyx":241
+ *     cdef public uint64_t total_latency_ns
+ *     cdef public uint64_t last_trade_entry_time_ns
+ *     cdef public uint64_t last_trade_exit_time_ns             # <<<<<<<<<<<<<<
+ *     cdef public uint64_t last_trade_latency_ns
+ * 
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_23last_trade_exit_time_ns_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_23last_trade_exit_time_ns_1__get__(PyObject *__pyx_v_self) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_23last_trade_exit_time_ns___get__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_23last_trade_exit_time_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->last_trade_exit_time_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 241, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        {
+          PyObject *__pyx_temp;
+          {
+            __pyx_temp = __pyx_r;
+            __pyx_r = __pyx_t_2;
+          }
+          __Pyx_XDECREF(__pyx_temp);
+        }
+        __pyx_t_2 = 0;
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+        goto __pyx_L3_return;
+      }
+      /*finally:*/ {
+        __pyx_L3_return: {
+          __pyx_t_3 = __pyx_r;
+          __pyx_r = 0;
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          __pyx_r = __pyx_t_3;
+          __pyx_t_3 = 0;
+          goto __pyx_L0;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.last_trade_exit_time_ns.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_12chronosmatch_6engine_4Book_23last_trade_exit_time_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_12chronosmatch_6engine_4Book_23last_trade_exit_time_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_23last_trade_exit_time_ns_2__set__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_12chronosmatch_6engine_4Book_23last_trade_exit_time_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  uint64_t __pyx_t_2;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 241, __pyx_L4_error)
+        __pyx_v_self->last_trade_exit_time_ns = __pyx_t_2;
+      }
+      /*finally:*/ {
+        /*normal exit:*/{
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L5;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+        __pyx_L5:;
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.last_trade_exit_time_ns.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "chronosmatch/engine.pyx":242
+ *     cdef public uint64_t last_trade_entry_time_ns
+ *     cdef public uint64_t last_trade_exit_time_ns
+ *     cdef public uint64_t last_trade_latency_ns             # <<<<<<<<<<<<<<
+ * 
+ *     def __cinit__(self, Py_ssize_t capacity=131072):
+*/
+
+/* Python wrapper */
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_21last_trade_latency_ns_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_12chronosmatch_6engine_4Book_21last_trade_latency_ns_1__get__(PyObject *__pyx_v_self) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_21last_trade_latency_ns___get__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_21last_trade_latency_ns___get__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_From_uint64_t(__pyx_v_self->last_trade_latency_ns); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 242, __pyx_L4_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        {
+          PyObject *__pyx_temp;
+          {
+            __pyx_temp = __pyx_r;
+            __pyx_r = __pyx_t_2;
+          }
+          __Pyx_XDECREF(__pyx_temp);
+        }
+        __pyx_t_2 = 0;
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+        goto __pyx_L3_return;
+      }
+      /*finally:*/ {
+        __pyx_L3_return: {
+          __pyx_t_3 = __pyx_r;
+          __pyx_r = 0;
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          __pyx_r = __pyx_t_3;
+          __pyx_t_3 = 0;
+          goto __pyx_L0;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.last_trade_latency_ns.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_12chronosmatch_6engine_4Book_21last_trade_latency_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_12chronosmatch_6engine_4Book_21last_trade_latency_ns_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
+  __pyx_r = __pyx_pf_12chronosmatch_6engine_4Book_21last_trade_latency_ns_2__set__(((struct __pyx_obj_12chronosmatch_6engine_Book *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_12chronosmatch_6engine_4Book_21last_trade_latency_ns_2__set__(struct __pyx_obj_12chronosmatch_6engine_Book *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  uint64_t __pyx_t_2;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  {
+      __Pyx_PyCriticalSection __pyx_cs;
+      __pyx_t_1 = ((PyObject *)__pyx_v_self);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_PyCriticalSection_Begin(&__pyx_cs, (PyObject*)__pyx_t_1);
+      /*try:*/ {
+        __pyx_t_2 = __Pyx_PyLong_As_uint64_t(__pyx_v_value); if (unlikely((__pyx_t_2 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 242, __pyx_L4_error)
+        __pyx_v_self->last_trade_latency_ns = __pyx_t_2;
+      }
+      /*finally:*/ {
+        /*normal exit:*/{
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L5;
+        }
+        __pyx_L4_error: {
+          __Pyx_PyCriticalSection_End(&__pyx_cs);
+          goto __pyx_L1_error;
+        }
+        __pyx_L5:;
+      }
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("chronosmatch.engine.Book.last_trade_latency_ns.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
@@ -8289,7 +10721,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine_4Book_12__setstate_cython__(CYT
  *     int __Pyx_UpdateUnpickledDict(object, object, Py_ssize_t) except -1
  * def __pyx_unpickle_MatchResult(__pyx_type, long __pyx_checksum, tuple __pyx_state):             # <<<<<<<<<<<<<<
  *     cdef object __pyx_result
- *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x81e6f4e, 0xe1b4863, 0x2288582, b'fills, first_maker_id, last_trade_price, resting_quantity')
+ *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x3e9a3bc, 0x44adddf, 0x2929363, b'entry_time_ns, exit_time_ns, fills, first_maker_id, last_trade_price, latency_ns, resting_quantity')
 */
 
 /* Python wrapper */
@@ -8421,16 +10853,16 @@ static PyObject *__pyx_pf_12chronosmatch_6engine___pyx_unpickle_MatchResult(CYTH
   /* "(tree fragment)":6
  * def __pyx_unpickle_MatchResult(__pyx_type, long __pyx_checksum, tuple __pyx_state):
  *     cdef object __pyx_result
- *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x81e6f4e, 0xe1b4863, 0x2288582, b'fills, first_maker_id, last_trade_price, resting_quantity')             # <<<<<<<<<<<<<<
+ *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x3e9a3bc, 0x44adddf, 0x2929363, b'entry_time_ns, exit_time_ns, fills, first_maker_id, last_trade_price, latency_ns, resting_quantity')             # <<<<<<<<<<<<<<
  *     __pyx_result = MatchResult.__new__(__pyx_type)
  *     if __pyx_state is not None:
 */
-  __pyx_t_1 = __Pyx_CheckUnpickleChecksum(__pyx_v___pyx_checksum, 0x81e6f4e, 0xe1b4863, 0x2288582, __pyx_k_fills_first_maker_id_last_trade); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(1, 6, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_CheckUnpickleChecksum(__pyx_v___pyx_checksum, 0x3e9a3bc, 0x44adddf, 0x2929363, __pyx_k_entry_time_ns_exit_time_ns_fills); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(1, 6, __pyx_L1_error)
 
 
   /* "(tree fragment)":7
  *     cdef object __pyx_result
- *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x81e6f4e, 0xe1b4863, 0x2288582, b'fills, first_maker_id, last_trade_price, resting_quantity')
+ *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x3e9a3bc, 0x44adddf, 0x2929363, b'entry_time_ns, exit_time_ns, fills, first_maker_id, last_trade_price, latency_ns, resting_quantity')
  *     __pyx_result = MatchResult.__new__(__pyx_type)             # <<<<<<<<<<<<<<
  *     if __pyx_state is not None:
  *         __pyx_unpickle_MatchResult__set_state(<MatchResult> __pyx_result, __pyx_state)
@@ -8449,7 +10881,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine___pyx_unpickle_MatchResult(CYTH
   __pyx_t_2 = 0;
 
   /* "(tree fragment)":8
- *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x81e6f4e, 0xe1b4863, 0x2288582, b'fills, first_maker_id, last_trade_price, resting_quantity')
+ *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x3e9a3bc, 0x44adddf, 0x2929363, b'entry_time_ns, exit_time_ns, fills, first_maker_id, last_trade_price, latency_ns, resting_quantity')
  *     __pyx_result = MatchResult.__new__(__pyx_type)
  *     if __pyx_state is not None:             # <<<<<<<<<<<<<<
  *         __pyx_unpickle_MatchResult__set_state(<MatchResult> __pyx_result, __pyx_state)
@@ -8475,7 +10907,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine___pyx_unpickle_MatchResult(CYTH
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
     /* "(tree fragment)":8
- *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x81e6f4e, 0xe1b4863, 0x2288582, b'fills, first_maker_id, last_trade_price, resting_quantity')
+ *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x3e9a3bc, 0x44adddf, 0x2929363, b'entry_time_ns, exit_time_ns, fills, first_maker_id, last_trade_price, latency_ns, resting_quantity')
  *     __pyx_result = MatchResult.__new__(__pyx_type)
  *     if __pyx_state is not None:             # <<<<<<<<<<<<<<
  *         __pyx_unpickle_MatchResult__set_state(<MatchResult> __pyx_result, __pyx_state)
@@ -8488,7 +10920,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine___pyx_unpickle_MatchResult(CYTH
  *         __pyx_unpickle_MatchResult__set_state(<MatchResult> __pyx_result, __pyx_state)
  *     return __pyx_result             # <<<<<<<<<<<<<<
  * cdef __pyx_unpickle_MatchResult__set_state(MatchResult __pyx_result, __pyx_state: tuple):
- *     __pyx_result.fills = __pyx_state[0]; __pyx_result.first_maker_id = __pyx_state[1]; __pyx_result.last_trade_price = __pyx_state[2]; __pyx_result.resting_quantity = __pyx_state[3]
+ *     __pyx_result.entry_time_ns = __pyx_state[0]; __pyx_result.exit_time_ns = __pyx_state[1]; __pyx_result.fills = __pyx_state[2]; __pyx_result.first_maker_id = __pyx_state[3]; __pyx_result.last_trade_price = __pyx_state[4]; __pyx_result.latency_ns = __pyx_state[5]; __pyx_result.resting_quantity = __pyx_state[6]
 */
   {
     PyObject *__pyx_temp;
@@ -8506,7 +10938,7 @@ static PyObject *__pyx_pf_12chronosmatch_6engine___pyx_unpickle_MatchResult(CYTH
  *     int __Pyx_UpdateUnpickledDict(object, object, Py_ssize_t) except -1
  * def __pyx_unpickle_MatchResult(__pyx_type, long __pyx_checksum, tuple __pyx_state):             # <<<<<<<<<<<<<<
  *     cdef object __pyx_result
- *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x81e6f4e, 0xe1b4863, 0x2288582, b'fills, first_maker_id, last_trade_price, resting_quantity')
+ *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x3e9a3bc, 0x44adddf, 0x2929363, b'entry_time_ns, exit_time_ns, fills, first_maker_id, last_trade_price, latency_ns, resting_quantity')
 */
 
   /* function exit code */
@@ -8526,8 +10958,8 @@ static PyObject *__pyx_pf_12chronosmatch_6engine___pyx_unpickle_MatchResult(CYTH
  *         __pyx_unpickle_MatchResult__set_state(<MatchResult> __pyx_result, __pyx_state)
  *     return __pyx_result
  * cdef __pyx_unpickle_MatchResult__set_state(MatchResult __pyx_result, __pyx_state: tuple):             # <<<<<<<<<<<<<<
- *     __pyx_result.fills = __pyx_state[0]; __pyx_result.first_maker_id = __pyx_state[1]; __pyx_result.last_trade_price = __pyx_state[2]; __pyx_result.resting_quantity = __pyx_state[3]
- *     __Pyx_UpdateUnpickledDict(__pyx_result, __pyx_state, 4)
+ *     __pyx_result.entry_time_ns = __pyx_state[0]; __pyx_result.exit_time_ns = __pyx_state[1]; __pyx_result.fills = __pyx_state[2]; __pyx_result.first_maker_id = __pyx_state[3]; __pyx_result.last_trade_price = __pyx_state[4]; __pyx_result.latency_ns = __pyx_state[5]; __pyx_result.resting_quantity = __pyx_state[6]
+ *     __Pyx_UpdateUnpickledDict(__pyx_result, __pyx_state, 7)
 */
 
 static PyObject *__pyx_f_12chronosmatch_6engine___pyx_unpickle_MatchResult__set_state(struct __pyx_obj_12chronosmatch_6engine_MatchResult *__pyx_v___pyx_result, PyObject *__pyx_v___pyx_state) {
@@ -8544,32 +10976,38 @@ static PyObject *__pyx_f_12chronosmatch_6engine___pyx_unpickle_MatchResult__set_
   /* "(tree fragment)":12
  *     return __pyx_result
  * cdef __pyx_unpickle_MatchResult__set_state(MatchResult __pyx_result, __pyx_state: tuple):
- *     __pyx_result.fills = __pyx_state[0]; __pyx_result.first_maker_id = __pyx_state[1]; __pyx_result.last_trade_price = __pyx_state[2]; __pyx_result.resting_quantity = __pyx_state[3]             # <<<<<<<<<<<<<<
- *     __Pyx_UpdateUnpickledDict(__pyx_result, __pyx_state, 4)
+ *     __pyx_result.entry_time_ns = __pyx_state[0]; __pyx_result.exit_time_ns = __pyx_state[1]; __pyx_result.fills = __pyx_state[2]; __pyx_result.first_maker_id = __pyx_state[3]; __pyx_result.last_trade_price = __pyx_state[4]; __pyx_result.latency_ns = __pyx_state[5]; __pyx_result.resting_quantity = __pyx_state[6]             # <<<<<<<<<<<<<<
+ *     __Pyx_UpdateUnpickledDict(__pyx_result, __pyx_state, 7)
 */
   __pyx_t_1 = __Pyx_PyLong_As_uint64_t(__Pyx_PyTuple_GET_ITEM(__pyx_v___pyx_state, 0)); if (unlikely((__pyx_t_1 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 12, __pyx_L1_error)
-  __pyx_v___pyx_result->fills = __pyx_t_1;
+  __pyx_v___pyx_result->entry_time_ns = __pyx_t_1;
   __pyx_t_1 = __Pyx_PyLong_As_uint64_t(__Pyx_PyTuple_GET_ITEM(__pyx_v___pyx_state, 1)); if (unlikely((__pyx_t_1 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 12, __pyx_L1_error)
+  __pyx_v___pyx_result->exit_time_ns = __pyx_t_1;
+  __pyx_t_1 = __Pyx_PyLong_As_uint64_t(__Pyx_PyTuple_GET_ITEM(__pyx_v___pyx_state, 2)); if (unlikely((__pyx_t_1 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 12, __pyx_L1_error)
+  __pyx_v___pyx_result->fills = __pyx_t_1;
+  __pyx_t_1 = __Pyx_PyLong_As_uint64_t(__Pyx_PyTuple_GET_ITEM(__pyx_v___pyx_state, 3)); if (unlikely((__pyx_t_1 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 12, __pyx_L1_error)
   __pyx_v___pyx_result->first_maker_id = __pyx_t_1;
-  __pyx_t_2 = __Pyx_PyLong_As_int64_t(__Pyx_PyTuple_GET_ITEM(__pyx_v___pyx_state, 2)); if (unlikely((__pyx_t_2 == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 12, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyLong_As_int64_t(__Pyx_PyTuple_GET_ITEM(__pyx_v___pyx_state, 4)); if (unlikely((__pyx_t_2 == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 12, __pyx_L1_error)
   __pyx_v___pyx_result->last_trade_price = __pyx_t_2;
-  __pyx_t_2 = __Pyx_PyLong_As_int64_t(__Pyx_PyTuple_GET_ITEM(__pyx_v___pyx_state, 3)); if (unlikely((__pyx_t_2 == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 12, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyLong_As_uint64_t(__Pyx_PyTuple_GET_ITEM(__pyx_v___pyx_state, 5)); if (unlikely((__pyx_t_1 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 12, __pyx_L1_error)
+  __pyx_v___pyx_result->latency_ns = __pyx_t_1;
+  __pyx_t_2 = __Pyx_PyLong_As_int64_t(__Pyx_PyTuple_GET_ITEM(__pyx_v___pyx_state, 6)); if (unlikely((__pyx_t_2 == ((int64_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 12, __pyx_L1_error)
   __pyx_v___pyx_result->resting_quantity = __pyx_t_2;
 
   /* "(tree fragment)":13
  * cdef __pyx_unpickle_MatchResult__set_state(MatchResult __pyx_result, __pyx_state: tuple):
- *     __pyx_result.fills = __pyx_state[0]; __pyx_result.first_maker_id = __pyx_state[1]; __pyx_result.last_trade_price = __pyx_state[2]; __pyx_result.resting_quantity = __pyx_state[3]
- *     __Pyx_UpdateUnpickledDict(__pyx_result, __pyx_state, 4)             # <<<<<<<<<<<<<<
+ *     __pyx_result.entry_time_ns = __pyx_state[0]; __pyx_result.exit_time_ns = __pyx_state[1]; __pyx_result.fills = __pyx_state[2]; __pyx_result.first_maker_id = __pyx_state[3]; __pyx_result.last_trade_price = __pyx_state[4]; __pyx_result.latency_ns = __pyx_state[5]; __pyx_result.resting_quantity = __pyx_state[6]
+ *     __Pyx_UpdateUnpickledDict(__pyx_result, __pyx_state, 7)             # <<<<<<<<<<<<<<
 */
-  __pyx_t_3 = __Pyx_UpdateUnpickledDict(((PyObject *)__pyx_v___pyx_result), __pyx_v___pyx_state, 4); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(1, 13, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_UpdateUnpickledDict(((PyObject *)__pyx_v___pyx_result), __pyx_v___pyx_state, 7); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(1, 13, __pyx_L1_error)
 
 
   /* "(tree fragment)":11
  *         __pyx_unpickle_MatchResult__set_state(<MatchResult> __pyx_result, __pyx_state)
  *     return __pyx_result
  * cdef __pyx_unpickle_MatchResult__set_state(MatchResult __pyx_result, __pyx_state: tuple):             # <<<<<<<<<<<<<<
- *     __pyx_result.fills = __pyx_state[0]; __pyx_result.first_maker_id = __pyx_state[1]; __pyx_result.last_trade_price = __pyx_state[2]; __pyx_result.resting_quantity = __pyx_state[3]
- *     __Pyx_UpdateUnpickledDict(__pyx_result, __pyx_state, 4)
+ *     __pyx_result.entry_time_ns = __pyx_state[0]; __pyx_result.exit_time_ns = __pyx_state[1]; __pyx_result.fills = __pyx_state[2]; __pyx_result.first_maker_id = __pyx_state[3]; __pyx_result.last_trade_price = __pyx_state[4]; __pyx_result.latency_ns = __pyx_state[5]; __pyx_result.resting_quantity = __pyx_state[6]
+ *     __Pyx_UpdateUnpickledDict(__pyx_result, __pyx_state, 7)
 */
 
   /* function exit code */
@@ -8729,6 +11167,48 @@ static int __pyx_setprop_12chronosmatch_6engine_11MatchResult_last_trade_price(P
   }
 }
 
+static PyObject *__pyx_getprop_12chronosmatch_6engine_11MatchResult_entry_time_ns(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_12chronosmatch_6engine_11MatchResult_13entry_time_ns_1__get__(o);
+}
+
+static int __pyx_setprop_12chronosmatch_6engine_11MatchResult_entry_time_ns(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_12chronosmatch_6engine_11MatchResult_13entry_time_ns_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
+static PyObject *__pyx_getprop_12chronosmatch_6engine_11MatchResult_exit_time_ns(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_12chronosmatch_6engine_11MatchResult_12exit_time_ns_1__get__(o);
+}
+
+static int __pyx_setprop_12chronosmatch_6engine_11MatchResult_exit_time_ns(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_12chronosmatch_6engine_11MatchResult_12exit_time_ns_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
+static PyObject *__pyx_getprop_12chronosmatch_6engine_11MatchResult_latency_ns(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_12chronosmatch_6engine_11MatchResult_10latency_ns_1__get__(o);
+}
+
+static int __pyx_setprop_12chronosmatch_6engine_11MatchResult_latency_ns(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_12chronosmatch_6engine_11MatchResult_10latency_ns_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
 static PyMethodDef __pyx_methods_12chronosmatch_6engine_MatchResult[] = {
   {"get", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_12chronosmatch_6engine_11MatchResult_3get, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
   {"as_dict", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_12chronosmatch_6engine_11MatchResult_7as_dict, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
@@ -8742,6 +11222,9 @@ static struct PyGetSetDef __pyx_getsets_12chronosmatch_6engine_MatchResult[] = {
   {"first_maker_id", __pyx_getprop_12chronosmatch_6engine_11MatchResult_first_maker_id, __pyx_setprop_12chronosmatch_6engine_11MatchResult_first_maker_id, 0, 0},
   {"resting_quantity", __pyx_getprop_12chronosmatch_6engine_11MatchResult_resting_quantity, __pyx_setprop_12chronosmatch_6engine_11MatchResult_resting_quantity, 0, 0},
   {"last_trade_price", __pyx_getprop_12chronosmatch_6engine_11MatchResult_last_trade_price, __pyx_setprop_12chronosmatch_6engine_11MatchResult_last_trade_price, 0, 0},
+  {"entry_time_ns", __pyx_getprop_12chronosmatch_6engine_11MatchResult_entry_time_ns, __pyx_setprop_12chronosmatch_6engine_11MatchResult_entry_time_ns, 0, 0},
+  {"exit_time_ns", __pyx_getprop_12chronosmatch_6engine_11MatchResult_exit_time_ns, __pyx_setprop_12chronosmatch_6engine_11MatchResult_exit_time_ns, 0, 0},
+  {"latency_ns", __pyx_getprop_12chronosmatch_6engine_11MatchResult_latency_ns, __pyx_setprop_12chronosmatch_6engine_11MatchResult_latency_ns, 0, 0},
   {0, 0, 0, 0, 0}
 };
 #if CYTHON_USE_TYPE_SPECS
@@ -8978,6 +11461,104 @@ static PyObject *__pyx_getprop_12chronosmatch_6engine_4Book_count(PyObject *o, C
   return __pyx_pw_12chronosmatch_6engine_4Book_5count_1__get__(o);
 }
 
+static PyObject *__pyx_getprop_12chronosmatch_6engine_4Book_last_entry_time_ns(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_12chronosmatch_6engine_4Book_18last_entry_time_ns_1__get__(o);
+}
+
+static int __pyx_setprop_12chronosmatch_6engine_4Book_last_entry_time_ns(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_12chronosmatch_6engine_4Book_18last_entry_time_ns_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
+static PyObject *__pyx_getprop_12chronosmatch_6engine_4Book_last_exit_time_ns(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_12chronosmatch_6engine_4Book_17last_exit_time_ns_1__get__(o);
+}
+
+static int __pyx_setprop_12chronosmatch_6engine_4Book_last_exit_time_ns(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_12chronosmatch_6engine_4Book_17last_exit_time_ns_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
+static PyObject *__pyx_getprop_12chronosmatch_6engine_4Book_last_latency_ns(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_12chronosmatch_6engine_4Book_15last_latency_ns_1__get__(o);
+}
+
+static int __pyx_setprop_12chronosmatch_6engine_4Book_last_latency_ns(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_12chronosmatch_6engine_4Book_15last_latency_ns_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
+static PyObject *__pyx_getprop_12chronosmatch_6engine_4Book_total_latency_ns(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_12chronosmatch_6engine_4Book_16total_latency_ns_1__get__(o);
+}
+
+static int __pyx_setprop_12chronosmatch_6engine_4Book_total_latency_ns(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_12chronosmatch_6engine_4Book_16total_latency_ns_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
+static PyObject *__pyx_getprop_12chronosmatch_6engine_4Book_last_trade_entry_time_ns(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_12chronosmatch_6engine_4Book_24last_trade_entry_time_ns_1__get__(o);
+}
+
+static int __pyx_setprop_12chronosmatch_6engine_4Book_last_trade_entry_time_ns(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_12chronosmatch_6engine_4Book_24last_trade_entry_time_ns_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
+static PyObject *__pyx_getprop_12chronosmatch_6engine_4Book_last_trade_exit_time_ns(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_12chronosmatch_6engine_4Book_23last_trade_exit_time_ns_1__get__(o);
+}
+
+static int __pyx_setprop_12chronosmatch_6engine_4Book_last_trade_exit_time_ns(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_12chronosmatch_6engine_4Book_23last_trade_exit_time_ns_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
+static PyObject *__pyx_getprop_12chronosmatch_6engine_4Book_last_trade_latency_ns(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_12chronosmatch_6engine_4Book_21last_trade_latency_ns_1__get__(o);
+}
+
+static int __pyx_setprop_12chronosmatch_6engine_4Book_last_trade_latency_ns(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_12chronosmatch_6engine_4Book_21last_trade_latency_ns_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
 static PyMethodDef __pyx_methods_12chronosmatch_6engine_Book[] = {
   {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_12chronosmatch_6engine_4Book_11__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
   {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_12chronosmatch_6engine_4Book_13__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
@@ -8990,6 +11571,13 @@ static struct PyGetSetDef __pyx_getsets_12chronosmatch_6engine_Book[] = {
   {"last_trade_price", __pyx_getprop_12chronosmatch_6engine_4Book_last_trade_price, 0, 0, 0},
   {"trades", __pyx_getprop_12chronosmatch_6engine_4Book_trades, 0, 0, 0},
   {"count", __pyx_getprop_12chronosmatch_6engine_4Book_count, 0, 0, 0},
+  {"last_entry_time_ns", __pyx_getprop_12chronosmatch_6engine_4Book_last_entry_time_ns, __pyx_setprop_12chronosmatch_6engine_4Book_last_entry_time_ns, 0, 0},
+  {"last_exit_time_ns", __pyx_getprop_12chronosmatch_6engine_4Book_last_exit_time_ns, __pyx_setprop_12chronosmatch_6engine_4Book_last_exit_time_ns, 0, 0},
+  {"last_latency_ns", __pyx_getprop_12chronosmatch_6engine_4Book_last_latency_ns, __pyx_setprop_12chronosmatch_6engine_4Book_last_latency_ns, 0, 0},
+  {"total_latency_ns", __pyx_getprop_12chronosmatch_6engine_4Book_total_latency_ns, __pyx_setprop_12chronosmatch_6engine_4Book_total_latency_ns, 0, 0},
+  {"last_trade_entry_time_ns", __pyx_getprop_12chronosmatch_6engine_4Book_last_trade_entry_time_ns, __pyx_setprop_12chronosmatch_6engine_4Book_last_trade_entry_time_ns, 0, 0},
+  {"last_trade_exit_time_ns", __pyx_getprop_12chronosmatch_6engine_4Book_last_trade_exit_time_ns, __pyx_setprop_12chronosmatch_6engine_4Book_last_trade_exit_time_ns, 0, 0},
+  {"last_trade_latency_ns", __pyx_getprop_12chronosmatch_6engine_4Book_last_trade_latency_ns, __pyx_setprop_12chronosmatch_6engine_4Book_last_trade_latency_ns, 0, 0},
   {0, 0, 0, 0, 0}
 };
 #if CYTHON_USE_TYPE_SPECS
@@ -9148,16 +11736,16 @@ static int __Pyx_modinit_Exttype___pyx_obj_12chronosmatch_6engine_MatchResult(__
   __Pyx_RefNannySetupContext("__Pyx_modinit_Exttype___pyx_obj_12chronosmatch_6engine_MatchResult", 0);
   /*--- Exttype __pyx_obj_12chronosmatch_6engine_MatchResult ---*/
   __pyx_vtabptr_12chronosmatch_6engine_MatchResult = &__pyx_vtable_12chronosmatch_6engine_MatchResult;
-  __pyx_vtable_12chronosmatch_6engine_MatchResult._set = (void (*)(struct __pyx_obj_12chronosmatch_6engine_MatchResult *, uint64_t, uint64_t, int64_t, int64_t))__pyx_f_12chronosmatch_6engine_11MatchResult__set;
+  __pyx_vtable_12chronosmatch_6engine_MatchResult._set = (void (*)(struct __pyx_obj_12chronosmatch_6engine_MatchResult *, uint64_t, uint64_t, int64_t, int64_t, uint64_t, uint64_t))__pyx_f_12chronosmatch_6engine_11MatchResult__set;
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_12chronosmatch_6engine_MatchResult_spec, NULL); if (unlikely(!__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult)) __PYX_ERR(0, 145, __pyx_L1_error)
+  __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_12chronosmatch_6engine_MatchResult_spec, NULL); if (unlikely(!__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult)) __PYX_ERR(0, 150, __pyx_L1_error)
   #else
   __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult = &__pyx_type_12chronosmatch_6engine_MatchResult;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult) < (0)) __PYX_ERR(0, 145, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult) < (0)) __PYX_ERR(0, 150, __pyx_L1_error)
   #endif
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount((PyObject*)__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult);
@@ -9167,9 +11755,9 @@ static int __Pyx_modinit_Exttype___pyx_obj_12chronosmatch_6engine_MatchResult(__
     __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult->tp_getattro = PyObject_GenericGetAttr;
   }
   #endif
-  if (__Pyx_SetVtable(__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult, __pyx_vtabptr_12chronosmatch_6engine_MatchResult) < (0)) __PYX_ERR(0, 145, __pyx_L1_error)
-  if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_MatchResult, (PyObject *) __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult) < (0)) __PYX_ERR(0, 145, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult) < (0)) __PYX_ERR(0, 145, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult, __pyx_vtabptr_12chronosmatch_6engine_MatchResult) < (0)) __PYX_ERR(0, 150, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_MatchResult, (PyObject *) __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult) < (0)) __PYX_ERR(0, 150, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_MatchResult) < (0)) __PYX_ERR(0, 150, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -9192,14 +11780,14 @@ static int __Pyx_modinit_Exttype___pyx_obj_12chronosmatch_6engine_Book(__pyx_mst
   __pyx_vtable_12chronosmatch_6engine_Book.cancel = (int (*)(struct __pyx_obj_12chronosmatch_6engine_Book *, uint64_t, int __pyx_skip_dispatch))__pyx_f_12chronosmatch_6engine_4Book_cancel;
   __pyx_vtable_12chronosmatch_6engine_Book.snapshot = (PyObject *(*)(struct __pyx_obj_12chronosmatch_6engine_Book *, int __pyx_skip_dispatch))__pyx_f_12chronosmatch_6engine_4Book_snapshot;
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_12chronosmatch_6engine_Book_spec, NULL); if (unlikely(!__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book)) __PYX_ERR(0, 198, __pyx_L1_error)
+  __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_12chronosmatch_6engine_Book_spec, NULL); if (unlikely(!__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book)) __PYX_ERR(0, 227, __pyx_L1_error)
   #else
   __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book = &__pyx_type_12chronosmatch_6engine_Book;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book) < (0)) __PYX_ERR(0, 198, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book) < (0)) __PYX_ERR(0, 227, __pyx_L1_error)
   #endif
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount((PyObject*)__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book);
@@ -9209,9 +11797,9 @@ static int __Pyx_modinit_Exttype___pyx_obj_12chronosmatch_6engine_Book(__pyx_mst
     __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book->tp_getattro = PyObject_GenericGetAttr;
   }
   #endif
-  if (__Pyx_SetVtable(__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book, __pyx_vtabptr_12chronosmatch_6engine_Book) < (0)) __PYX_ERR(0, 198, __pyx_L1_error)
-  if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_Book, (PyObject *) __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book) < (0)) __PYX_ERR(0, 198, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book) < (0)) __PYX_ERR(0, 198, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book, __pyx_vtabptr_12chronosmatch_6engine_Book) < (0)) __PYX_ERR(0, 227, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_Book, (PyObject *) __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book) < (0)) __PYX_ERR(0, 227, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_12chronosmatch_6engine_Book) < (0)) __PYX_ERR(0, 227, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -9520,35 +12108,48 @@ __Pyx_RefNannySetupContext("PyInit_engine", 0);
   if (__Pyx_InitAfterSharedUtility() < (0)) __PYX_ERR(0, 1, __pyx_L1_error)
   /*--- Execution code ---*/
 
-  /* "chronosmatch/engine.pyx":175
+  /* "chronosmatch/engine.pyx":20
+ * from libc.stdlib cimport malloc, free
+ * from libc.string cimport memset, memmove
+ * import time             # <<<<<<<<<<<<<<
+ * 
+ * cdef struct LevelOrder:
+*/
+  __pyx_t_1 = __Pyx_Import(__pyx_mstate_global->__pyx_n_u_time, 0, 0, NULL, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 20, __pyx_L1_error)
+  __pyx_t_2 = __pyx_t_1;
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_time, __pyx_t_2) < (0)) __PYX_ERR(0, 20, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "chronosmatch/engine.pyx":193
  *         raise KeyError(key)
  * 
  *     def get(self, str key, default=None):             # <<<<<<<<<<<<<<
  *         if key == "fills":
  *             return self.fills
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12chronosmatch_6engine_11MatchResult_3get, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_MatchResult_get, NULL, __pyx_mstate_global->__pyx_n_u_chronosmatch_engine, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[0])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12chronosmatch_6engine_11MatchResult_3get, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_MatchResult_get, NULL, __pyx_mstate_global->__pyx_n_u_chronosmatch_engine, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[0])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 193, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[0]);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_MatchResult, __pyx_mstate_global->__pyx_n_u_get, __pyx_t_2) < (0)) __PYX_ERR(0, 175, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_MatchResult, __pyx_mstate_global->__pyx_n_u_get, __pyx_t_2) < (0)) __PYX_ERR(0, 193, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "chronosmatch/engine.pyx":190
- *                 f"resting_quantity={self.resting_quantity} last_trade_price={self.last_trade_price}>")
+  /* "chronosmatch/engine.pyx":216
+ *                 f"latency_ns={self.latency_ns}>")
  * 
  *     def as_dict(self):             # <<<<<<<<<<<<<<
  *         return {
  *             "fills": self.fills,
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12chronosmatch_6engine_11MatchResult_7as_dict, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_MatchResult_as_dict, NULL, __pyx_mstate_global->__pyx_n_u_chronosmatch_engine, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[1])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 190, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12chronosmatch_6engine_11MatchResult_7as_dict, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_MatchResult_as_dict, NULL, __pyx_mstate_global->__pyx_n_u_chronosmatch_engine, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[1])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 216, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_MatchResult, __pyx_mstate_global->__pyx_n_u_as_dict, __pyx_t_2) < (0)) __PYX_ERR(0, 190, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_MatchResult, __pyx_mstate_global->__pyx_n_u_as_dict, __pyx_t_2) < (0)) __PYX_ERR(0, 216, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "(tree fragment)":1
@@ -9566,7 +12167,7 @@ __Pyx_RefNannySetupContext("PyInit_engine", 0);
 
   /* "(tree fragment)":17
  *     else:
- *         return __pyx_unpickle_MatchResult, (type(self), 0x81e6f4e, state)
+ *         return __pyx_unpickle_MatchResult, (type(self), 0x3e9a3bc, state)
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     __pyx_unpickle_MatchResult__set_state(self, __pyx_state)
 */
@@ -9578,50 +12179,50 @@ __Pyx_RefNannySetupContext("PyInit_engine", 0);
   if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_MatchResult, __pyx_mstate_global->__pyx_n_u_setstate_cython, __pyx_t_2) < (0)) __PYX_ERR(1, 17, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "chronosmatch/engine.pyx":255
+  /* "chronosmatch/engine.pyx":300
  *         return c_submit(&self.core, order_id, price_ticks, quantity_lots, side, order_type)
  * 
  *     cpdef MatchResult submit(self, uint64_t order_id, int64_t price_ticks, int64_t quantity_lots,             # <<<<<<<<<<<<<<
- *                              uint8_t side, uint8_t order_type=0):
+ *                              uint8_t side, uint8_t order_type=0, uint64_t entry_time_ns=0):
  *         """Submit limit or market order to the book, executing matching with nogil.
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12chronosmatch_6engine_4Book_5submit, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_Book_submit, NULL, __pyx_mstate_global->__pyx_n_u_chronosmatch_engine, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[4])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 255, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12chronosmatch_6engine_4Book_5submit, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_Book_submit, NULL, __pyx_mstate_global->__pyx_n_u_chronosmatch_engine, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[4])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 300, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_2, __pyx_mstate_global->__pyx_tuple[1]);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_Book, __pyx_mstate_global->__pyx_n_u_submit, __pyx_t_2) < (0)) __PYX_ERR(0, 255, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_Book, __pyx_mstate_global->__pyx_n_u_submit, __pyx_t_2) < (0)) __PYX_ERR(0, 300, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "chronosmatch/engine.pyx":284
+  /* "chronosmatch/engine.pyx":349
  *         return c_cancel(&self.core, order_id)
  * 
  *     cpdef bint cancel(self, uint64_t order_id):             # <<<<<<<<<<<<<<
  *         """Cancel an existing order by order_id."""
  *         cdef bint success
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12chronosmatch_6engine_4Book_7cancel, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_Book_cancel, NULL, __pyx_mstate_global->__pyx_n_u_chronosmatch_engine, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[5])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 284, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12chronosmatch_6engine_4Book_7cancel, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_Book_cancel, NULL, __pyx_mstate_global->__pyx_n_u_chronosmatch_engine, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[5])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_Book, __pyx_mstate_global->__pyx_n_u_cancel, __pyx_t_2) < (0)) __PYX_ERR(0, 284, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_Book, __pyx_mstate_global->__pyx_n_u_cancel, __pyx_t_2) < (0)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "chronosmatch/engine.pyx":291
+  /* "chronosmatch/engine.pyx":356
  *         return success
  * 
  *     cpdef snapshot(self):             # <<<<<<<<<<<<<<
  *         """Returns snapshot of current top-of-book and trading metrics."""
  *         return {
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12chronosmatch_6engine_4Book_9snapshot, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_Book_snapshot, NULL, __pyx_mstate_global->__pyx_n_u_chronosmatch_engine, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[6])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 291, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12chronosmatch_6engine_4Book_9snapshot, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_Book_snapshot, NULL, __pyx_mstate_global->__pyx_n_u_chronosmatch_engine, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[6])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_Book, __pyx_mstate_global->__pyx_n_u_snapshot, __pyx_t_2) < (0)) __PYX_ERR(0, 291, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_12chronosmatch_6engine_Book, __pyx_mstate_global->__pyx_n_u_snapshot, __pyx_t_2) < (0)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "(tree fragment)":1
@@ -9656,7 +12257,7 @@ __Pyx_RefNannySetupContext("PyInit_engine", 0);
  *     int __Pyx_UpdateUnpickledDict(object, object, Py_ssize_t) except -1
  * def __pyx_unpickle_MatchResult(__pyx_type, long __pyx_checksum, tuple __pyx_state):             # <<<<<<<<<<<<<<
  *     cdef object __pyx_result
- *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x81e6f4e, 0xe1b4863, 0x2288582, b'fills, first_maker_id, last_trade_price, resting_quantity')
+ *     __Pyx_CheckUnpickleChecksum(__pyx_checksum, 0x3e9a3bc, 0x44adddf, 0x2929363, b'entry_time_ns, exit_time_ns, fills, first_maker_id, last_trade_price, latency_ns, resting_quantity')
 */
   __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_12chronosmatch_6engine_1__pyx_unpickle_MatchResult, 0, __pyx_mstate_global->__pyx_n_u_pyx_unpickle_MatchResult, NULL, __pyx_mstate_global->__pyx_n_u_chronosmatch_engine, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[9])); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -9732,7 +12333,7 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
   CYTHON_UNUSED_VAR(__pyx_mstate);
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "chronosmatch/engine.pyx":175
+  /* "chronosmatch/engine.pyx":193
  *         raise KeyError(key)
  * 
  *     def get(self, str key, default=None):             # <<<<<<<<<<<<<<
@@ -9741,21 +12342,21 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
 */
   {
     PyObject* __pyx_temp[1] = {Py_None};
-    __pyx_mstate_global->__pyx_tuple[0] = __Pyx_PyTuple_FromArray(__pyx_temp, 1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[0])) __PYX_ERR(0, 175, __pyx_L1_error)
+    __pyx_mstate_global->__pyx_tuple[0] = __Pyx_PyTuple_FromArray(__pyx_temp, 1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[0])) __PYX_ERR(0, 193, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[0]);
   }
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[0]);
 
-  /* "chronosmatch/engine.pyx":255
+  /* "chronosmatch/engine.pyx":300
  *         return c_submit(&self.core, order_id, price_ticks, quantity_lots, side, order_type)
  * 
  *     cpdef MatchResult submit(self, uint64_t order_id, int64_t price_ticks, int64_t quantity_lots,             # <<<<<<<<<<<<<<
- *                              uint8_t side, uint8_t order_type=0):
+ *                              uint8_t side, uint8_t order_type=0, uint64_t entry_time_ns=0):
  *         """Submit limit or market order to the book, executing matching with nogil.
 */
   {
-    PyObject* __pyx_temp[1] = {__pyx_mstate_global->__pyx_int_0};
-    __pyx_mstate_global->__pyx_tuple[1] = __Pyx_PyTuple_FromArray(__pyx_temp, 1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[1])) __PYX_ERR(0, 255, __pyx_L1_error)
+    PyObject* __pyx_temp[2] = {__pyx_mstate_global->__pyx_int_0, __pyx_mstate_global->__pyx_int_0};
+    __pyx_mstate_global->__pyx_tuple[1] = __Pyx_PyTuple_FromArray(__pyx_temp, 2); if (unlikely(!__pyx_mstate_global->__pyx_tuple[1])) __PYX_ERR(0, 300, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[1]);
   }
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[1]);
@@ -9796,41 +12397,41 @@ static int __Pyx_InitConstants(__pyx_mstatetype *__pyx_mstate) {
   int __pyx_clineno = 0;
   CYTHON_UNUSED_VAR(__pyx_mstate);
   {
-    const struct { const unsigned int length: 8; } str_length_index[] = {{16},{18},{18},{15},{19},{1},{1},{40},{179},{8},{25},{23},{7},{6},{2},{20},{9},{34},{50},{27},{4},{22},{24},{11},{13},{11},{11},{29},{31},{19},{15},{20},{12},{8},{8},{12},{8},{10},{8},{7},{14},{12},{11},{10},{26},{14},{12},{10},{17},{13},{12},{12},{19},{8},{5},{13},{7},{18},{8},{8},{6},{8},{19},{18},{7},{5},{14},{3},{5},{3},{16},{8},{10},{3},{11},{13},{14},{16},{4},{10},{4},{8},{5},{6},{6},{6},{12},{6}};
-    const struct { const unsigned int length: 8; } bytes_length_index[] = {{9},{11},{55},{110},{33},{163},{50},{27},{68}};
+    const struct { const unsigned int length: 8; } str_length_index[] = {{15},{14},{16},{18},{12},{18},{15},{19},{1},{1},{40},{179},{8},{25},{23},{7},{6},{2},{20},{9},{34},{50},{27},{4},{22},{24},{11},{13},{11},{11},{29},{31},{19},{15},{20},{12},{8},{8},{12},{8},{10},{8},{7},{14},{12},{11},{10},{26},{14},{12},{10},{17},{13},{12},{12},{19},{8},{5},{13},{7},{18},{8},{8},{6},{8},{19},{18},{7},{10},{13},{18},{9},{12},{17},{5},{14},{3},{5},{3},{18},{17},{15},{24},{23},{21},{16},{7},{10},{8},{10},{15},{3},{11},{13},{14},{16},{4},{10},{4},{8},{5},{6},{4},{6},{6},{12},{6}};
+    const struct { const unsigned int length: 9; } bytes_length_index[] = {{9},{11},{55},{140},{54},{308},{92},{27},{122}};
     #ifndef CYTHON_COMPRESS_STRINGS
       #define CYTHON_COMPRESS_STRINGS 90
     #endif
-    #if (CYTHON_COMPRESS_STRINGS) == 1 /* compression: zlib (1071 bytes) */
-static const char cstring[] = "x\332\215T?s\033E\024\267\202&Qb\305F\266C\230a\300\253\t!\016`\021aC\2301vF\211\355\220\002c\033\0170C\261\263\332[I\213N\273\322\355\236\261 \205J\225Wny\345\225*U\272T\251R\245>\202?\002o\357$\215l7hF\367\336\276\377\357\367\336.\252pOi\334 u\346a\356\354\"\227\300Q{\304a\270\351q\312v\221\307\224\346\242\212[>\021\232\353\366\356\206\366\030C\025\217T\033L\350\347?\376L4\255\2352\345\273\032U\270\353\252\335\275W\207\204\273\314AZ\"\342\272\222\022\315\220\364\034\346\241\006kH\257\215*\322C\257\245\254\037I\320\350\032\321\350M[\327\244@\\!\207\271\274\314<\360q\333Hi\250B\203#\030\tt|p\274\271\375\3036\"\302\201\272\376bT+\244\3742\205\252\025SHVP\331\347.\224\213t\273\311T\001\275\253\240\266\364\221`I1M\260\233w\3205&\220b\3322\350\031\021Bj\242\271\024\030\334\241\347g\310\341\036$\341\347\314z\037\022W\261\002q\034\014v\214\222&\241\200\007j\370J\2432CM\251\2705\2455O\n\251\032\026\226o\230\250r\301\n\315\366\205\303\025)\273\214\t\373\255R.\316\211\313\235\t,\025\316\\Gq\225h\035\2277\270\236\250\3421\334J\"$\340T!\026s\214=\346\370\224a\214\034?.TH\261\t\270\235s\342\202\026Rq\215q\022\255\014\240\243Y\351\036#\264\306\034;\t\373/\314B\321x\032\030O\244\000\221\002dn\310)\021\224\2711\253\004i\252\232\324\311\301/C\371sk1\307\336Nq]y+\323\274\232(\354\3006\314\213\252\014Z;n_\300\177\037T\370\210]\350SV\301x2L@\005\307N\226V|A-\255N\223\300\257A\270\210\251t|7\226\010\322H(\373\333\022\030\035\006\220h]\371\215\344\344\305\251\023~\022\307\262v\345\022\316\027MN\353\020m\256\322Ds\256\355|mX\270N\3564\323t~\267\260\231\t\330\205=\0008\263\352\324\\\017\267@\303X\303\255\235v\316\025\246\322\223>\334\0136\201\220\250\266\240\\\026frU\266\016D\325cZ\346N2\334\351\246\314\357t!\331i\352\302\007\003x\360ZPV&\264>Y\310\370\r\270\376\256\000\340\\\263\206\252\263\366\315\007&^K0I\250\305\260)\233\261\006k\000QM\237\035\354J\255\246oQl\254n\276L\212\271\025\200bR\206\342\016\233\256e\214N\262\226qj\3457\035\220\370\212\315\260\203\333\3503\325I\215\322\017\272_""\005\047\226y\036\345\242/z\251Nj\234^7\255!z\321[\354\357\\\326\207\047\247\243\364j\260cj!\t[\243\364\275\316\373\340\245\311\2172\233\321I$\372G\203\374(\275\330-vRW\231\205\007\237XE.X\013\3760g\303\374\267\275\317\207\337\277\033\254\rNF\231\017\203{A\313\3345n\224\2671\316\273\277\007\007f\315\200f%\000\237\307Akl?V\327\032e\226\207\313_G\373\275T\357q\177\361\362\345 ?\276.)vJ\243\314\375Q\366Qpfr\243\354g\306\t\363\243,\n\323aiB\300`\357\325\325\322\302\375lw\317\254\232\327\206\206\217\302rt\047z\022\375\331\277\323\007\353\225\340KS\262\371\027\273;\0015+f\333\274\217\266\"2\323\214\037.Y~\303\344M\321\354\207\367\302\177z\237\366\345\340\267\341\257gcp\332\032.M\022\256\004\233\246\025\246\306\231l\367\027S\034e\326\315\277\321F/\337+\332\330\337\005\251`5\370\311\274\031\256\277\350}0\334:\274\244\203\0344\330muJc\333\303\307&m\016\302\334\034c\333y\nPg?\n\034\363\324\264\222\226\016\242\\\247tuwai\331*j\206@\316t\3706*\306\301\206\351\047a\234o\273\253\000\317\354j\260\r`>\314A\356\322\3779\331\030\377\001\001\332\3105";
-    PyObject *data = __Pyx_DecompressString(cstring, 1071, 1);
+    #if (CYTHON_COMPRESS_STRINGS) == 1 /* compression: zlib (1347 bytes) */
+static const char cstring[] = "x\332\215T;s\333F\020\026\025\216M[\364C\017\307\031\277t\264-K\216-\305\034)\343\3148r\206\262$\333E\034I\326D\366\304\016\346\010\034\311\013\201\003\210;(\242\343\202%K\224W\242D\311\222\245J\225(Q\362\047\350\047d\017 )JJ\021\316\020{\267{\273\373\335\267{\213\010\023nS\023\324\"\032\343\253\210\034Pq\262\253P\227\013\315\302u\342j\324XE&\206\255p\261A4\307\245:Q\032A\230\336LN\273\204\013\312\252Z\303\303LP\321\\]\020.!\250\342\342\252\005i\036\377\374+\026zm\207p\317\024\020\3324\371\352\313_615\211\201\204\215\260i\332:\204C\266k\020\027Y\304\262\335&\252\330.Z\263\355\372;\033,\242\206\005z\325\0245\233!\312\221ALZ&.\370\230M\304\005 \022\340\010\207\030\332\332\330Z\\\371i\005af\000\256\277\210.8\342^Y\207\033p\302\221]Ae\217\232\000\027\211\246C\370\022z[AM\333C\214\244`\03487\352 j\204!N\204Z\240y\314\230-\260\2406\323\300\035\356<\217\014\352B\022\272O\224\367&69Y\302\206\241\3019\242c\007\353\300\007\262<.P\231 \307\346T\035\325k\256\315ln)Z~ \254J\031Yr\232\007\006\345\270l\022\302\324\267\252S\266\217Mj\364i\251Pb\032\234\362\324j\230\324\242\242oJJr.\t\263\201\247\nV\234k\232K\014O\047\232\206\014/\001\312l\266\010\274\355Sl\202\025RA\365\2654Z\031HGC\350.\301z\215\030\252\022\352\2774\014\245\047\325\320\264\276\026(\342\300\314\031\275\216\231N\314d\311\031vx\315\026\351\306+\003\374\221\266\030Y\236Oq\332x.\323\250\031s\315\200n\030UU\t\\m\253y\000\377u0i\357\310\201\330!\025M\353\027\023X\321\022\047%+\036\323\225\254\016\222\300\317\302\224%\3226<3\3210l\245\222\374\255\004\224N\003\222\364:\367\254t\347&\251\323u?\216Z\252\226KW\036s\250^\207h#HS\313\276P\365Ua\3419\231\203L\203\372\235\343f\250 \007j\003\344\014\321\361\221;\234#M\323\004\274\332\301\315)\327t\333\265=x\027\244O!\346M\246S{i\250\347e\345\200y=\221ej\244\305\035t\312hO/\245=\255\233\360\321\200<\230\034:)c\275\336o\310\223\331sj\n\235l\000\253\345(\315`*\215\216\247\341zp*\031)\247G\026\324\217\nb\361:i&\263\353T\236T3\0221Q\234L\264\221iw\336\257\257?\353\235\252\3773F\362<""\373\226\223\003\311c\003\244\251T\235\341\020\267\002e\360\030\01438\340\330N\342\ti\240\263\006\263U3m\301\007\0037\361\345g\307/\047f\005\352\335\347\232S\203\014\336^\322\002\351\333S\330\023x\334s\014\320z\234\014\233\004\306\216Gx+\023g/\267\237\370\333j\3618\234\014\037u2\255L/;+\033\021z\326\231\350\2768\254G\333;qv\332\177!k\001\016\032q\366b\353\253\377\\\026\342\334b\270\035\262\356\273\243B\234\235h\027[\231\343\334\330\345\333\3120\351\317D7\346\202\335p\266\233\355\2769\\\217\336|\214>~\216>;\221#\216\307\306\274\314\3328\210\265\361M%6\307_\217\307\271\353\376E\277!/H3,\250\014\373\355=\177C\316\310\35587\345C\304\233~\243\247>\312\326\210s\327\242kO\303\365N\246s\263;q\370\374\250\320;\255)\266Jq\356R\234\277\341\357\312\3118\177O\032A!\316\243 \033\224\206\342\256\334\r\300vG\256\007\2318\177K>\224\030\274^~\210>|<\236\032\273T\210P\261s\257\313\017\347\217nE\357\367\242\275jT\255\365r\023\355\227rZ\256I=\270\021\224\303\361\360A\370Gw\274\013\301\247\374\357eI\301\235h\277\360u9%W\344\327p9\304CK\357\312U\265^\220\005Y\204\234\027\203/\235\273]\373\350\367\350\375\256\n\273\034]\355\003\233\362\027e#\310\364r\263\362K8\023-\256v!*\002\0077\274\335y\335]\356ZGE\360\210&\356H\270%\310\333\022\366\371\366o\262\030\347\362Q\376>\334U\311\002\\OI(\345`\237$jW\375\035 2\177=\272\3764,%\362IXL$4\200J\373O\270\320)t\212\352.?\372\031\177\332\177#_E\263\317:\337D\313\233\207z\364\366S\364\211D\244\002eh7Z\245\236b\372;\231\225\033\212\317\341B\221>\007\355\222\377\3267\344\034`H\210\337\010\301t?x\030\0001\205`&\330\216\001\237\010 \375B\230Uh\346\003\241\300\250\346\231l\225\216/\214]\275\246B\324$\006R\262\301k0\252\264Q\366A\220\000\\is\350\217\374\264\277\002w\2722\t`K\377s\007-\372(`\2353\252\271\340sg4\336\214\377\247B\227\356U\346\177\001?;\252\000";
+    PyObject *data = __Pyx_DecompressString(cstring, 1347, 1);
     #define __Pyx_DecompressString_LZSS_UNUSED
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #elif (CYTHON_COMPRESS_STRINGS) > 0 && (CYTHON_COMPRESS_STRINGS) <= 90 /* compression: lzss (1380 bytes) */
-static const char cstring[] = "\377 first_m\377aker_id=\367 la\014\000trad\377e_price=\377 resting\377_quantit\377y=(tree \377fragment\377)<MatchR\337esultL\000ll\377s=>?Fail\377ed to al\377locate o\377rder mem\377ory for \277BookNo\027\000t\377hat Cyth\377on is de\337liber1\000ly\227 st\203\000t6\000\"\000n\377 PEP-484\357 and\225\000jec\177ts subc\263\000\377ses of b\367uil\254\000 typ\377es. If y\337ou ne\207\003pa\375s$\nthen s\367et \006\000 \047an\377notation\371_<\000\361\000\047 dir\356b\000ive\307\001Fal\177se.add_%\000\277ecapac\215  \377must be \337posit(\000ch\277ronosm\223!/\377engine.p\377yxdisabl\367een\002\001gcin\337valid\220$fi\277eldsis\030\003d\037limit\253$\202BT\016\333no\245 fa\360!__\377reduce__\367 du\244\002non-\376\265 vial __^h\000it__\372#b\362 \375 \262\006reache\251d\206A\212A.B\006c\211B_i_\017\004\240 s\227 e_\013\n\277cancel4\002s\177napshot\007\003\003ub\274\000\214h\227hQ\017\017\013Y\016\3760\tas_dict\366C\tge\330\000Pyx_\367PyD\030\000_Nex?tRef__\306D\223 \375_0\002____fu\303nc\004\0012\000\311\003\022\000ma\373in\030\001moduln)\002nam\002\003ew1\001\372\270@_\242 cksum\013__\n\001r\347\204\002\006\003A\004!\001\374\357a\033\003unpick\230K\000\220\205\0105\003vt\200a\210\001q\207ualb\005\270E\356.\322Fe\005x\274\001s\352\000\226\005\212F\326\000\216N\237__tes\361@\364\003i\377s_corout\367ine\274$asynocio.\017\006sb-\001wask\003\002bid\327C\364\335\204\005\310\204\t.\316\204\003clin\373e_\272 trace\277backde\214\204\002f\317ills\312\207\013\243@it?emskey\321\207\r\222\207\002\347_id\002\003\263\206\001pop\326\366\207\002_t\302 s\357\207\005_l\247ots\204\210\005\307\207\002s\212\210\rs\277elfset\200\004s\047ide\217\204\005\270\204\002s\222\204\002\327\210\002\377supdateu\367se_\323\204\005valu\377es\200\001\330\004\n\210\367+\220Q\005\001)\250\021\250\377&\260\001\200\001\340\004\037\377\230q\320 0\260\013\270\377;\300k\320QR\330\004\377\023\220;\230h\240a\240\377q\330\004\007\200|\2207\377\230!\330\010-\250Q\250\377n\270N\310!\330\004\013\377\2101\200\001\360""\010\000\n\375\033\025\001\021\220\024\220X\230\377T\320!2\260$\3206\377I\310\024\310Q\330\010\020\377\220\007\220q\230\006\230l\375\250-\000\007\200v\210W\220oE\230\024\230\027\000\022\220J\000\237\027\220q\340\010\002\000\\\001q\377\330\010\017\320\017,\250D\377\260\001\260\027\270\013\3007\367\310!\340\004\0131\200A\330\377\010\t\330\014\025\220T\230\377\021\330\014\036\230d\240!\177\330\014 \240\004\240A\000\004\376\036\000>?\360\016\000\t\014\377\210>\230\023\230B\230c\377\240\025\240b\250\002\250#\337\250[\270\002\270+\000\022\220\367*\230A|\001\013\210;\220\377c\230\022\2304\230|\250\3373\250a\330\014\023\004\340\r\375\016\010\001(\230!\2301\230\377D\240\007\240z\260\035\270\377o\310V\320ST\340\010\337\013\2103\320\016j\004\022\220\377-\230q\240\001\340\010\014\377\210O\2301\330\010\037\230\277{\250(\260!\260\010\000\013\377\2105\220\001\220\023\220H\377\230C\320\0370\260\003\320\2773F\300c\310\021\336\000\210\357q\200A\340\300\001\030\230\004G\230E\240\303\000\000\006\313\001%\350 \377\014\026\220d\230%\230q\376\324\003E\250\021\200A\360\006\357\000\016\017\330\026\000h\230a\276q\000\004\240G\2501H\002\320w\004#\240k\0024\210s\315 \377\014\023\2204\220q\330\r\341\021y\000\220 \000\013\010\021\010\017\210\001q";
-    PyObject *data = __Pyx_DecompressString_LZSS(cstring, 1380, 1822);
+    #elif (CYTHON_COMPRESS_STRINGS) > 0 && (CYTHON_COMPRESS_STRINGS) <= 90 /* compression: lzss (1738 bytes) */
+static const char cstring[] = "\377 entry_t\377ime_ns= \357exit\004\007fir\377st_maker\177_id= la\014\000\377trade_pr\367ice\016\001tenc\375y7\002restin\377g_quanti\377ty=(tree\277 fragmd\000)\377<MatchRe\377sult fil\377ls=>?Fai\377led to a\377llocate \377order me\377mory for\177 BookNo\027\000\377that Cyt\377hon is d\277eliber1\000l/y st\217\000t6\000\"\000\377n PEP-48\3774 and re\377jects su\373bc\277\000ses o\277f buil\254\000 \377types. I\377f you ne\356\207\003pas$\nthe\277n set \006\000 \377\047annotat\317ion_<\000\361\000\047 wdirb\000ive\307\001\377False.ad\373d_%\000ecapa\375c\215  must \377be posit\376(\000chronos\375m\223!/engin\377e.pyxdis\277ableen\002\001g\377cinvalid\376\220$fieldsi\375s\030\003dlimit\330\253$\216BT\016no\245 fa\376\360!__reduc\277e__ du\244\002n\367on-\265 vial\247 __h\000\373@_\372#b\372\362  \262\006reachSed\206A\212A.B\006c\211B\323__\017\004\240 s\227 e_~\013\ncancel4\002\377snapshot\006\007\003ub\274\000\214h\227hQ\017\017\013\374Y\0160\tas_dic\375tC\tget__P\353yx\001\000D\030\000_Ne\177xtRef__\306D\372\223 _0\002____f\207unc\004\0012\000\311\003\022\000m\367ain\030\001modu\335l)\002nam\002\003ew\3641\001\270@_\242 cksu\027m__\n\001r\347\204\002\006\003A\004\370!\001\357a\033\003unpic1kK\000\220\205\0105\003vt\200a\210\001\017qualb\005\270E\356.\322F\013ex\274\001s\352\000\226\005\212F\326\000>\216N__tes\226 \364\003\377is_corou\357tine\274$asy\337ncio.\017\006sb\356-\001ask\003\002bid\350\327C\335\204\005\310\204\t.\316\204\003cli\367ne_\272 trac\177ebackde\214\204\002\360\362\207\007\371\207\n\211\210\007\310`mp_n\001s\215\210\006\223\210\t\242\210\006\036\005\316\207\002\245\210\013\362@\377itemskey`\267\210\002\341\210\n\014\003\346\210\010\332\210\002la\312\210\005\010\343\210\010&\017\200\211\003e.\r\227\211\003/\022\255\211\0028W\004[\007\350\210\002_id\002\003\211\210\001\357perf\204@unt\377er_nspop\326\347\211\002_t\247`s\324\211\005_l\247ots\351\211\005\254\211\002s\357\211\rs\277elfset\345$s\047ide\364\205\005\235\206\002s\367\205\002\365\212\001""\376\314\212\002supdate\357use_\274\206\005val\377ues\200\001\330\004\n\357\210+\220Q\005\001)\250\021\377\250&\260\001\200\001\340\004\377\037\230q\320 0\260\013\377\270;\300k\320QR\330\377\004\023\220;\230h\240a\377\240q\330\004\007\200|\220\3777\230!\330\010-\250Q\377\250n\270N\310!\330\004\377\013\2101\200\001\360\010\000\373\n\033\025\001\021\220\024\320\025\377%\240T\250\037\270\004\270\377H\300D\320HY\320Y\377]\320]p\320pt\360\277\000\000u\001B\002\004\000B\373\002F\003\001F\002G\002\330\377\010\020\220\007\220q\230\006\367\230l\250K\000\007\200v\210\377W\220E\230\024\230Q\330\367\010\022\220h\000\027\220q\340\371\010\002\000z\001q\330\010\017\320\377\017,\250D\260\001\260\027\177\270\013\3007\310!\340\004\013\3771\200A\330\010\t\330\014\377\025\220T\230\021\330\014\036\377\230d\240!\330\014 \240\367\004\240A\000\004\330\014\035\230\373T\240\031\000\034\230D\240\001\177\330\014\032\230$\230a3\000\377>X\320XY\360\022\000\377\t!\320 1\260\036\270\377s\300\047\310\032\320SW\377\320Wg\320gh\340\010\377\013\210>\230\023\230B\230\377c\240\025\240b\250\002\250\277#\250[\270\002\270Z\000\022\357\220*\230A\253\001\013\210;\377\220c\230\022\2304\230|\277\2503\250a\330\014\023\004\340\373\r\016\010\001(\230!\2301\376q\000\007\240z\260\035\270o\337\310V\320STS\0013\320\375\016\231\004\022\220-\230q\240\377\001\340\010\037\230z\250\024\357\320-=\270\202  \240\007\377\240r\250\033\260G\2703\357\270m\3101\206\000\320\013\034}\230\343\000\013\320\013\033\230\r\000\377\014\210O\2301\330\010\014\047\320\014\"\351\000\004\001!\334\000\014\001\362\310@\330\t\004d\002\210g\220R\377\220q\330\014\020\320\020,;\250A\003\002+\2501\013\002\376@~s\001{\250(\260!\260K\000\377\013\2105\220\001\220\023\220\377H\230C\320\0370\260\003\377\3203F\300c\320I\\\277\320\\e\320ef\204@\210\357q\200A\340\346!\030\230\004\243\230E\314!\000\006\361!%\254`\014\177\026\220d\230%\230q\372#{E\250\215@\"\240$\240\226 \377!\240\024\240Q\330\014\037w\230t\240|\000(\250\004\212\001\347\047\240t\211\001\271a""\021\200A\277\360\006\000\016\017\330@\000h\273\230a\222 \004\240G\247\000\010\177\017\210q\320\004#\240\234\002\3674\210s\235`\014\023\2204\206\321\000\r\021\252\000\340@\000\013\005\024\024?\320\025&\240n\260#\t\261\204\002s]\260\251`G\006\024\220^\232\001\000Z\003v\001";
+    PyObject *data = __Pyx_DecompressString_LZSS(cstring, 1738, 2388);
     #define __Pyx_DecompressString_UNUSED
     if (unlikely(!data)) __PYX_ERR(0, 1, __pyx_L1_error)
     const char* const bytes = __Pyx_PyBytes_AsString(data);
     #if !CYTHON_ASSUME_SAFE_MACROS
     if (likely(bytes)); else { Py_DECREF(data); __PYX_ERR(0, 1, __pyx_L1_error) }
     #endif
-    #else /* compression: none (1822 bytes) */
-static const char bytes[] = " first_maker_id= last_trade_price= resting_quantity=(tree fragment)<MatchResult fills=>?Failed to allocate order memory for BookNote that Cython is deliberately stricter than PEP-484 and rejects subclasses of builtin types. If you need to pass subclasses then set the \047annotation_typing\047 directive to False.add_notecapacity must be positivechronosmatch/engine.pyxdisableenablegcinvalid order fieldsisenabledlimit order price must be positiveno default __reduce__ due to non-trivial __cinit__order book capacity reachedBookBook.__reduce_cython__Book.__setstate_cython__Book.cancelBook.snapshotBook.submitMatchResultMatchResult.__reduce_cython__MatchResult.__setstate_cython__MatchResult.as_dictMatchResult.get__Pyx_PyDict_NextRef__annotate____dict____func____getstate____main____module____name____new____pyx_checksum__pyx_result__pyx_state__pyx_type__pyx_unpickle_MatchResult__pyx_vtable____qualname____reduce____reduce_cython____reduce_ex____set_name____setstate____setstate_cython____test___dict_is_coroutineas_dictasyncio.coroutinesbest_askbest_bidcancelcapacitychronosmatch.enginecline_in_tracebackdefaultfillsfirst_maker_idgetitemskeylast_trade_priceorder_idorder_typepopprice_ticksquantity_lotsresting_ordersresting_quantityselfsetdefaultsidesnapshotstatesubmittradesupdateuse_setstatevalues\200\001\330\004\n\210+\220Q\200\001\330\004)\250\021\250&\260\001\200\001\340\004\037\230q\320 0\260\013\270;\300k\320QR\330\004\023\220;\230h\240a\240q\330\004\007\200|\2207\230!\330\010-\250Q\250n\270N\310!\330\004\013\2101\200\001\360\010\000\n\033\230!\330\010\021\220\024\220X\230T\320!2\260$\3206I\310\024\310Q\330\010\020\220\007\220q\230\006\230l\250!\330\004\007\200v\210W\220E\230\024\230Q\330\010\022\220!\330\010\027\220q\340\010\027\220q\330\004\007\200q\330\010\017\320\017,\250D\260\001\260\027\270\013\3007\310!\340\010\017\320\017,\250D\260\001\260\027\270\013\3001\200A\330\010\t\330\014\025\220T\230\021\330\014\036\230d\240!\330\014 \240\004\240A\330\014 \240\004\240A\200A""\330>?\360\016\000\t\014\210>\230\023\230B\230c\240\025\240b\250\002\250#\250[\270\002\270!\330\014\022\220*\230A\230Q\330\010\013\210;\220c\230\022\2304\230|\2503\250a\330\014\022\220*\230A\230Q\340\r\016\330\014\022\220(\230!\2301\230D\240\007\240z\260\035\270o\310V\320ST\340\010\013\2103\320\016 \240\004\240A\330\014\022\220-\230q\240\001\340\010\014\210O\2301\330\010\037\230{\250(\260!\2601\330\010\013\2105\220\001\220\023\220H\230C\320\0370\260\003\3203F\300c\310\021\330\010\017\210q\200A\340\010\t\330\014\030\230\004\230E\240\021\330\014\030\230\004\230E\240\021\330\014\036\230d\240%\240q\330\014\026\220d\230%\230q\330\014 \240\004\240E\250\021\200A\360\006\000\016\017\330\014\026\220h\230a\230q\240\004\240G\2501\330\010\017\210q\320\004#\2401\330\010\013\2104\210s\220!\330\014\023\2204\220q\330\r\021\220\023\220A\330\014\023\2204\220q\330\r\021\220\023\220A\330\014\023\2204\220q\330\r\021\220\023\220A\330\014\023\2204\220q\330\010\017\210q";
+    #else /* compression: none (2388 bytes) */
+static const char bytes[] = " entry_time_ns= exit_time_ns= first_maker_id= last_trade_price= latency_ns= resting_quantity=(tree fragment)<MatchResult fills=>?Failed to allocate order memory for BookNote that Cython is deliberately stricter than PEP-484 and rejects subclasses of builtin types. If you need to pass subclasses then set the \047annotation_typing\047 directive to False.add_notecapacity must be positivechronosmatch/engine.pyxdisableenablegcinvalid order fieldsisenabledlimit order price must be positiveno default __reduce__ due to non-trivial __cinit__order book capacity reachedBookBook.__reduce_cython__Book.__setstate_cython__Book.cancelBook.snapshotBook.submitMatchResultMatchResult.__reduce_cython__MatchResult.__setstate_cython__MatchResult.as_dictMatchResult.get__Pyx_PyDict_NextRef__annotate____dict____func____getstate____main____module____name____new____pyx_checksum__pyx_result__pyx_state__pyx_type__pyx_unpickle_MatchResult__pyx_vtable____qualname____reduce____reduce_cython____reduce_ex____set_name____setstate____setstate_cython____test___dict_is_coroutineas_dictasyncio.coroutinesbest_askbest_bidcancelcapacitychronosmatch.enginecline_in_tracebackdefaultentry_timeentry_time_nsentry_timestamp_nsexit_timeexit_time_nsexit_timestamp_nsfillsfirst_maker_idgetitemskeylast_entry_time_nslast_exit_time_nslast_latency_nslast_trade_entry_time_nslast_trade_exit_time_nslast_trade_latency_nslast_trade_pricelatencylatency_nsorder_idorder_typeperf_counter_nspopprice_ticksquantity_lotsresting_ordersresting_quantityselfsetdefaultsidesnapshotstatesubmittimetradesupdateuse_setstatevalues\200\001\330\004\n\210+\220Q\200\001\330\004)\250\021\250&\260\001\200\001\340\004\037\230q\320 0\260\013\270;\300k\320QR\330\004\023\220;\230h\240a\240q\330\004\007\200|\2207\230!\330\010-\250Q\250n\270N\310!\330\004\013\2101\200\001\360\010\000\n\033\230!\330\010\021\220\024\320\025%\240T\250\037\270\004\270H\300D\320HY\320Y]\320]p\320pt\360\000\000u\001B\002\360\000\000B\002F\002\360\000\000F\002G\002\330\010\020\220""\007\220q\230\006\230l\250!\330\004\007\200v\210W\220E\230\024\230Q\330\010\022\220!\330\010\027\220q\340\010\027\220q\330\004\007\200q\330\010\017\320\017,\250D\260\001\260\027\270\013\3007\310!\340\010\017\320\017,\250D\260\001\260\027\270\013\3001\200A\330\010\t\330\014\025\220T\230\021\330\014\036\230d\240!\330\014 \240\004\240A\330\014 \240\004\240A\330\014\035\230T\240\021\330\014\034\230D\240\001\330\014\032\230$\230a\200A\330>X\320XY\360\022\000\t!\320 1\260\036\270s\300\047\310\032\320SW\320Wg\320gh\340\010\013\210>\230\023\230B\230c\240\025\240b\250\002\250#\250[\270\002\270!\330\014\022\220*\230A\230Q\330\010\013\210;\220c\230\022\2304\230|\2503\250a\330\014\022\220*\230A\230Q\340\r\016\330\014\022\220(\230!\2301\230D\240\007\240z\260\035\270o\310V\320ST\340\010\013\2103\320\016 \240\004\240A\330\014\022\220-\230q\240\001\340\010\037\230z\250\024\320-=\270Q\330\010 \240\007\240r\250\033\260G\2703\270m\3101\340\010\013\320\013\034\230A\330\010\013\320\013\033\2301\340\010\014\210O\2301\330\010\014\320\014\"\240!\330\010\014\320\014!\240\021\330\010\014\320\014\037\230q\330\010\014\320\014!\240\021\340\010\013\2103\210g\220R\220q\330\014\020\320\020,\250A\330\014\020\320\020+\2501\330\014\020\320\020)\250\021\340\010\037\230{\250(\260!\2601\330\010\013\2105\220\001\220\023\220H\230C\320\0370\260\003\3203F\300c\320I\\\320\\e\320ef\330\010\017\210q\200A\340\010\t\330\014\030\230\004\230E\240\021\330\014\030\230\004\230E\240\021\330\014\036\230d\240%\240q\330\014\026\220d\230%\230q\330\014 \240\004\240E\250\021\330\014\"\240$\240a\330\014!\240\024\240Q\330\014\037\230t\2401\330\014(\250\004\250A\330\014\047\240t\2501\330\014%\240T\250\021\200A\360\006\000\016\017\330\014\026\220h\230a\230q\240\004\240G\2501\330\010\017\210q\320\004#\2401\330\010\013\2104\210s\220!\330\014\023\2204\220q\330\r\021\220\023\220A\330\014\023\2204\220q\330\r\021\220\023\220A\330\014\023\2204\220q\330\r\021\220\023\220A\330\014\023\2204\220q\330\r\021\220\024\320\025&\240n\260A\330""\014\023\2204\220q\330\r\021\220\024\320\025%\240]\260!\330\014\023\2204\220q\330\r\021\220\024\220^\2401\330\014\023\2204\220q\330\010\017\210q";
     PyObject *data = NULL;
     #define __Pyx_DecompressString_UNUSED
     #define __Pyx_DecompressString_LZSS_UNUSED
     #endif
     PyObject **stringtab = __pyx_mstate->__pyx_string_tab;
     Py_ssize_t pos = 0;
-    for (int i = 0; i < 88; i++) {
+    for (int i = 0; i < 107; i++) {
       Py_ssize_t bytes_length = str_length_index[i].length;
       PyObject *string = PyUnicode_DecodeUTF8(bytes + pos, bytes_length, NULL);
-      if (likely(string) && i >= 20) PyUnicode_InternInPlace(&string);
+      if (likely(string) && i >= 23) PyUnicode_InternInPlace(&string);
       if (unlikely(!string)) {
         Py_XDECREF(data);
         __PYX_ERR(0, 1, __pyx_L1_error)
@@ -9838,8 +12439,8 @@ static const char bytes[] = " first_maker_id= last_trade_price= resting_quantity
       stringtab[i] = string;
       pos += bytes_length;
     }
-    for (int i = 88; i < 97; i++) {
-      Py_ssize_t bytes_length = bytes_length_index[i-88].length;
+    for (int i = 107; i < 116; i++) {
+      Py_ssize_t bytes_length = bytes_length_index[i-107].length;
       PyObject *string = PyBytes_FromStringAndSize(bytes + pos, bytes_length);
       stringtab[i] = string;
       pos += bytes_length;
@@ -9849,14 +12450,14 @@ static const char bytes[] = " first_maker_id= last_trade_price= resting_quantity
       }
     }
     Py_XDECREF(data);
-    for (Py_ssize_t i = 0; i < 97; i++) {
+    for (Py_ssize_t i = 0; i < 116; i++) {
       if (unlikely(PyObject_Hash(stringtab[i]) == -1)) {
         __PYX_ERR(0, 1, __pyx_L1_error)
       }
     }
     #if CYTHON_IMMORTAL_CONSTANTS
     {
-      PyObject **table = stringtab + 88;
+      PyObject **table = stringtab + 107;
       for (Py_ssize_t i=0; i<9; ++i) {
         #if PY_VERSION_HEX >= 0x030F0000
         PyUnstable_SetImmortal(table[i]);
@@ -9881,7 +12482,7 @@ static const char bytes[] = " first_maker_id= last_trade_price= resting_quantity
   {
     PyObject **numbertab = __pyx_mstate->__pyx_number_tab + 0;
     int8_t const cint_constants_1[] = {0};
-    int32_t const cint_constants_4[] = {136212302L};
+    int32_t const cint_constants_4[] = {65643452L};
     for (int i = 0; i < 2; i++) {
       numbertab[i] = PyLong_FromLong((i < 1 ? cint_constants_1[i - 0] : cint_constants_4[i - 1]));
       if (unlikely(!numbertab[i])) __PYX_ERR(0, 1, __pyx_L1_error)
@@ -9944,19 +12545,19 @@ static int __Pyx_CreateCodeObjects(__pyx_mstatetype *__pyx_mstate) {
   PyObject* tuple_dedup_map = PyDict_New();
   if (unlikely(!tuple_dedup_map)) return -1;
   {
-    const __Pyx_PyCode_New_function_description descr = {3, 0, 0, 3, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 175};
+    const __Pyx_PyCode_New_function_description descr = {3, 0, 0, 3, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 193};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_key, __pyx_mstate->__pyx_n_u_default};
-    __pyx_mstate_global->__pyx_codeobj_tab[0] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_chronosmatch_engine_pyx, __pyx_mstate->__pyx_n_u_get, __pyx_mstate->__pyx_kp_b_iso88591_1_4s_4q_A_4q_A_4q_A_4q_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[0])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[0] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_chronosmatch_engine_pyx, __pyx_mstate->__pyx_n_u_get, __pyx_mstate->__pyx_kp_b_iso88591_1_4s_4q_A_4q_A_4q_A_4q_nA_4q_4q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[0])) goto bad;
   }
   {
-    const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 190};
+    const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 216};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self};
-    __pyx_mstate_global->__pyx_codeobj_tab[1] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_chronosmatch_engine_pyx, __pyx_mstate->__pyx_n_u_as_dict, __pyx_mstate->__pyx_kp_b_iso88591_A_T_d_A_A, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[1])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[1] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_chronosmatch_engine_pyx, __pyx_mstate->__pyx_n_u_as_dict, __pyx_mstate->__pyx_kp_b_iso88591_A_T_d_A_A_T_D_a, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[1])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 4, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 1};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_state, __pyx_mstate->__pyx_n_u_dict_2, __pyx_mstate->__pyx_n_u_use_setstate};
-    __pyx_mstate_global->__pyx_codeobj_tab[2] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_tree_fragment, __pyx_mstate->__pyx_n_u_reduce_cython, __pyx_mstate->__pyx_kp_b_iso88591_XT_2_6I_Q_q_l_vWE_Q_q_q_q_D_7_D, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[2])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[2] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_tree_fragment, __pyx_mstate->__pyx_n_u_reduce_cython, __pyx_mstate->__pyx_kp_b_iso88591_T_HDHYY_ppt_u_B_B_F_F_G_q_l_vWE, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[2])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 2, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 17};
@@ -9964,19 +12565,19 @@ static int __Pyx_CreateCodeObjects(__pyx_mstatetype *__pyx_mstate) {
     __pyx_mstate_global->__pyx_codeobj_tab[3] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_tree_fragment, __pyx_mstate->__pyx_n_u_setstate_cython, __pyx_mstate->__pyx_kp_b_iso88591__3, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[3])) goto bad;
   }
   {
-    const __Pyx_PyCode_New_function_description descr = {6, 0, 0, 6, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 255};
-    PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_order_id, __pyx_mstate->__pyx_n_u_price_ticks, __pyx_mstate->__pyx_n_u_quantity_lots, __pyx_mstate->__pyx_n_u_side, __pyx_mstate->__pyx_n_u_order_type};
-    __pyx_mstate_global->__pyx_codeobj_tab[4] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_chronosmatch_engine_pyx, __pyx_mstate->__pyx_n_u_submit, __pyx_mstate->__pyx_kp_b_iso88591_A_Bc_b_AQ_c_4_3a_AQ_1D_z_oVST_3, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[4])) goto bad;
+    const __Pyx_PyCode_New_function_description descr = {7, 0, 0, 7, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 300};
+    PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_order_id, __pyx_mstate->__pyx_n_u_price_ticks, __pyx_mstate->__pyx_n_u_quantity_lots, __pyx_mstate->__pyx_n_u_side, __pyx_mstate->__pyx_n_u_order_type, __pyx_mstate->__pyx_n_u_entry_time_ns};
+    __pyx_mstate_global->__pyx_codeobj_tab[4] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_chronosmatch_engine_pyx, __pyx_mstate->__pyx_n_u_submit, __pyx_mstate->__pyx_kp_b_iso88591_A_XXY_1_s_SWWggh_Bc_b_AQ_c_4_3a, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[4])) goto bad;
   }
   {
-    const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 2, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 284};
+    const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 2, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 349};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_order_id};
     __pyx_mstate_global->__pyx_codeobj_tab[5] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_chronosmatch_engine_pyx, __pyx_mstate->__pyx_n_u_cancel, __pyx_mstate->__pyx_kp_b_iso88591_A_haq_G1_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[5])) goto bad;
   }
   {
-    const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 291};
+    const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 356};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self};
-    __pyx_mstate_global->__pyx_codeobj_tab[6] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_chronosmatch_engine_pyx, __pyx_mstate->__pyx_n_u_snapshot, __pyx_mstate->__pyx_kp_b_iso88591_A_E_E_d_q_d_q_E, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[6])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[6] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_chronosmatch_engine_pyx, __pyx_mstate->__pyx_n_u_snapshot, __pyx_mstate->__pyx_kp_b_iso88591_A_E_E_d_q_d_q_E_a_Q_t1_A_t1_T, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[6])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 1};
@@ -12801,6 +15402,160 @@ __PYX_GOOD:
     Py_XDECREF(setstate);
     Py_XDECREF(setstate_cython);
     return ret;
+}
+
+/* HasAttr (used by ImportImpl) */
+#if __PYX_LIMITED_VERSION_HEX < 0x030d0000
+static CYTHON_INLINE int __Pyx_HasAttr(PyObject *o, PyObject *n) {
+    PyObject *r;
+    if (unlikely(!PyUnicode_Check(n))) {
+        PyErr_SetString(PyExc_TypeError,
+                        "hasattr(): attribute name must be string");
+        return -1;
+    }
+    r = __Pyx_PyObject_GetAttrStrNoError(o, n);
+    if (!r) {
+        return (unlikely(PyErr_Occurred())) ? -1 : 0;
+    } else {
+        Py_DECREF(r);
+        return 1;
+    }
+}
+#endif
+
+/* TupleOrListFromArrayImpl (used by ListFromArray) */
+CYTHON_UNUSED static PyObject *
+__Pyx_PyList_FromArray(PyObject *const *src, Py_ssize_t n) {
+    PyObject *res = PyList_New(n);
+    if (unlikely(res == NULL)) return NULL;
+    #if CYTHON_COMPILING_IN_CPYTHON
+    __Pyx_copy_object_array(src, ((PyListObject*)res)->ob_item, n);
+    #else
+    Py_ssize_t i;
+    for (i = 0; i < n; i++) {
+        Py_INCREF(src[i]);
+        if (unlikely(__Pyx_PyList_SET_ITEM(res, i, src[i]) < (0))) {
+            Py_DECREF(res);
+            return NULL;
+        }
+    }
+    #endif
+    return res;
+}
+
+/* ImportImpl (used by Import) */
+static int __Pyx__Import_GetModule(PyObject *qualname, PyObject **module) {
+    PyObject *imported_module = PyImport_GetModule(qualname);
+    if (unlikely(!imported_module)) {
+        *module = NULL;
+        if (PyErr_Occurred()) {
+            return -1;
+        }
+        return 0;
+    }
+    *module = imported_module;
+    return 1;
+}
+static int __Pyx__Import_Lookup(PyObject *qualname, PyObject *const *imported_names, Py_ssize_t len_imported_names, PyObject **module) {
+    PyObject *imported_module;
+    PyObject *top_level_package_name;
+    Py_ssize_t i;
+    int status, module_found;
+    Py_ssize_t dot_index;
+    module_found = __Pyx__Import_GetModule(qualname, &imported_module);
+    if (unlikely(!module_found || module_found == -1)) {
+        *module = NULL;
+        return module_found;
+    }
+    if (imported_names) {
+        for (i = 0; i < len_imported_names; i++) {
+            PyObject *imported_name = imported_names[i];
+#if __PYX_LIMITED_VERSION_HEX < 0x030d0000
+            int has_imported_attribute = PyObject_HasAttr(imported_module, imported_name);
+#else
+            int has_imported_attribute = PyObject_HasAttrWithError(imported_module, imported_name);
+            if (unlikely(has_imported_attribute == -1)) goto error;
+#endif
+            if (!has_imported_attribute) {
+                goto not_found;
+            }
+        }
+        *module = imported_module;
+        return 1;
+    }
+    dot_index = PyUnicode_FindChar(qualname, '.', 0, PY_SSIZE_T_MAX, 1);
+    if (dot_index == -1) {
+        *module = imported_module;
+        return 1;
+    }
+    if (unlikely(dot_index == -2)) goto error;
+    top_level_package_name = PyUnicode_Substring(qualname, 0, dot_index);
+    if (unlikely(!top_level_package_name)) goto error;
+    Py_DECREF(imported_module);
+    status = __Pyx__Import_GetModule(top_level_package_name, module);
+    Py_DECREF(top_level_package_name);
+    return status;
+error:
+    Py_DECREF(imported_module);
+    *module = NULL;
+    return -1;
+not_found:
+    Py_DECREF(imported_module);
+    *module = NULL;
+    return 0;
+}
+static PyObject *__Pyx__Import(PyObject *name, PyObject *const *imported_names, Py_ssize_t len_imported_names, PyObject *qualname, PyObject *moddict, int level) {
+    PyObject *module = 0;
+    PyObject *empty_dict = 0;
+    PyObject *from_list = 0;
+    int module_found;
+    if (!qualname) {
+        qualname = name;
+    }
+    module_found = __Pyx__Import_Lookup(qualname, imported_names, len_imported_names, &module);
+    if (likely(module_found == 1)) {
+        return module;
+    } else if (unlikely(module_found == -1)) {
+        return NULL;
+    }
+    #if !CYTHON_COMPILING_IN_LIMITED_API && PY_VERSION_HEX >= 0x030f00a6
+    empty_dict = PyFrozenDict_New(NULL);
+    #else
+    empty_dict = PyDict_New();
+    #endif
+    if (unlikely(!empty_dict))
+        goto bad;
+    if (imported_names) {
+        from_list = __Pyx_PyList_FromArray(imported_names, len_imported_names);
+        if (unlikely(!from_list))
+            goto bad;
+    }
+    if (level == -1) {
+        const char* package_sep = strchr(__Pyx_MODULE_NAME, '.');
+        if (package_sep != (0)) {
+            module = PyImport_ImportModuleLevelObject(
+                name, moddict, empty_dict, from_list, 1);
+            if (unlikely(!module)) {
+                if (unlikely(!PyErr_ExceptionMatches(PyExc_ImportError)))
+                    goto bad;
+                PyErr_Clear();
+            }
+        }
+        level = 0;
+    }
+    if (!module) {
+        module = PyImport_ImportModuleLevelObject(
+            name, moddict, empty_dict, from_list, level);
+    }
+bad:
+    Py_XDECREF(from_list);
+    Py_XDECREF(empty_dict);
+    return module;
+}
+
+/* Import */
+static PyObject *__Pyx_Import(PyObject *name, PyObject *const *imported_names, Py_ssize_t len_imported_names, PyObject *qualname, int level) {
+    return __Pyx__Import(name, imported_names, len_imported_names, qualname, __pyx_mstate_global->__pyx_d, level);
 }
 
 /* dict_setdefault (used by FetchCommonType) */

@@ -69,6 +69,54 @@ class TestLimitOrderBook(unittest.TestCase):
         stats_after = gc.get_stats()[0]["collections"]
         self.assertEqual(stats_before, stats_after, "Garbage collector must never trigger during trades")
 
+    def test_nanosecond_timestamps_and_latency(self):
+        import time
+        t_before = time.perf_counter_ns()
+        res1 = self.book.submit(order_id=20, price_ticks=100, quantity_lots=10, side=0, order_type=0)
+        t_after = time.perf_counter_ns()
+
+        # Check entry and exit bounds and relation
+        self.assertGreaterEqual(res1.entry_time_ns, t_before)
+        self.assertLessEqual(res1.exit_time_ns, t_after)
+        self.assertGreaterEqual(res1.exit_time_ns, res1.entry_time_ns)
+        self.assertEqual(res1.latency_ns, res1.exit_time_ns - res1.entry_time_ns)
+
+        # Check dictionary-like access
+        self.assertEqual(res1["entry_time_ns"], res1.entry_time_ns)
+        self.assertEqual(res1["exit_time_ns"], res1.exit_time_ns)
+        self.assertEqual(res1["latency_ns"], res1.latency_ns)
+
+        # Check as_dict() representation
+        d = res1.as_dict()
+        self.assertIn("entry_time_ns", d)
+        self.assertIn("exit_time_ns", d)
+        self.assertIn("latency_ns", d)
+        self.assertEqual(d["entry_time_ns"], res1.entry_time_ns)
+        self.assertEqual(d["exit_time_ns"], res1.exit_time_ns)
+
+        # Check snapshot metrics
+        snap = self.book.snapshot()
+        self.assertEqual(snap["last_entry_time_ns"], res1.entry_time_ns)
+        self.assertEqual(snap["last_exit_time_ns"], res1.exit_time_ns)
+        self.assertEqual(snap["last_latency_ns"], res1.latency_ns)
+
+        # Execute matching order (trade occurs)
+        res2 = self.book.submit(order_id=21, price_ticks=100, quantity_lots=10, side=1, order_type=0)
+        self.assertEqual(res2.fills, 1)
+        snap2 = self.book.snapshot()
+        self.assertEqual(snap2["trades"], 1)
+        self.assertEqual(snap2["last_trade_entry_time_ns"], res2.entry_time_ns)
+        self.assertEqual(snap2["last_trade_exit_time_ns"], res2.exit_time_ns)
+        self.assertEqual(snap2["last_trade_latency_ns"], res2.latency_ns)
+
+    def test_custom_entry_timestamp(self):
+        import time
+        custom_t = time.perf_counter_ns() - 100_000  # 100 microseconds ago
+        res = self.book.submit(order_id=30, price_ticks=150, quantity_lots=5, side=0, order_type=0, entry_time_ns=custom_t)
+        self.assertEqual(res.entry_time_ns, custom_t)
+        self.assertGreaterEqual(res.exit_time_ns, custom_t)
+        self.assertEqual(res.latency_ns, res.exit_time_ns - custom_t)
+
 
 
 if __name__ == "__main__":
