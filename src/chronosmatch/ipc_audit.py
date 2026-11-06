@@ -31,41 +31,72 @@ def _initialize_file(path: str, capacity: int) -> None:
             mapped.flush()
 
 
+
 def _producer(
     path: str,
     capacity: int,
     count: int,
     lock,
+    batch_size: int = 256,
 ) -> None:
-    """Write sequentially numbered binary orders into the shared ring."""
+    """Write binary orders in batches to reduce lock acquisitions."""
     with open(path, "r+b") as file:
         with mmap.mmap(file.fileno(), 0) as mapped:
-            for order_id in range(count):
-                order = Order(
-                    order_id=order_id,
-                    side=BUY if order_id % 2 == 0 else SELL,
-                    price_ticks=10_000 + order_id % 100,
-                    quantity=1 + order_id % 10,
-                    timestamp_ns=time.perf_counter_ns(),
-                )
-                record = pack_order(order)
+            next_id = 0
 
-                while True:
+            while next_id < count:
+                # Prepare records outside the critical section.
+                batch = []
+                batch_end = min(count, next_id + batch_size)
+
+                for order_id in range(next_id, batch_end):
+                    order = Order(
+                        order_id=order_id,
+                        side=BUY if order_id % 2 == 0 else SELL,
+                        price_ticks=10_000 + order_id % 100,
+                        quantity=1 + order_id % 10,
+                        timestamp_ns=time.perf_counter_ns(),
+                    )
+                    batch.append(pack_order(order))
+
+                written = 0
+
+                while written < len(batch):
                     with lock:
-                        write_pos, read_pos = _HEADER.unpack_from(mapped, 0)
+                        write_pos, read_pos = _HEADER.unpack_from(
+                            mapped, 0
+                        )
+                        free_slots = capacity - (write_pos - read_pos)
 
-                        if write_pos - read_pos < capacity:
-                            slot = write_pos % capacity
-                            offset = _HEADER_SIZE + slot * ORDER_SIZE
-
-                            mapped[offset : offset + ORDER_SIZE] = record
-                            _HEADER.pack_into(
-                                mapped, 0, write_pos + 1, read_pos
+                        if free_slots > 0:
+                            n = min(
+                                free_slots,
+                                len(batch) - written,
                             )
-                            break
 
-                    # Give the consumer a chance to free a slot.
-                    time.sleep(0)
+                            for i in range(n):
+                                slot = (write_pos + i) % capacity
+                                offset = (
+                                    _HEADER_SIZE + slot * ORDER_SIZE
+                                )
+                                mapped[
+                                    offset : offset + ORDER_SIZE
+                                ] = batch[written + i]
+
+                            _HEADER.pack_into(
+                                mapped,
+                                0,
+                                write_pos + n,
+                                read_pos,
+                            )
+                            written += n
+
+                    if written < len(batch):
+                        time.sleep(0)
+
+                next_id = batch_end
+
+
 
 
 def _consumer(
@@ -74,44 +105,70 @@ def _consumer(
     count: int,
     lock,
     results,
+    batch_size: int = 256,
 ) -> None:
-    """Read and validate every order, including FIFO sequence."""
+    """Read batches while preserving FIFO and integrity checks."""
     checksum = 0
     quantity_checksum = 0
+    received = 0
 
     with open(path, "r+b") as file:
         with mmap.mmap(file.fileno(), 0) as mapped:
-            received = 0
-
             while received < count:
-                order = None
+                records = []
 
                 with lock:
-                    write_pos, read_pos = _HEADER.unpack_from(mapped, 0)
+                    write_pos, read_pos = _HEADER.unpack_from(
+                        mapped, 0
+                    )
+                    available = write_pos - read_pos
 
-                    if read_pos < write_pos:
-                        slot = read_pos % capacity
-                        offset = _HEADER_SIZE + slot * ORDER_SIZE
-                        record = mapped[offset : offset + ORDER_SIZE]
-
-                        order = unpack_order(record)
-                        _HEADER.pack_into(
-                            mapped, 0, write_pos, read_pos + 1
+                    if available > 0:
+                        n = min(
+                            available,
+                            batch_size,
+                            count - received,
                         )
 
-                if order is None:
+                        # Copy bytes while protected. Decode after releasing
+                        # the lock so the producer can continue sooner.
+                        for i in range(n):
+                            slot = (read_pos + i) % capacity
+                            offset = (
+                                _HEADER_SIZE + slot * ORDER_SIZE
+                            )
+                            records.append(
+                                bytes(
+                                    mapped[
+                                        offset : offset + ORDER_SIZE
+                                    ]
+                                )
+                            )
+
+                        _HEADER.pack_into(
+                            mapped,
+                            0,
+                            write_pos,
+                            read_pos + n,
+                        )
+
+                if not records:
                     time.sleep(0)
                     continue
 
-                if order.order_id != received:
-                    raise RuntimeError(
-                        f"FIFO/loss/duplicate check failed: expected "
-                        f"order ID {received}, got {order.order_id}"
-                    )
+                for record in records:
+                    order = unpack_order(record)
 
-                checksum += order.order_id
-                quantity_checksum += order.quantity
-                received += 1
+                    if order.order_id != received:
+                        raise RuntimeError(
+                            "FIFO/loss/duplicate check failed: "
+                            f"expected order ID {received}, "
+                            f"got {order.order_id}"
+                        )
+
+                    checksum += order.order_id
+                    quantity_checksum += order.quantity
+                    received += 1
 
     results.put(
         {
@@ -120,6 +177,7 @@ def _consumer(
             "quantity_checksum": quantity_checksum,
         }
     )
+
 
 
 def run_audit(count: int = 1_000_000, capacity: int = 8192) -> None:

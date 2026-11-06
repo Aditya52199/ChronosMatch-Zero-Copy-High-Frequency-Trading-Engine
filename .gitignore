@@ -9,3 +9,10 @@ dist/
 .env
 *.db
 .pytest_cache/
+# Local runtime data and generated verification artifacts
+*.ring
+chronosmatch-source-dump.txt
+verification_*/
+verification_final_*/
+# Generated Cython C source (regenerated from the .pyx file)
+src/chronosmatch/matching_engine_cy.c
